@@ -1,0 +1,17 @@
+<div class="bg-gray-100 min-h-screen py-12">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
+      <div class="bg-slate-900 text-white py-12 px-8 border-b-4 border-amber-500">
+        <h1 class="text-3xl font-black tracking-tight">Frequently Asked Questions</h1>
+        <p class="text-sm text-slate-400 mt-2">Common answers about orders, shipping, returns, and more.</p>
+      </div>
+      <div class="p-8 space-y-4">
+        @if (content) {
+          <div class="text-slate-600 text-sm whitespace-pre-line leading-relaxed">{{ content }}</div>
+        } @else {
+          <div class="text-slate-400 text-sm italic">FAQ content will appear here once published by the store administrator.</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,28 @@
+@if (product) {
+  <div class="bg-white p-4 rounded-md border border-gray-200 shadow-sm flex flex-col justify-between h-full">
+    <div>
+      <img [src]="'http://localhost:3000/uploads/' + product.imgURL" class="w-full h-48 object-cover rounded" [alt]="product.name">
+      
+      <h3 class="text-lg font-bold text-slate-900 mt-2">{{ product.name }}</h3>
+      <p class="text-sm text-gray-500 mt-1 leading-relaxed">{{ product.desc }}</p>
+    </div>
+    
+    <div class="mt-4">
+      <div class="flex justify-between items-center">
+        <span class="text-xl font-black text-slate-950">{{ product.price }} EGP</span>
+        
+        <button 
+          [disabled]="product.stock === 0"
+          class="px-4 py-2 bg-[#FFD814] hover:bg-[#F7CA00] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-slate-950 font-bold text-xs rounded shadow-sm transition-all">
+          {{ product.stock === 0 ? 'Out of Stock' : 'Add to Cart ' }}
+        </button>
+      </div>
+
+      @if (product.stock <= 3 && product.stock > 0) {
+        <div class="text-xs text-amber-600 font-semibold mt-2 bg-amber-50 p-1.5 rounded border border-amber-200 text-center">
+          Alert: Only {{ product.stock }} items left in stock! 
+        </div>
+      }
+    </div>
+  </div>
+}

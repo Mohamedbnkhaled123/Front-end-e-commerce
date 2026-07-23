@@ -1,0 +1,54 @@
+@if (modal) {
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Header with Icon -->
+      <div class="flex items-start gap-4">
+        <div [ngClass]="{
+          'bg-amber-100 text-amber-600': modal.data.type === 'warning',
+          'bg-rose-100 text-rose-600': modal.data.type === 'danger',
+          'bg-blue-100 text-blue-600': modal.data.type === 'info',
+          'bg-emerald-100 text-emerald-600': modal.data.type === 'success'
+        }" class="p-3 rounded-full shrink-0">
+          @if (modal.data.type === 'warning' || modal.data.type === 'danger') {
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          }
+          @if (modal.data.type === 'info' || modal.data.type === 'success') {
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+        </div>
+
+        <div class="space-y-1">
+          <h3 class="text-lg font-extrabold text-slate-900 tracking-tight">{{ modal.data.title }}</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">{{ modal.data.message }}</p>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex justify-end gap-3 pt-2 border-t border-gray-100">
+        @if (modal.data.cancelText) {
+          <button 
+            (click)="onResponse(false)" 
+            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-slate-700 text-xs font-bold rounded-lg transition-colors">
+            {{ modal.data.cancelText }}
+          </button>
+        }
+        <button 
+          (click)="onResponse(true)" 
+          [ngClass]="{
+            'bg-[#FF9900] hover:bg-[#DF8300] text-white': modal.data.type === 'warning' || modal.data.type === 'info',
+            'bg-rose-600 hover:bg-rose-700 text-white': modal.data.type === 'danger',
+            'bg-emerald-600 hover:bg-emerald-700 text-white': modal.data.type === 'success'
+          }"
+          class="px-5 py-2 text-xs font-bold rounded-lg shadow-sm transition-all">
+          {{ modal.data.confirmText }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

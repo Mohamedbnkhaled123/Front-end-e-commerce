@@ -1,0 +1,16 @@
+<app-admin-header></app-admin-header>
+
+<!-- Admin Content -->
+<main class="min-h-[calc(100vh-14rem)] bg-slate-50 flex flex-col">
+  <router-outlet></router-outlet>
+</main>
+
+<!-- Footer -->
+<footer class="bg-slate-900 text-white py-6 border-t border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400">
+    <p>&copy; 2026 Velora Admin Panel &mdash; Internal Use Only</p>
+  </div>
+</footer>
+
+<!-- Global Confirmation Modal for Admin Panel -->
+<app-confirm-modal></app-confirm-modal>

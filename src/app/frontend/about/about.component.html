@@ -1,0 +1,27 @@
+<div class="bg-gray-100 min-h-screen py-12">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
+      <!-- Hero -->
+      <div class="bg-slate-900 text-white py-16 px-10 text-center border-b-4 border-amber-500">
+        <h1 class="text-4xl font-black tracking-tight">About Velora Store</h1>
+        <p class="text-sm text-slate-300 mt-3 max-w-lg mx-auto leading-relaxed">We design and curate premium carrywear for modern professionals who value both form and function.</p>
+      </div>
+      <!-- Content placeholder -->
+      <div class="p-10 space-y-8 text-slate-700 text-sm leading-relaxed">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 mb-3">Our Story</h2>
+          @if (content) {
+            <p class="text-slate-600 whitespace-pre-line leading-relaxed">{{ content }}</p>
+          } @else {
+            <p class="text-slate-500">Content for this section will be managed through the Admin CMS panel. Once the administrator sets the about page content, it will appear here.</p>
+          }
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
+          <div class="text-center"><div class="text-3xl font-extrabold text-amber-500">0+</div><div class="text-xs font-bold text-slate-600 uppercase tracking-wider mt-1">Products Listed</div></div>
+          <div class="text-center"><div class="text-3xl font-extrabold text-amber-500">0+</div><div class="text-xs font-bold text-slate-600 uppercase tracking-wider mt-1">Happy Customers</div></div>
+          <div class="text-center"><div class="text-3xl font-extrabold text-amber-500">0+</div><div class="text-xs font-bold text-slate-600 uppercase tracking-wider mt-1">Countries Shipped</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

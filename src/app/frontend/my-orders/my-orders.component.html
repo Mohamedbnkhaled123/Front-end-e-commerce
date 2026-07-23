@@ -1,0 +1,175 @@
+<div class="bg-gray-100 min-h-screen py-10">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-8">
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Your Orders</h1>
+      <p class="text-xs text-slate-500 mt-1">Track dispatch updates, status, and write reviews for received orders.</p>
+    </div>
+
+    <!-- Alert Message -->
+    @if (message) {
+      <div class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold p-3 rounded-md">
+        {{ message }}
+      </div>
+    }
+
+    @if (isLoading) {
+      <div class="p-8 text-center text-slate-500 text-sm font-medium">
+        Loading your orders...
+      </div>
+    }
+
+    <!-- Empty state -->
+    @if (!isLoading && orders.length === 0) {
+      <div class="bg-white border border-gray-200 rounded-md p-16 text-center shadow-sm">
+        <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        </svg>
+        <h3 class="mt-2 text-sm font-semibold text-slate-900">No orders placed</h3>
+        <p class="mt-1 text-xs text-slate-500">Your order tracking and purchase histories will appear here.</p>
+        <div class="mt-6">
+          <a routerLink="/products" class="bg-[#FFD814] hover:bg-[#F7CA00] text-black border border-[#FCD200] text-xs font-bold px-6 py-2.5 rounded-lg shadow-sm transition-all">Start Shopping</a>
+        </div>
+      </div>
+    }
+
+    <!-- Order Cards -->
+    @if (!isLoading && orders.length > 0) {
+      <div class="space-y-6">
+        @for (order of orders; track order._id) {
+          <div class="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
+            
+            <div class="bg-gray-50 border-b border-gray-100 px-6 py-4 flex flex-wrap justify-between items-center text-xs text-slate-600 gap-4">
+              <div class="flex gap-6">
+                <div>
+                  <span class="block text-[10px] uppercase font-bold text-slate-400">Order Placed</span>
+                  <span class="font-semibold text-slate-800">{{ order.createdAt | date:'mediumDate' }}</span>
+                </div>
+                <div>
+                  <span class="block text-[10px] uppercase font-bold text-slate-400">Total Price</span>
+                  <span class="font-extrabold text-slate-800">{{ order.totalPrice }} EGP</span>
+                </div>
+              </div>
+              <div>
+                <span class="block text-[10px] uppercase font-bold text-slate-400 text-right">Order ID</span>
+                <span class="font-mono font-semibold text-slate-800">{{ order._id }}</span>
+              </div>
+            </div>
+
+            <div class="p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+              <div class="space-y-2">
+                <h4 class="text-sm font-bold text-slate-900">{{ order.items.length }} item(s) in package</h4>
+                
+                @if (!isCancelled(order.orderStatus)) {
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500 font-medium">Status:</span>
+                    <span class="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider border"
+                      [ngClass]="{
+                        'bg-yellow-50 text-yellow-800 border-yellow-200': order.orderStatus === 'pending',
+                        'bg-blue-50 text-blue-800 border-blue-200': order.orderStatus === 'prepared' || order.orderStatus === 'shipped',
+                        'bg-emerald-50 text-emerald-800 border-emerald-200': order.orderStatus === 'received'
+                      }">
+                      {{ order.orderStatus }}
+                    </span>
+                  </div>
+                }
+
+                @if (isCancelled(order.orderStatus)) {
+                  <div class="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold px-3 py-1.5 rounded inline-block">
+                    the order has cancelled 
+                  </div>
+                }
+              </div>
+
+              <div class="flex sm:flex-col gap-2 w-full sm:w-auto items-end">
+                @if (canCancel(order.orderStatus)) {
+                  <button 
+                    (click)="cancelOrder(order._id)"
+                    class="w-full sm:w-36 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold py-2 px-4 rounded shadow-sm transition-all">
+                    Cancel Order
+                  </button>
+                }
+
+                @if (order.orderStatus === 'shipped') {
+                  <span class="text-xs text-amber-600 font-bold bg-amber-50 px-3 py-1.5 rounded border border-amber-200">
+                    Shipped (Cannot Cancel) 
+                  </span>
+                }
+
+                @if (order.orderStatus === 'received') {
+                  <button 
+                    (click)="openReviewModal(order)"
+                    class="w-full sm:w-36 bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-bold py-2 px-4 rounded shadow-sm transition-all">
+                    Write Feedback ️
+                  </button>
+                }
+              </div>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Review Modal for Received Order -->
+    @if (selectedOrderForReview) {
+      <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-xl space-y-4">
+          
+          <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+            <h3 class="text-base font-extrabold text-slate-900">Write Feedback / Product Review</h3>
+            <button (click)="closeReviewModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+          </div>
+
+          @if (errorMessage) {
+            <div class="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold p-3 rounded">
+              {{ errorMessage }}
+            </div>
+          }
+
+          <form (ngSubmit)="submitReview()" class="space-y-4">
+            
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Rating (Stars)</label>
+              <select name="reviewRating" [(ngModel)]="reviewRating" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-slate-800 font-bold">
+                <option [value]="5">⭐⭐⭐⭐⭐ (5/5) - Excellent</option>
+                <option [value]="4">⭐⭐⭐⭐ (4/5) - Very Good</option>
+                <option [value]="3">⭐⭐⭐ (3/5) - Average</option>
+                <option [value]="2">⭐⭐ (2/5) - Fair</option>
+                <option [value]="1">⭐ (1/5) - Poor</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Your Feedback & Review</label>
+              <textarea 
+                name="reviewText" 
+                [(ngModel)]="reviewText" 
+                rows="4" 
+                required 
+                placeholder="Write your thoughts and experience with the product after receiving it..."
+                class="w-full border border-gray-300 rounded-md p-3 text-sm focus:border-amber-500 focus:outline-none shadow-sm resize-none"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+              <button 
+                type="button" 
+                (click)="closeReviewModal()"
+                class="px-4 py-2 border border-gray-300 rounded text-xs font-bold text-slate-600 hover:bg-gray-50">
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                [disabled]="isSubmittingReview"
+                class="px-5 py-2 bg-[#FF9900] hover:bg-[#DF8300] disabled:bg-gray-300 text-white rounded text-xs font-bold shadow transition-all">
+                {{ isSubmittingReview ? 'Submitting Feedback...' : 'Submit Feedback ' }}
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

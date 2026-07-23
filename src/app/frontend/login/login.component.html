@@ -1,0 +1,116 @@
+<div class="min-h-screen bg-slate-50 flex flex-col justify-center items-center px-4 py-12">
+  <div class="mb-6">
+    <a routerLink="/home" class="text-2xl font-black tracking-tight text-slate-900 flex items-center justify-center">
+      VELORA <span class="text-amber-500 font-medium ml-1">STORE</span>
+    </a>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-md p-8 w-full max-w-[360px] shadow-sm">
+    <h1 class="text-2xl font-semibold text-slate-900 mb-5">Login</h1>
+
+    <!-- Error Alerts -->
+    <div *ngIf="isEmptyFields"
+      class="mb-4 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold px-3 py-2 rounded-md">
+      Please enter your email and password.
+    </div>
+
+    <!-- ️ Unregistered User Alert -->
+    <div *ngIf="isNotRegistered"
+      class="mb-4 bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold px-3.5 py-2.5 rounded-md flex items-center justify-between">
+      <span>You are not logged in, please</span>
+      <a routerLink="/signup"
+        class="bg-amber-400 hover:bg-amber-500 text-slate-950 text-[11px] font-extrabold px-2.5 py-1 rounded shadow-sm transition-all ml-1 shrink-0">
+        Sign Up →
+      </a>
+    </div>
+
+    <div *ngIf="isInvalidCredentials"
+      class="mb-4 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold px-3 py-2 rounded-md">
+      Invalid email or password. If you don't have an account, please <a routerLink="/signup"
+        class="underline font-bold text-amber-600">Sign Up</a>.
+    </div>
+
+    <div *ngIf="isServerError"
+      class="mb-4 bg-red-50 border border-red-200 text-red-700 text-xs font-semibold px-3 py-2 rounded-md">
+      {{ serverErrorMsg || 'Login failed. Please check your server connection.' }}
+    </div>
+
+    <form (ngSubmit)="onLogin()" class="space-y-4">
+      <div>
+        <label for="email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email</label>
+        <input type="email" id="email" name="email" [(ngModel)]="email" required placeholder="name@example.com"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none shadow-sm transition-shadow">
+      </div>
+
+      <div>
+        <div class="flex justify-between items-baseline mb-1">
+          <label for="password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Password</label>
+          <button type="button" (click)="openResetModal()" class="text-xs font-bold text-amber-600 hover:underline">
+            Forgot Password?
+          </button>
+        </div>
+        <input type="password" id="password" name="password" [(ngModel)]="password" required placeholder="••••••••"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none shadow-sm transition-shadow">
+      </div>
+
+      <button type="submit" [disabled]="isLoading"
+        class="w-full bg-[#FFD814] hover:bg-[#F7CA00] text-black border border-[#FCD200] rounded-lg py-2 text-sm font-bold shadow-sm transition-all disabled:opacity-50">
+        {{ isLoading ? 'Signing In...' : 'Sign-In' }}
+      </button>
+    </form>
+
+    <div
+      class="mt-6 border-t border-gray-100 pt-4 flex justify-between items-center text-xs text-slate-600 font-medium">
+      <span>New to Velora?</span>
+      <a routerLink="/signup" class="font-bold text-amber-600 hover:underline">Create an Account</a>
+    </div>
+  </div>
+
+  <!--  Reset Password Modal -->
+  <div *ngIf="showResetModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4 relative">
+      <div class="flex justify-between items-center border-b border-gray-100 pb-3">
+        <h2 class="text-lg font-extrabold text-slate-900">Reset Password</h2>
+        <button (click)="closeResetModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+      </div>
+
+      <p class="text-xs text-slate-500">Enter your registered email address and set a new password.</p>
+
+      <div *ngIf="resetError" class="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold px-3 py-2 rounded-md">
+        {{ resetError }}
+      </div>
+
+      <div *ngIf="resetSuccess" class="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold px-3 py-2 rounded-md">
+        {{ resetSuccess }}
+      </div>
+
+      <form (ngSubmit)="onResetPassword()" class="space-y-4">
+        <div>
+          <label for="reset-email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Account Email</label>
+          <input type="email" id="reset-email" name="resetEmail" [(ngModel)]="resetEmail" required placeholder="name@example.com"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none shadow-sm">
+        </div>
+
+        <div>
+          <label for="reset-new-pass" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">New Password</label>
+          <input type="password" id="reset-new-pass" name="resetNewPassword" [(ngModel)]="resetNewPassword" required placeholder="Min 6 characters"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none shadow-sm">
+        </div>
+
+        <div>
+          <label for="reset-confirm-pass" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Confirm New Password</label>
+          <input type="password" id="reset-confirm-pass" name="resetConfirmPassword" [(ngModel)]="resetConfirmPassword" required placeholder="Repeat new password"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none shadow-sm">
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" (click)="closeResetModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors">
+            Cancel
+          </button>
+          <button type="submit" [disabled]="isResetting" class="px-4 py-2 bg-[#FFD814] hover:bg-[#F7CA00] text-slate-950 border border-[#FCD200] text-xs font-extrabold rounded-lg shadow-sm transition-all disabled:opacity-50">
+            {{ isResetting ? 'Updating...' : 'Update Password' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

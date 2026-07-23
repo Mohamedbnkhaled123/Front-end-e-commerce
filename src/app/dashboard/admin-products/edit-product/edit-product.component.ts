@@ -1,0 +1,196 @@
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ProductService } from '../../../core/services/product.service';
+import { ModalService } from '../../../core/services/modal.service';
+import { env } from '../../../../env/env';
+import { Subscription } from 'rxjs';
+
+@Component({
+  selector: 'app-edit-product',
+  standalone: true,
+  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  templateUrl: './edit-product.component.html'
+})
+export class EditProduct implements OnInit, OnDestroy {
+  productId = '';
+  editForm!: FormGroup;
+  staticURL = env.staticURL;
+
+  currentImgURL = '';
+  existingCategory: any = null;
+  existingSubCategory: any = null;
+  selectedFile: File | null = null;
+
+  isLoading = false;
+  isSaving = false;
+  errorMessage = '';
+  successMessage = '';
+  private subscriptions = new Subscription();
+
+  constructor(
+    private _fb: FormBuilder,
+    private _route: ActivatedRoute,
+    private _router: Router,
+    private _productService: ProductService,
+    private _modalService: ModalService,
+    private _cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.productId = this._route.snapshot.paramMap.get('id') || '';
+
+    this.editForm = this._fb.group({
+      name:        ['', Validators.required],
+      desc:        ['', Validators.required],
+      price:       [null, [Validators.required, Validators.min(0)]],
+      stock:       [null, [Validators.required, Validators.min(0)]],
+      slug:        [''],
+      isActive:    [true],
+      newArrived:  [false],
+      mostPopular: [false]
+    });
+
+    if (this.productId) {
+      this.loadProductDetails();
+    }
+  }
+
+  // Loads existing product details
+  loadProductDetails() {
+    this.isLoading = true;
+    this._cdr.detectChanges();
+
+    const sub = this._productService.getAllProducts().subscribe({
+      next: (res) => {
+        const found = (res.data || []).find(p => p._id === this.productId);
+        if (found) {
+          this.currentImgURL = found.imgURL || '';
+          this.existingCategory = found.category || null;
+          this.existingSubCategory = found.subCategory || null;
+
+          this.editForm.patchValue({
+            name: found.name,
+            desc: found.desc || '',
+            price: found.price,
+            stock: found.stock,
+            slug: found.slug || '',
+            isActive: found.isActive !== false,
+            newArrived: found.newArrived || false,
+            mostPopular: found.mostPopular || false
+          });
+        } else {
+          this.errorMessage = 'Product not found.';
+        }
+        this.isLoading = false;
+        this._cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.errorMessage = 'Failed to load product details.';
+        this._cdr.detectChanges();
+      }
+    });
+    this.subscriptions.add(sub);
+  }
+
+  // Handles image file selection
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const fileNameLower = (file.name || '').toLowerCase();
+      this.selectedFile = file;
+    }
+  }
+
+  // Submits product updates
+  onSubmit() {
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      this.errorMessage = 'Please fill in all required fields (Name, Description, Price, Stock).';
+      return;
+    }
+
+    this.isSaving = true;
+    this._cdr.detectChanges();
+
+    const formData = new FormData();
+    formData.append('name', this.editForm.get('name')?.value || '');
+    formData.append('desc', this.editForm.get('desc')?.value || '');
+    formData.append('price', String(this.editForm.get('price')?.value || 0));
+    formData.append('stock', String(this.editForm.get('stock')?.value || 0));
+    formData.append('slug', this.editForm.get('slug')?.value || '');
+    formData.append('isActive', String(this.editForm.get('isActive')?.value));
+    formData.append('newArrived', String(this.editForm.get('newArrived')?.value));
+    formData.append('mostPopular', String(this.editForm.get('mostPopular')?.value));
+
+    if (this.existingCategory) {
+      const catId = typeof this.existingCategory === 'object' ? this.existingCategory._id : String(this.existingCategory);
+      if (catId) formData.append('category', catId);
+    }
+
+    if (this.existingSubCategory) {
+      const subCatId = typeof this.existingSubCategory === 'object' ? this.existingSubCategory._id : String(this.existingSubCategory);
+      if (subCatId) formData.append('subCategory', subCatId);
+    }
+
+    if (this.selectedFile) {
+      formData.append('img', this.selectedFile);
+    }
+
+    const sub = this._productService.updateProduct(this.productId, formData).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.successMessage = 'Product updated successfully!';
+        this._cdr.detectChanges();
+        setTimeout(() => {
+          this._router.navigate(['/admin/products']);
+        }, 1200);
+      },
+      error: (err) => {
+        this.isSaving = false;
+        this.errorMessage = err?.error?.message || 'Failed to update product.';
+        this._cdr.detectChanges();
+      }
+    });
+    this.subscriptions.add(sub);
+  }
+
+  // Soft deletes product by ID
+  async onSoftDelete() {
+    const confirmDelete = await this._modalService.confirm({
+      title: 'Soft Delete Product',
+      message: 'Are you sure you want to soft delete / disable this product?',
+      confirmText: 'Yes, Delete',
+      cancelText: 'No, Keep it',
+      type: 'danger'
+    });
+
+    if (!confirmDelete) return;
+
+    this.isSaving = true;
+    this._cdr.detectChanges();
+    const sub = this._productService.deleteProduct(this.productId).subscribe({
+      next: () => {
+        this.successMessage = 'Product soft-deleted / archived successfully!';
+        this._cdr.detectChanges();
+        setTimeout(() => {
+          this._router.navigate(['/admin/products']);
+        }, 1200);
+      },
+      error: (err) => {
+        this.errorMessage = err?.error?.message || 'Failed to delete product.';
+        this._cdr.detectChanges();
+      }
+    });
+    this.subscriptions.add(sub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+}

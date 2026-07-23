@@ -1,0 +1,78 @@
+<div class="bg-slate-50 min-h-screen py-8">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-extrabold text-slate-900">Review Moderation</h1>
+      <p class="text-xs text-slate-500 mt-1">Approve client reviews to display them as store testimonials, or reject spam.</p>
+    </div>
+
+    <!-- Feedback alert -->
+    <div *ngIf="message" class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold px-4 py-2.5 rounded-md">
+      {{ message }}
+    </div>
+
+    <div *ngIf="isLoading" class="p-8 text-center text-slate-500 text-sm font-medium">
+      Loading reviews...
+    </div>
+
+    <div *ngIf="!isLoading && reviews.length === 0" class="bg-white border border-gray-200 rounded-md p-12 text-center shadow-sm">
+      <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-semibold text-slate-900">Queue is clean</h3>
+      <p class="mt-1 text-xs text-slate-500">There are no customer reviews to moderate at this time.</p>
+    </div>
+
+    <div *ngIf="!isLoading && reviews.length > 0" class="space-y-4">
+      <div *ngFor="let item of reviews" class="bg-white border border-gray-200 rounded-md p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        
+        <div class="space-y-2 max-w-xl">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              {{ item.productId?.name || 'Store Review / Testimonial' }}
+            </span>
+            <span class="h-3 w-px bg-gray-300"></span>
+            <span class="text-xs text-slate-500 font-semibold">by {{ item.userId?.name || 'Customer' }}</span>
+          </div>
+
+          <div class="flex items-center gap-1 text-amber-400">
+            <svg *ngFor="let star of getStars(item.rating)" class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
+            <span class="text-xs text-slate-400 ml-2">Rating: {{ item.rating }}/5</span>
+          </div>
+
+          <p class="text-sm text-slate-700 italic">"{{ item.text }}"</p>
+
+          <div>
+            <span *ngIf="item.status === 'Approved'" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-emerald-50 text-emerald-800 border-emerald-200">
+              Approved
+            </span>
+            <span *ngIf="item.status === 'Pending'" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-amber-50 text-amber-800 border-amber-200">
+              Pending
+            </span>
+            <span *ngIf="item.status === 'Cancelled'" class="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-rose-50 text-rose-800 border-rose-200">
+              Cancelled
+            </span>
+          </div>
+        </div>
+
+        <div class="flex md:flex-col items-center gap-2 self-start md:self-center shrink-0">
+          <button 
+            (click)="changeStatus(item._id, 'Approved')"
+            [disabled]="item.status === 'Approved'"
+            class="md:w-28 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-bold py-2 px-4 rounded-md shadow-sm transition-colors">
+            Approve
+          </button>
+          <button 
+            (click)="changeStatus(item._id, 'Cancelled')"
+            [disabled]="item.status === 'Cancelled'"
+            class="md:w-28 bg-white hover:bg-rose-50 text-rose-600 border border-gray-200 text-xs font-bold py-2 px-4 rounded-md shadow-sm transition-colors">
+            Reject
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

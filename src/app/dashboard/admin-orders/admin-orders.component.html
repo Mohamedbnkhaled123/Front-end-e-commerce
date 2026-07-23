@@ -1,0 +1,105 @@
+<div class="bg-slate-50 min-h-screen py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+      <div>
+        <h1 class="text-2xl font-extrabold text-slate-900">Order Management</h1>
+        <p class="text-xs text-slate-500 mt-1">Review order status updates, customer summaries, and dispatch products.</p>
+      </div>
+    </div>
+
+    <!-- Alert -->
+    @if (message) {
+      <div class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold p-3 rounded-md">
+        {{ message }}
+      </div>
+    }
+
+    <div class="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between flex-wrap gap-4">
+        <h2 class="text-sm font-bold text-slate-700">All Client Orders ({{ filteredOrders.length }})</h2>
+        <div class="flex items-center gap-3">
+          <label for="status-filter" class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Filter Status:</label>
+          <select 
+            id="status-filter" 
+            [(ngModel)]="statusFilter" 
+            (ngModelChange)="applyFilter()"
+            class="text-xs bg-white border border-gray-300 rounded-md px-3 py-1.5 text-slate-700 font-medium outline-none">
+            <option value="">All Statuses</option>
+            @for (s of availableStatuses; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (isLoading) {
+        <div class="p-8 text-center text-slate-500 text-sm font-medium">
+          Loading orders...
+        </div>
+      }
+
+      @if (!isLoading) {
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 text-left">
+            <thead class="bg-gray-50 text-xs font-bold text-slate-600 uppercase tracking-wider">
+              <tr>
+                <th class="px-6 py-4">Order ID</th>
+                <th class="px-6 py-4">Client</th>
+                <th class="px-6 py-4">Date</th>
+                <th class="px-6 py-4">Total Amount</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4 text-right">Update Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white text-sm text-slate-700">
+              
+              @for (order of filteredOrders; track order._id) {
+                <tr>
+                  <td class="px-6 py-4 font-mono text-xs font-bold text-slate-800">{{ order._id }}</td>
+                  <td class="px-6 py-4">
+                    <div class="font-semibold text-slate-900">{{ order.user?.name || 'Customer' }}</div>
+                    <div class="text-xs text-slate-400">{{ order.user?.email || 'N/A' }}</div>
+                  </td>
+                  <td class="px-6 py-4 text-slate-500 text-xs">{{ order.createdAt | date:'medium' }}</td>
+                  <td class="px-6 py-4 font-bold text-slate-900">{{ order.totalPrice }} EGP</td>
+                  <td class="px-6 py-4">
+                    <span class="px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider border"
+                      [ngClass]="{
+                        'bg-yellow-50 text-yellow-800 border-yellow-200': order.orderStatus === 'pending',
+                        'bg-blue-50 text-blue-800 border-blue-200': order.orderStatus === 'prepared' || order.orderStatus === 'shipped',
+                        'bg-emerald-50 text-emerald-800 border-emerald-200': order.orderStatus === 'received',
+                        'bg-rose-50 text-rose-800 border-rose-200': order.orderStatus.includes('cancelled') || order.orderStatus === 'rejected'
+                      }">
+                      {{ order.orderStatus }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <select 
+                      [ngModel]="order.orderStatus" 
+                      (ngModelChange)="onStatusChange(order._id, $event)"
+                      class="text-xs font-bold bg-white border border-gray-300 rounded px-2.5 py-1.5 text-slate-700 outline-none">
+                      @if (order.orderStatus === 'cancelledByUser') {
+                        <option value="cancelledByUser" disabled selected>cancelledByUser (Cancelled by User)</option>
+                      }
+                      @for (s of adminSelectableStatuses; track s) {
+                        <option [value]="s">{{ s }}</option>
+                      }
+                    </select>
+                  </td>
+                </tr>
+              }
+
+              @if (filteredOrders.length === 0) {
+                <tr>
+                  <td colspan="6" class="px-6 py-12 text-center text-slate-400 text-xs">No orders found matching status.</td>
+                </tr>
+              }
+
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>

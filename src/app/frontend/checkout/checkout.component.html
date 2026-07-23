@@ -1,0 +1,69 @@
+<div class="bg-gray-100 min-h-screen py-10">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-8">
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Checkout</h1>
+      <p class="text-xs text-slate-500 mt-1">Input address details and place your order securely.</p>
+    </div>
+
+    <!-- Alerts -->
+    @if (successMessage) {
+      <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold p-4 rounded-md">
+        {{ successMessage }}
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm font-semibold p-4 rounded-md">
+        {{ errorMessage }}
+      </div>
+    }
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Forms -->
+      <form (ngSubmit)="onPlaceOrder()" class="lg:col-span-2 space-y-6">
+
+        <!-- Shipping Address -->
+        <div class="bg-white border border-gray-200 rounded-md p-6 shadow-sm">
+          <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">1. Shipping Address</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="title" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Address Label</label>
+              <input type="text" id="title" name="title" [(ngModel)]="title" placeholder="Home / Work" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none">
+            </div>
+            <div>
+              <label for="phone" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Number <span class="text-red-500">*</span></label>
+              <input type="text" id="phone" name="phone" [(ngModel)]="phone" required placeholder="+20 123 456 7890" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none">
+            </div>
+            <div class="col-span-full">
+              <label for="street" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Street Address <span class="text-red-500">*</span></label>
+              <input type="text" id="street" name="street" [(ngModel)]="street" required placeholder="123 Main St, Apt 4B" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none">
+            </div>
+            <div>
+              <label for="city" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">City <span class="text-red-500">*</span></label>
+              <input type="text" id="city" name="city" [(ngModel)]="city" required placeholder="Cairo" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Option -->
+        <div class="bg-white border border-gray-200 rounded-md p-6 shadow-sm">
+          <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">2. Payment Method</h2>
+          <div class="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
+            <input type="radio" checked id="cod" name="payment" class="accent-amber-600">
+            <label for="cod" class="text-xs font-bold text-slate-900">Cash on Delivery (COD)</label>
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          [disabled]="isLoading"
+          class="w-full bg-[#FFD814] hover:bg-[#F7CA00] text-black border border-[#FCD200] rounded-lg py-3 text-sm font-bold shadow-sm transition-all disabled:opacity-50">
+          {{ isLoading ? 'Processing Order...' : 'Place Your Order' }}
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+</div>

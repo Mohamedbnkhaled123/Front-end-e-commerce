@@ -1,0 +1,105 @@
+<div class="bg-slate-50 min-h-screen py-8">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-extrabold text-slate-900">CMS Pages Management</h1>
+      <p class="text-xs text-slate-500 mt-1">Configure user-facing static pages — About, Policy, FAQ, and Contact.</p>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
+
+      <!-- Tab Bar -->
+      <div class="border-b border-gray-200 bg-gray-50 flex items-end">
+        <div class="flex overflow-x-auto px-4">
+          @for (page of pages; track page) {
+            <button
+              (click)="selectTab(page)"
+              [class]="activeTab === page
+                ? 'border-b-2 border-orange-500 text-slate-900 font-bold px-6 py-4 text-sm focus:outline-none capitalize transition-colors'
+                : 'border-b-2 border-transparent text-slate-500 hover:text-slate-800 px-6 py-4 text-sm focus:outline-none capitalize transition-colors'">
+              {{ page }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      @if (isLoading) {
+        <div class="p-6 flex items-center gap-3 text-slate-500 text-sm">
+          <svg class="animate-spin h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          Loading {{ activeTab }} page content...
+        </div>
+      }
+
+      <!-- Editor -->
+      @if (!isLoading) {
+        <div class="p-6">
+          <div>
+
+            <!-- Success Alert -->
+            @if (successMsg) {
+              <div class="mb-4 flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium px-4 py-3 rounded-md animate-fade-in">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                {{ successMsg }}
+              </div>
+            }
+
+            <!-- Error Alert -->
+            @if (errorMsg) {
+              <div class="mb-4 flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm font-medium px-4 py-3 rounded-md animate-fade-in">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ errorMsg }}
+              </div>
+            }
+
+            <!-- Textarea -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                {{ activeTab }} Page Content
+              </label>
+              <textarea
+                [value]="currentContent"
+                (input)="currentContent = $any($event.target).value"
+                rows="16"
+                [placeholder]="'Write the content for the ' + activeTab + ' page here...'"
+                class="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#FF9900] focus:border-[#FF9900] outline-none shadow-sm transition-shadow resize-y font-mono">
+              </textarea>
+              <p class="text-xs text-slate-400 mt-1">{{ currentContent.length }} characters</p>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
+              <span class="text-xs text-slate-400">
+                Editing: <span class="font-semibold text-slate-600">{{ activeTab }}</span> page
+              </span>
+              <button
+                (click)="saveContent()"
+                [disabled]="isSaving"
+                class="bg-[#FF9900] hover:bg-[#DF8300] disabled:opacity-60 disabled:cursor-not-allowed text-white border border-[#E68A00] rounded-lg px-6 py-2.5 text-sm font-bold shadow-sm transition-all flex items-center gap-2">
+                @if (isSaving) {
+                  <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  Saving...
+                } @else {
+                  Save Updates
+                }
+              </button>
+            </div>
+
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>

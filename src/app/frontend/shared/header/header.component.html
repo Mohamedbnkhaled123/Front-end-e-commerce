@@ -1,0 +1,45 @@
+<header class="bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      
+      <!-- Logo and Brand -->
+      <a routerLink="/" class="text-xl font-black tracking-tight text-slate-900 flex items-center">
+        VELORA <span class="text-amber-500 font-medium ml-1">STORE</span>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-700">
+        <a routerLink="/home" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">Home</a>
+        <a routerLink="/products" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">Products</a>
+        <a routerLink="/about" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">About</a>
+        <a routerLink="/policy" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">Policy</a>
+        <a routerLink="/faq" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">FAQ</a>
+        <a routerLink="/contact" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">Contact</a>
+      </nav>
+
+      <!-- Account, Cart & Admin Area -->
+      <div class="flex items-center space-x-6">
+        <a routerLink="/my-orders" routerLinkActive="text-orange-500 font-bold" class="text-sm font-medium text-slate-700 hover:text-orange-600 transition-colors">
+          Returns &amp; Orders
+        </a>
+
+        <!-- Cart with Badge -->
+        <a routerLink="/cart" routerLinkActive="text-orange-500 font-bold" class="relative text-sm font-medium text-slate-700 hover:text-orange-600 transition-colors flex items-center space-x-1.5">
+          <svg class="h-6 w-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <span class="absolute -top-2 left-3 bg-[#FF9900] text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full min-w-[18px] text-center border border-white">
+            0
+          </span>
+          <span class="text-xs font-bold text-slate-800 self-end">Cart</span>
+        </a>
+
+        <span class="h-4 w-px bg-gray-300"></span>
+
+        <!-- Admin Quick Access -->
+        <a routerLink="/admin" class="text-xs text-slate-400 hover:underline">Admin Panel</a>
+      </div>
+
+    </div>
+  </div>
+</header>

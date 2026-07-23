@@ -1,0 +1,65 @@
+<div class="bg-slate-50 min-h-screen py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+      <div>
+        <h1 class="text-2xl font-extrabold text-slate-900">Admin & User Management</h1>
+        <p class="text-xs text-slate-500 mt-1">Manage system accounts and administrators.</p>
+      </div>
+      <a routerLink="/admin/adduser" class="bg-[#FF9900] hover:bg-[#DF8300] text-white text-xs font-bold py-2 px-4 rounded-lg shadow-sm border border-[#E68A00] transition-colors">+ Add New Admin</a>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+        <h2 class="text-sm font-bold text-slate-700">Registered Accounts</h2>
+        <span class="text-xs text-slate-500 font-medium">Total: {{ users.length }} accounts</span>
+      </div>
+
+      <div *ngIf="isLoading" class="p-8 text-center text-slate-500 text-sm font-medium">
+        Loading accounts...
+      </div>
+
+      <div *ngIf="!isLoading" class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-left">
+          <thead class="bg-gray-50 text-xs font-bold text-slate-600 uppercase tracking-wider">
+            <tr>
+              <th class="px-6 py-4">Name</th>
+              <th class="px-6 py-4">Email</th>
+              <th class="px-6 py-4">Role</th>
+              <th class="px-6 py-4">Status</th>
+              <th class="px-6 py-4">Joined Date</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 bg-white text-sm text-slate-700">
+            <tr *ngFor="let u of users">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <span class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 text-sm border border-gray-200 uppercase">
+                    {{ u.name.charAt(0) }}
+                  </span>
+                  <span class="font-bold text-slate-900">{{ u.name }}</span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-slate-600 font-medium">{{ u.email }}</td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border"
+                  [ngClass]="u.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'">
+                  {{ u.role }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider border bg-emerald-50 text-emerald-800 border-emerald-200">
+                  Active
+                </span>
+              </td>
+              <td class="px-6 py-4 text-slate-500 text-xs">{{ u.createdAt | date:'mediumDate' }}</td>
+            </tr>
+
+            <tr *ngIf="users.length === 0">
+              <td colspan="5" class="px-6 py-12 text-center text-slate-400 text-xs">No user accounts found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

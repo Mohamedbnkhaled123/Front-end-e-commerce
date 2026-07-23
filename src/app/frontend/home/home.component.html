@@ -1,0 +1,143 @@
+<div class="bg-gray-100 min-h-screen py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+    
+    <!-- Hero Banner -->
+    <div class="relative bg-slate-900 rounded-2xl overflow-hidden shadow-xl text-white p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+      <div class="space-y-4 max-w-xl">
+        <span class="inline-block px-3 py-1 bg-amber-500 text-slate-950 text-xs font-black uppercase tracking-widest rounded-full">New Collection 2026</span>
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">Elevate Your Everyday Carry</h1>
+        <p class="text-slate-300 text-sm md:text-base leading-relaxed">Discover luxury leather bags, backpacks, and accessories engineered for durability and effortless elegance.</p>
+        <div class="pt-2 flex flex-wrap gap-4">
+          <a routerLink="/products" class="bg-[#FFD814] hover:bg-[#F7CA00] text-slate-950 border border-[#FCD200] font-bold text-sm px-6 py-3 rounded-lg shadow-md transition-all">Shop Collection</a>
+          <a routerLink="/about" class="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 font-bold text-sm px-6 py-3 rounded-lg transition-all">Learn More</a>
+        </div>
+      </div>
+      <div class="w-full md:w-80 h-64 rounded-xl overflow-hidden shadow-lg border border-slate-700 shrink-0">
+        <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80" alt="Hero Bag" class="w-full h-full object-cover">
+      </div>
+    </div>
+
+    <!-- Feature Highlights -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+        <div class="p-3 bg-amber-50 text-amber-600 rounded-lg text-2xl"></div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm">Free Nationwide Shipping</h3>
+          <p class="text-xs text-slate-500 mt-0.5">On all orders across Egypt</p>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+        <div class="p-3 bg-amber-50 text-amber-600 rounded-lg text-2xl">️</div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm">100% Genuine Leather</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Crafted with top-grade materials</p>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+        <div class="p-3 bg-amber-50 text-amber-600 rounded-lg text-2xl"></div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-sm">Hassle-Free Returns</h3>
+          <p class="text-xs text-slate-500 mt-0.5">14-day easy return policy</p>
+        </div>
+      </div>
+    </div>
+
+    <!--  New Arrivals Section -->
+    @if (newArrivals.length > 0) {
+      <div>
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-black text-slate-900 uppercase tracking-wider"> New Arrivals</h2>
+          <a routerLink="/products" class="text-xs font-bold text-amber-600 hover:underline">View All</a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          @for (product of newArrivals; track product._id) {
+            <div class="bg-white p-4 rounded-md border border-gray-200 shadow-sm flex flex-col justify-between">
+              <a [routerLink]="['/products', product.slug || product._id]">
+                <img [src]="staticURL + product.imgURL" class="w-full h-40 object-cover rounded mb-3" [alt]="product.name">
+                <h3 class="text-sm font-bold text-slate-900 truncate">{{ product.name }}</h3>
+                <p class="text-xs text-slate-500 line-clamp-2 mt-1">{{ product.desc }}</p>
+              </a>
+              <div class="mt-4 flex items-center justify-between">
+                <span class="text-base font-black text-slate-950">{{ product.price }} EGP</span>
+                <div class="flex items-center gap-2">
+                  <button 
+                    (click)="addToCart(product)"
+                    [disabled]="product.stock === 0"
+                    class="px-3 py-1.5 bg-[#FFD814] hover:bg-[#F7CA00] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-slate-950 font-bold text-xs rounded shadow-sm transition-all">
+                    Add
+                  </button>
+                  <a [routerLink]="['/products', product.slug || product._id]" class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-bold rounded shadow-sm">View Details</a>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!--  Most Popular Section -->
+    @if (mostPopular.length > 0) {
+      <div>
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-black text-slate-900 uppercase tracking-wider"> Most Popular</h2>
+          <a routerLink="/products" class="text-xs font-bold text-amber-600 hover:underline">View All</a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          @for (product of mostPopular; track product._id) {
+            <div class="bg-white p-4 rounded-md border border-gray-200 shadow-sm flex flex-col justify-between">
+              <a [routerLink]="['/products', product.slug || product._id]">
+                <img [src]="staticURL + product.imgURL" class="w-full h-40 object-cover rounded mb-3" [alt]="product.name">
+                <h3 class="text-sm font-bold text-slate-900 truncate">{{ product.name }}</h3>
+                <p class="text-xs text-slate-500 line-clamp-2 mt-1">{{ product.desc }}</p>
+              </a>
+              <div class="mt-4 flex items-center justify-between">
+                <span class="text-base font-black text-slate-950">{{ product.price }} EGP</span>
+                <div class="flex items-center gap-2">
+                  <button 
+                    (click)="addToCart(product)"
+                    [disabled]="product.stock === 0"
+                    class="px-3 py-1.5 bg-[#FFD814] hover:bg-[#F7CA00] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-slate-950 font-bold text-xs rounded shadow-sm transition-all">
+                    Add
+                  </button>
+                  <a [routerLink]="['/products', product.slug || product._id]" class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-bold rounded shadow-sm">View Details</a>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!--  Customer Testimonials Section -->
+    <div>
+      <h2 class="text-lg font-black text-slate-900 mb-6 uppercase tracking-wider"> Customer Testimonials</h2>
+      
+      @if (testimonials.length === 0) {
+        <div class="bg-white border border-gray-200 rounded-md p-8 text-center shadow-sm">
+          <p class="text-slate-500 text-sm">No reviews published yet. Be the first to leave a feedback!</p>
+        </div>
+      }
+
+      @if (testimonials.length > 0) {
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          @for (item of testimonials; track item._id) {
+            <div class="bg-white p-6 rounded-md border border-gray-200 shadow-sm space-y-3">
+              <div class="flex items-center gap-1 text-amber-400">
+                @for (star of getStars(item.rating); track $index) {
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                }
+              </div>
+              <p class="text-sm text-slate-700 italic">"{{ item.text }}"</p>
+              <div class="text-xs font-bold text-slate-900 border-t border-gray-100 pt-2 flex items-center">
+                <span>{{ item.userId?.name || 'Verified Customer' }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+</div>
