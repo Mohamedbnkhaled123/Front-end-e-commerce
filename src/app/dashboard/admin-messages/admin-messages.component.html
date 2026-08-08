@@ -1,0 +1,110 @@
+<div class="bg-slate-50 dark:bg-slate-950 min-h-screen py-8 transition-colors duration-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
+      <div>
+        <h1 class="text-2xl font-semibold text-slate-900 dark:text-white ">{{ 'admin.customer_inbox' | translate }}</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{{ 'admin.customer_inbox_desc' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Messages Table -->
+    <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden transition-colors duration-200">
+      <div class="overflow-x-auto min-h-[400px]">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50/80 dark:bg-slate-800/50 border-b border-gray-200/80 dark:border-slate-800">
+              <th class="px-5 py-4 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ 'admin.th_customer' | translate }}</th>
+              <th class="px-5 py-4 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ 'admin.th_subject' | translate }}</th>
+              <th class="px-5 py-4 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ 'admin.th_message' | translate }}</th>
+              <th class="px-5 py-4 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-center">{{ 'admin.th_date' | translate }}</th>
+              <th class="px-5 py-4 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-right">{{ 'admin.th_actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 dark:divide-slate-800/80">
+
+            @if (isLoading) {
+              <tr>
+                <td colspan="5" class="px-5 py-16 text-center">
+                  <svg class="animate-spin h-8 w-8 text-blue-500 mx-auto" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                </td>
+              </tr>
+            } @else if (messages.length === 0) {
+              <tr>
+                <td colspan="5" class="px-5 py-12 text-center">
+                  <div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+                    <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    <p class="text-sm font-semibold">{{ 'admin.inbox_clear' | translate }}</p>
+                  </div>
+                </td>
+              </tr>
+            } @else {
+              @for (msg of messages; track msg._id) {
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors" [ngClass]="{'bg-blue-50/30 dark:bg-blue-900/10': !msg.isRead}">
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      @if (!msg.isRead) {
+                        <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+                      }
+                      <div>
+                        <div class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{{ msg.name }}</div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400">{{ msg.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-5 py-4 text-xs font-semibold text-slate-800 dark:text-slate-200 max-w-xs truncate">
+                    {{ msg.subject }}
+                  </td>
+                  <td class="px-5 py-4 text-xs font-medium text-slate-500 dark:text-slate-400 max-w-sm">
+                    <p class="line-clamp-2">{{ msg.message }}</p>
+                  </td>
+                  <td class="px-5 py-4 text-[11px] font-semibold text-slate-400 dark:text-slate-500 text-center whitespace-nowrap">
+                    {{ msg.createdAt | date:'short':'':_langService.currentLang() }}
+                  </td>
+                  <td class="px-5 py-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      @if (!msg.isRead) {
+                        <button (click)="markAsRead(msg)" class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors tooltip-btn" [title]="'admin.mark_as_read' | translate">
+                          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        </button>
+                      }
+                      <button (click)="deleteMessage(msg._id)" class="p-2 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors tooltip-btn" [title]="'admin.delete' | translate">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="px-5 py-4 border-t border-gray-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-4">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            {{ 'admin.showing' | translate }} {{ (currentPage - 1) * pageSize + 1 }} {{ 'admin.to' | translate }} {{ min(currentPage * pageSize, totalResults) }} {{ 'admin.of' | translate }} {{ totalResults }} {{ 'admin.entries' | translate }}
+          </p>
+          <div class="flex items-center gap-1.5">
+            <button (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1"
+              class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">{{ 'admin.prev' | translate }}</button>
+            @for (p of pageNumbers; track p) {
+              <button (click)="setPage(p)"
+                [class]="p === currentPage ? 'bg-blue-600 text-white font-bold' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-gray-50 dark:hover:bg-slate-700'"
+                class="w-8 h-8 rounded-lg border border-gray-200 dark:border-slate-700 flex items-center justify-center text-xs transition-colors">
+                {{ p }}
+              </button>
+            }
+            <button (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages"
+              class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">{{ 'admin.next' | translate }}</button>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

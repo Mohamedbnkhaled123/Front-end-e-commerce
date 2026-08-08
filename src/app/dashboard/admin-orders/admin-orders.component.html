@@ -1,103 +1,178 @@
-<div class="bg-slate-50 min-h-screen py-8">
+<div class="bg-slate-50 dark:bg-slate-950 min-h-screen py-8 transition-colors duration-200">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
       <div>
-        <h1 class="text-2xl font-extrabold text-slate-900">Order Management</h1>
-        <p class="text-xs text-slate-500 mt-1">Review order status updates, customer summaries, and dispatch products.</p>
+        <h1 class="text-2xl font-semibold text-slate-900 dark:text-white ">{{ 'admin.orders' | translate }}</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{{ 'admin.overview_status' | translate }}</p>
       </div>
     </div>
 
     <!-- Alert -->
     @if (message) {
-      <div class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold p-3 rounded-md">
+      <div class="mb-4 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold p-3.5 rounded-lg shadow-xs">
         {{ message }}
       </div>
     }
 
-    <div class="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between flex-wrap gap-4">
-        <h2 class="text-sm font-bold text-slate-700">All Client Orders ({{ filteredOrders.length }})</h2>
+    <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden transition-colors duration-200">
+      <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 flex items-center justify-between flex-wrap gap-4">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-white">{{ 'admin.all_client_orders' | translate }} ({{ filteredOrders.length }})</h2>
         <div class="flex items-center gap-3">
-          <label for="status-filter" class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Filter Status:</label>
+          <label for="status-filter" class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">{{ 'admin.filter_status' | translate }}</label>
           <select 
             id="status-filter" 
-            [(ngModel)]="statusFilter" 
+            [(ngModel)]="statusFilter"  
             (ngModelChange)="applyFilter()"
-            class="text-xs bg-white border border-gray-300 rounded-md px-3 py-1.5 text-slate-700 font-medium outline-none">
-            <option value="">All Statuses</option>
+            class="text-xs bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-900 dark:text-white font-medium outline-none min-h-[36px]">
+            <option value="">{{ 'admin.all_statuses' | translate }}</option>
             @for (s of availableStatuses; track s) {
-              <option [value]="s">{{ s }}</option>
+              <option [value]="s">{{ formatStatus(s) | translate }}</option>
             }
           </select>
         </div>
       </div>
 
       @if (isLoading) {
-        <div class="p-8 text-center text-slate-500 text-sm font-medium">
-          Loading orders...
+        <div class="p-8 text-center text-slate-500 dark:text-slate-400 text-sm font-medium">
+          {{ 'admin.loading_orders' | translate }}
         </div>
       }
 
       @if (!isLoading) {
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200 text-left">
-            <thead class="bg-gray-50 text-xs font-bold text-slate-600 uppercase tracking-wider">
-              <tr>
-                <th class="px-6 py-4">Order ID</th>
-                <th class="px-6 py-4">Client</th>
-                <th class="px-6 py-4">Date</th>
-                <th class="px-6 py-4">Total Amount</th>
-                <th class="px-6 py-4">Status</th>
-                <th class="px-6 py-4 text-right">Update Status</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 bg-white text-sm text-slate-700">
+        <!-- Card-Based Adaptive Responsive Orders List (No Horizontal Table Scroll!) -->
+        <div class="divide-y divide-gray-100 dark:divide-slate-800 p-4 sm:p-6 space-y-4">
+          @for (order of filteredOrders; track order._id; let i = $index) {
+            <div class="bg-slate-50/50 dark:bg-slate-800/40 border border-gray-200/80 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-xs transition-all space-y-4">
               
-              @for (order of filteredOrders; track order._id) {
-                <tr>
-                  <td class="px-6 py-4 font-mono text-xs font-bold text-slate-800">{{ order._id }}</td>
-                  <td class="px-6 py-4">
-                    <div class="font-semibold text-slate-900">{{ order.user?.name || 'Customer' }}</div>
-                    <div class="text-xs text-slate-400">{{ order.user?.email || 'N/A' }}</div>
-                  </td>
-                  <td class="px-6 py-4 text-slate-500 text-xs">{{ order.createdAt | date:'medium' }}</td>
-                  <td class="px-6 py-4 font-bold text-slate-900">{{ order.totalPrice }} EGP</td>
-                  <td class="px-6 py-4">
-                    <span class="px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider border"
-                      [ngClass]="{
-                        'bg-yellow-50 text-yellow-800 border-yellow-200': order.orderStatus === 'pending',
-                        'bg-blue-50 text-blue-800 border-blue-200': order.orderStatus === 'prepared' || order.orderStatus === 'shipped',
-                        'bg-emerald-50 text-emerald-800 border-emerald-200': order.orderStatus === 'received',
-                        'bg-rose-50 text-rose-800 border-rose-200': order.orderStatus.includes('cancelled') || order.orderStatus === 'rejected'
-                      }">
-                      {{ order.orderStatus }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <select 
-                      [ngModel]="order.orderStatus" 
-                      (ngModelChange)="onStatusChange(order._id, $event)"
-                      class="text-xs font-bold bg-white border border-gray-300 rounded px-2.5 py-1.5 text-slate-700 outline-none">
-                      @if (order.orderStatus === 'cancelledByUser') {
-                        <option value="cancelledByUser" disabled selected>cancelledByUser (Cancelled by User)</option>
-                      }
-                      @for (s of adminSelectableStatuses; track s) {
-                        <option [value]="s">{{ s }}</option>
-                      }
-                    </select>
-                  </td>
-                </tr>
-              }
+              <!-- Top Header Row: Order Number, Customer Info, Date, Total Amount -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                  <span class="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-md shrink-0">
+                    #{{ i + 1 }}
+                  </span>
+                  <div>
+                    <h3 class="font-semibold text-slate-900 dark:text-white text-sm">{{ order.user?.name || 'Customer' }}</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">{{ order.user?.email || 'N/A' }}</p>
+                  </div>
+                </div>
 
-              @if (filteredOrders.length === 0) {
-                <tr>
-                  <td colspan="6" class="px-6 py-12 text-center text-slate-400 text-xs">No orders found matching status.</td>
-                </tr>
-              }
+                <div class="flex items-center justify-between sm:justify-end gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  <span class="font-mono text-[11px]">{{ order.createdAt | date:'medium':'':_langService.currentLang() }}</span>
+                  <span class="text-base font-bold text-slate-900 dark:text-white shrink-0">{{ order.totalPrice | number:'1.0-2' }} EGP</span>
+                </div>
+              </div>
 
-            </tbody>
-          </table>
+              <!-- Bottom Row: Order Status Badge & Admin Action Selector -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ 'admin.order_status' | translate }}</span>
+                  <span class="px-3 py-1 rounded-md text-xs font-bold border"
+                    [ngClass]="{
+                      'bg-yellow-50 dark:bg-yellow-950/40 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800': order.orderStatus === 'pending',
+                      'bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800': order.orderStatus === 'prepared' || order.orderStatus === 'shipped',
+                      'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800': order.orderStatus === 'received',
+                      'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800': order.orderStatus.includes('cancelled') || order.orderStatus === 'rejected'
+                    }">
+                    {{ formatStatus(order.orderStatus) | translate }}
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <label class="text-xs font-bold text-slate-500 dark:text-slate-400 shrink-0">{{ 'admin.action' | translate }}</label>
+                  <select 
+                    [disabled]="['rejected', 'cancelledByUser', 'received'].includes(order.orderStatus)"
+                    (change)="onStatusChange(order, $any($event.target))"
+                    class="text-xs font-bold bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-900 dark:text-white outline-none cursor-pointer focus:ring-2 focus:ring-blue-500 shadow-xs min-h-[38px] disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-slate-50 dark:disabled:bg-slate-950">
+                    @if (!adminSelectableStatuses.includes(order.orderStatus)) {
+                      <option [value]="order.orderStatus" selected>{{ formatStatus(order.orderStatus) | translate }}</option>
+                    }
+                    @for (s of adminSelectableStatuses; track s) {
+                      <option [value]="s" [selected]="s === order.orderStatus">{{ formatStatus(s) | translate }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <!-- Expanded Order Details Section -->
+              <div class="mt-4 border-t border-gray-100 dark:border-slate-700/60 pt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Order Items -->
+                <div class="space-y-3">
+                  <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ 'admin.ordered_products' | translate }} ({{ order.items ? order.items.length : 0 }})</h4>
+                  <div class="space-y-2">
+                    @for (item of order.items; track $index) {
+                      <div class="flex items-center gap-3 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-2.5 rounded-lg shadow-sm">
+                        @if (item.productId?.imgURL) {
+                          <img [src]="item.productId.imgURL.startsWith('http') ? item.productId.imgURL : staticURL + item.productId.imgURL" class="w-12 h-12 object-cover rounded-md border border-gray-100 dark:border-slate-800 shrink-0" [alt]="(item.productId | localizeField:'name') || 'Product'">
+                        } @else {
+                          <div class="w-12 h-12 rounded-md bg-slate-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 flex items-center justify-center text-slate-400 font-bold text-[10px] shrink-0">
+                            IMG
+                          </div>
+                        }
+                        <div class="flex-1 min-w-0">
+                          <h5 class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ (item.productId | localizeField:'name') || 'Unknown Product' }}</h5>
+                          <div class="flex items-center justify-between mt-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                            <span>{{ 'admin.qty' | translate }} <strong class="text-slate-700 dark:text-slate-300">{{ item.quantity }}</strong></span>
+                            <span>{{ 'admin.price' | translate }} <strong class="text-slate-700 dark:text-slate-300">{{ (item.discountedPrice || item.priceAtPurchase) | number:'1.0-2' }} EGP</strong></span>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Shipping Address & Info -->
+                <div class="space-y-3">
+                  <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ 'admin.shipping_details' | translate }}</h4>
+                  @if (order.shippingAddress) {
+                    <div class="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-3.5 rounded-lg shadow-sm space-y-2 text-xs">
+                      <div class="flex items-start gap-2">
+                        <svg class="w-4 h-4 text-blue-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <div class="text-slate-700 dark:text-slate-300 font-medium">
+                          {{ order.shippingAddress.street }}, {{ order.shippingAddress.city }}
+                          <br>
+                          @if (order.shippingAddress.buildingNumber) {
+                            {{ 'admin.building' | translate }} {{ order.shippingAddress.buildingNumber }} 
+                          }
+                          @if (order.shippingAddress.floorNumber) {
+                            | {{ 'admin.floor' | translate }} {{ order.shippingAddress.floorNumber }}
+                          }
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2 pt-1 border-t border-gray-50 dark:border-slate-800/60 mt-2">
+                        <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                        <span class="text-slate-900 dark:text-white font-mono font-bold">{{ order.shippingAddress.phoneNumber }}</span>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="bg-gray-50 dark:bg-slate-900/50 p-4 border border-dashed border-gray-200 dark:border-slate-700 rounded-lg text-slate-400 text-xs italic">
+                      {{ 'admin.no_shipping_address' | translate }}
+                    </div>
+                  }
+                  
+                  <!-- Order Total Breakdown -->
+                  <div class="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-100 dark:border-blue-900/30 mt-3 flex flex-col gap-1 text-xs">
+                    @if (order.grossTotal) {
+                      <div class="flex justify-between text-slate-500 dark:text-slate-400 font-medium"><span>{{ 'cart.subtotal' | translate }}:</span> <span>{{ order.grossTotal | number:'1.0-2' }} EGP</span></div>
+                      <div class="flex justify-between text-slate-500 dark:text-slate-400 font-medium"><span>{{ 'cart.shipping' | translate }}:</span> <span>{{ (order.shippingFee || 0) | number:'1.0-2' }} EGP</span></div>
+                    }
+                    @if (order.totalDiscount) {
+                      <div class="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium"><span>{{ 'admin.discount' | translate }}:</span> <span>-{{ order.totalDiscount | number:'1.0-2' }} EGP</span></div>
+                    }
+                    <div class="flex justify-between text-slate-900 dark:text-white font-bold text-sm pt-1 border-t border-blue-200/50 dark:border-blue-800/50 mt-1">
+                      <span>{{ 'cart.total' | translate }}:</span> <span>{{ order.totalPrice | number:'1.0-2' }} EGP</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          } @empty {
+            <div class="py-12 text-center text-slate-400 text-xs font-medium">
+              {{ 'admin.no_orders_found' | translate }}
+            </div>
+          }
         </div>
       }
     </div>

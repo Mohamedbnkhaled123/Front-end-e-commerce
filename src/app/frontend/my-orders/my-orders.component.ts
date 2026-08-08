@@ -1,17 +1,22 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { LocalizeFieldPipe } from '../../core/pipes/localize-field.pipe';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { OrderService, IOrder } from '../../core/services/order.service';
 import { ReviewService } from '../../core/services/review.service';
 import { ModalService } from '../../core/services/modal.service';
+import { LanguageService } from '../../core/services/language.service';
 import { env } from '../../../env/env';
 import { Subscription } from 'rxjs';
+
+import { SkeletonComponent } from '../../shared/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-my-orders',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [TranslatePipe, CommonModule, RouterLink, FormsModule, SkeletonComponent, LocalizeFieldPipe],
   templateUrl: './my-orders.component.html'
 })
 export class MyOrders implements OnInit, OnDestroy {
@@ -27,13 +32,17 @@ export class MyOrders implements OnInit, OnDestroy {
   isSubmittingReview = false;
   errorMessage = '';
 
+  @ViewChild('reviewModal') reviewModal!: ElementRef<HTMLDialogElement>;
+
   private subscriptions = new Subscription();
 
   constructor(
     private _orderService: OrderService,
     private _reviewService: ReviewService,
     private _modalService: ModalService,
-    private _cdr: ChangeDetectorRef
+    private _langService: LanguageService,
+    private _cdr: ChangeDetectorRef,
+    private _router: Router
   ) {}
 
   ngOnInit(): void {
@@ -100,27 +109,40 @@ export class MyOrders implements OnInit, OnDestroy {
     this.subscriptions.add(sub);
   }
 
-  // Opens order review modal
-  openReviewModal(order: IOrder) {
+  // Opens product review modal for a specific purchased item
+  openReviewModal(order: IOrder, specificProductId?: string) {
     this.selectedOrderForReview = order;
-    this.selectedProductId = order.items && order.items[0] ? (order.items[0].productId?._id || order.items[0].productId) : '';
+    if (specificProductId) {
+      this.selectedProductId = specificProductId;
+    } else {
+      const firstProduct = order.items && order.items[0] ? order.items[0].productId : null;
+      this.selectedProductId = typeof firstProduct === 'object' && firstProduct ? firstProduct._id : (firstProduct || '');
+    }
+
     this.reviewText = '';
     this.reviewRating = 5;
     this.errorMessage = '';
     this._cdr.detectChanges();
+
+    if (this.reviewModal?.nativeElement) {
+      this.reviewModal.nativeElement.showModal();
+    }
   }
 
   closeReviewModal() {
+    if (this.reviewModal?.nativeElement) {
+      this.reviewModal.nativeElement.close();
+    }
     this.selectedOrderForReview = null;
     this.selectedProductId = '';
     this.reviewText = '';
     this._cdr.detectChanges();
   }
 
-  // Submits customer review feedback
+  // Submits verified product review feedback
   submitReview() {
-    if (!this.reviewText.trim()) {
-      this.errorMessage = 'Please write your review feedback.';
+    if (!this.selectedProductId) {
+      this.errorMessage = 'Please select a product to review.';
       this._cdr.detectChanges();
       return;
     }
@@ -130,17 +152,25 @@ export class MyOrders implements OnInit, OnDestroy {
     this._cdr.detectChanges();
 
     const payload = {
+      productId: this.selectedProductId,
+      orderId: this.selectedOrderForReview?._id,
       text: this.reviewText,
-      rating: Number(this.reviewRating),
-      productId: this.selectedProductId || undefined
+      rating: Number(this.reviewRating)
     };
 
     const sub = this._reviewService.addReview(payload).subscribe({
       next: (res) => {
         this.isSubmittingReview = false;
-        this.message = res.message || 'Review submitted successfully! Pending admin approval.';
+        this.message = this._langService.translate('orders.review_thanks');
+        
+        const productIdToNavigate = this.selectedProductId;
+        
         this.closeReviewModal();
         this._cdr.detectChanges();
+        
+        // Navigate to product details page immediately, scrolling to reviews
+        this._router.navigate(['/products', productIdToNavigate], { fragment: 'reviews' });
+        
         setTimeout(() => {
           this.message = '';
           this._cdr.detectChanges();
@@ -148,7 +178,7 @@ export class MyOrders implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.isSubmittingReview = false;
-        this.errorMessage = err?.error?.message || 'You can only submit a review after receiving the order.';
+        this.errorMessage = err?.error?.message || 'Failed to submit review. Ensure order status is received.';
         this._cdr.detectChanges();
       }
     });
@@ -160,3 +190,4 @@ export class MyOrders implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 }
+

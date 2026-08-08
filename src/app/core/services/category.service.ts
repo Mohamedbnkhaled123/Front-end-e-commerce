@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { env } from '../../../env/env';
+import { ICategory } from '../models/category.model';
 
-export interface ICategory {
-  _id: string;
-  name: string;
-}
+export type { ICategory };
+
 
 @Injectable({
   providedIn: 'root'
@@ -15,13 +14,6 @@ export class CategoryService {
 
   constructor(private _http: HttpClient) {}
 
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
   getCategories() {
     return this._http.get<{ status: string; data: ICategory[] }>(this.apiURL);
   }
@@ -29,8 +21,9 @@ export class CategoryService {
   addCategory(formData: FormData) {
     return this._http.post<{ status: string; message: string; data: ICategory }>(
       this.apiURL, 
-      formData, 
-      { headers: this.getHeaders() }
+      formData
     );
   }
 }
+
+

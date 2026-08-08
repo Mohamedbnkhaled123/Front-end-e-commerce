@@ -45,6 +45,7 @@ export class EditProduct implements OnInit, OnDestroy {
       name:        ['', Validators.required],
       desc:        ['', Validators.required],
       price:       [null, [Validators.required, Validators.min(0)]],
+      discount:    [0, [Validators.min(0), Validators.max(100)]],
       stock:       [null, [Validators.required, Validators.min(0)]],
       slug:        [''],
       isActive:    [true],
@@ -62,9 +63,9 @@ export class EditProduct implements OnInit, OnDestroy {
     this.isLoading = true;
     this._cdr.detectChanges();
 
-    const sub = this._productService.getAllProducts().subscribe({
+    const sub = this._productService.getProductById(this.productId).subscribe({
       next: (res) => {
-        const found = (res.data || []).find(p => p._id === this.productId);
+        const found = res.data;
         if (found) {
           this.currentImgURL = found.imgURL || '';
           this.existingCategory = found.category || null;
@@ -74,6 +75,7 @@ export class EditProduct implements OnInit, OnDestroy {
             name: found.name,
             desc: found.desc || '',
             price: found.price,
+            discount: found.discount || 0,
             stock: found.stock,
             slug: found.slug || '',
             isActive: found.isActive !== false,
@@ -105,7 +107,7 @@ export class EditProduct implements OnInit, OnDestroy {
   }
 
   // Submits product updates
-  onSubmit() {
+  async onSubmit() {
     this.errorMessage = '';
     this.successMessage = '';
 
@@ -115,6 +117,16 @@ export class EditProduct implements OnInit, OnDestroy {
       return;
     }
 
+    const confirmed = await this._modalService.confirm({
+      title: 'Confirm Save Changes',
+      message: 'Are you sure you want to save the changes made to this product?',
+      confirmText: 'Yes, Save Changes',
+      cancelText: 'Cancel',
+      type: 'info'
+    });
+
+    if (!confirmed) return;
+
     this.isSaving = true;
     this._cdr.detectChanges();
 
@@ -122,6 +134,7 @@ export class EditProduct implements OnInit, OnDestroy {
     formData.append('name', this.editForm.get('name')?.value || '');
     formData.append('desc', this.editForm.get('desc')?.value || '');
     formData.append('price', String(this.editForm.get('price')?.value || 0));
+    formData.append('discount', String(this.editForm.get('discount')?.value || 0));
     formData.append('stock', String(this.editForm.get('stock')?.value || 0));
     formData.append('slug', this.editForm.get('slug')?.value || '');
     formData.append('isActive', String(this.editForm.get('isActive')?.value));

@@ -42,3 +42,23 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Dist backups and analysis logs
+dist_old_*/
+lh-*.json
+bundle-analysis.json
+*.bak
+test-tailwind.html
+all_product_details_steps.txt
+recovered_product_details.txt
+
+# Documentation files
+E-commerce_Backend.md
+E-commerce_front.md
+Full_Stack_Connection.md
+Project_Docs/
+SLILL_RESPONSIVE.md
+UI_UX_FULL_REPORT.md
+report_panel.md
+walkthrough.md
+

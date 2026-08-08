@@ -1,27 +1,86 @@
-<div class="bg-gray-100 min-h-screen py-12">
+<div class="bg-blue-50/30 dark:bg-slate-950 min-h-screen py-12 transition-colors duration-200">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-      <!-- Hero -->
-      <div class="bg-slate-900 text-white py-16 px-10 text-center border-b-4 border-amber-500">
-        <h1 class="text-4xl font-black tracking-tight">About Velora Store</h1>
-        <p class="text-sm text-slate-300 mt-3 max-w-lg mx-auto leading-relaxed">We design and curate premium carrywear for modern professionals who value both form and function.</p>
+
+    @if (isLoading) {
+      <div class="flex items-center justify-center py-24">
+        <svg class="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
       </div>
-      <!-- Content placeholder -->
-      <div class="p-10 space-y-8 text-slate-700 text-sm leading-relaxed">
-        <div>
-          <h2 class="text-lg font-bold text-slate-900 mb-3">Our Story</h2>
-          @if (content) {
-            <p class="text-slate-600 whitespace-pre-line leading-relaxed">{{ content }}</p>
-          } @else {
-            <p class="text-slate-500">Content for this section will be managed through the Admin CMS panel. Once the administrator sets the about page content, it will appear here.</p>
-          }
+    } @else {
+      <!-- Hero Section -->
+      <div class="bg-gradient-to-br from-slate-100 via-blue-50/50 to-slate-100 dark:from-slate-900 dark:via-blue-950 dark:to-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm rounded-2xl py-16 px-10 text-center mb-8">
+        <div class="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 text-xs font-bold px-4 py-1.5 rounded-full mb-6 uppercase tracking-widest shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          {{ 'about.ourStory' | translate }}
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
-          <div class="text-center"><div class="text-3xl font-extrabold text-amber-500">0+</div><div class="text-xs font-bold text-slate-600 uppercase tracking-wider mt-1">Products Listed</div></div>
-          <div class="text-center"><div class="text-3xl font-extrabold text-amber-500">0+</div><div class="text-xs font-bold text-slate-600 uppercase tracking-wider mt-1">Happy Customers</div></div>
-          <div class="text-center"><div class="text-3xl font-extrabold text-amber-500">0+</div><div class="text-xs font-bold text-slate-600 uppercase tracking-wider mt-1">Countries Shipped</div></div>
+        <h1 class="text-3xl sm:text-4xl font-semibold text-slate-900 dark:text-white">{{ localized(pageData.heroTitle) }}</h1>
+        <p class="text-sm text-slate-600 dark:text-slate-300 mt-3 max-w-xl mx-auto leading-relaxed font-medium">{{ localized(pageData.heroSubtitle) }}</p>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        @for (stat of pageData.stats; track stat.label) {
+          <div class="bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl p-5 text-center">
+            <div class="text-xl sm:text-2xl font-semibold text-blue-600 dark:text-blue-400">{{ localized(stat.value) }}</div>
+            <div class="text-[9px] sm:text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-1">{{ localized(stat.label) }}</div>
+          </div>
+        }
+      </div>
+
+      <!-- Story + Team + Mission -->
+      <div class="bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl overflow-hidden mb-8">
+        <div class="p-8 sm:p-10 space-y-8">
+
+          <!-- {{ 'about.ourStory' | translate }} -->
+          <div class="border-b border-gray-100 dark:border-slate-800 pb-8">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-1 h-6 bg-blue-600 rounded-full shrink-0"></div>
+              <h2 class="text-lg font-semibold text-slate-900 dark:text-white ">{{ localized(pageData.storyTitle) }}</h2>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium whitespace-pre-line">{{ localized(pageData.storyBody) }}</p>
+          </div>
+
+          <!-- Features Grid -->
+          <div>
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-1 h-6 bg-blue-600 rounded-full shrink-0"></div>
+              <h2 class="text-lg font-semibold text-slate-900 dark:text-white ">{{ 'about.whyChooseUs' | translate }}</h2>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              @for (feature of pageData.features; track feature.title) {
+                <div class="bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl p-5">
+                  <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mb-3 shadow-sm">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="feature.icon"/>
+                    </svg>
+                  </div>
+                  <h3 class="text-sm font-semibold text-slate-900 dark:text-white mb-1">{{ localized(feature.title) }}</h3>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">{{ localized(feature.description) }}</p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Team -->
+          <div class="border-t border-gray-100 dark:border-slate-800 pt-8">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-1 h-6 bg-blue-600 rounded-full shrink-0"></div>
+              <h2 class="text-lg font-semibold text-slate-900 dark:text-white ">{{ localized(pageData.teamTitle) }}</h2>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{{ localized(pageData.teamBody) }}</p>
+          </div>
+
+          <!-- Mission -->
+          <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 sm:p-8">
+            <h2 class="text-base font-semibold text-white mb-2">{{ localized(pageData.missionTitle) }}</h2>
+            <p class="text-sm text-blue-100 leading-relaxed font-medium">{{ localized(pageData.missionBody) }}</p>
+          </div>
+
         </div>
       </div>
-    </div>
+    }
   </div>
 </div>
+

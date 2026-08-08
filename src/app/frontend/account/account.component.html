@@ -1,57 +1,57 @@
-<div class="bg-gray-100 min-h-screen py-10">
+<div class="bg-blue-50/30 min-h-screen py-10">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h1 class="text-2xl font-extrabold text-slate-900 mb-6">Your Account</h1>
+    <h1 class="text-2xl font-semibold text-slate-900 mb-6 ">{{ 'account.title' | translate }}</h1>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
       <!-- Account Quick Links -->
-      <div class="bg-white border border-gray-200 rounded-md shadow-sm p-6 col-span-1">
+      <div class="bg-white border border-gray-200/80 rounded-xl shadow-xs p-6 col-span-1">
         <div class="flex items-center gap-4 mb-6 pb-4 border-b border-gray-100">
-          <div class="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center text-white font-extrabold text-xl border-2 border-amber-600">U</div>
+          <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-xs">S</div>
           <div>
-            <div class="text-sm font-bold text-slate-900">Velora User</div>
-            <div class="text-xs text-slate-400">user@example.com</div>
+            <div class="text-sm font-bold text-slate-900">{{ 'account.shoPRO_customer' | translate }}</div>
+            <div class="text-xs text-slate-400 font-medium">user@example.com</div>
           </div>
         </div>
         <nav class="space-y-1 text-sm font-semibold text-slate-700">
-          <a routerLink="/my-orders" class="flex items-center gap-2 px-3 py-2 rounded bg-amber-50 text-amber-700 border border-amber-100">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-            My Orders
+          <a routerLink="/my-orders" class="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 font-medium">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+            <span>{{ 'account.my_orders' | translate }}</span>
           </a>
-          <a href="#" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-            Profile Settings
+          <a href="#" class="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            <span>{{ 'account.profile_settings' | translate }}</span>
           </a>
-          <a href="#" class="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
-            Change Password
+          <a href="#" class="flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-slate-50 transition-colors">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+            <span>{{ 'account.change_password' | translate }}</span>
           </a>
-          <a routerLink="/login" class="flex items-center gap-2 px-3 py-2 rounded text-rose-600 hover:bg-rose-50 transition-colors mt-4 border-t border-gray-100">
+          <a routerLink="/login" class="flex items-center gap-2 px-3 py-2.5 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors mt-4 border-t border-gray-100 font-medium">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            Sign Out
+            <span>{{ 'account.sign_out' | translate }}</span>
           </a>
         </nav>
       </div>
 
       <!-- Account Info Panel -->
-      <div class="md:col-span-2 bg-white border border-gray-200 rounded-md shadow-sm p-6">
-        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-gray-100 pb-3 mb-4">Personal Information</h2>
+      <div class="md:col-span-2 bg-white border border-gray-200/80 rounded-xl shadow-xs p-6">
+        <h2 class="text-xs font-semibold text-slate-800 uppercase tracking-wider border-b border-gray-100 pb-3 mb-4">{{ 'account.personal_info' | translate }}</h2>
         <form class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label for="accName" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Full Name</label>
-              <input type="text" id="accName" value="Velora User" class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none shadow-sm">
+              <label for="accName" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">{{ 'account.full_name' | translate }}</label>
+              <input type="text" id="accName" value="{{ 'account.shoPRO_customer' | translate }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none shadow-2xs">
             </div>
             <div>
-              <label for="accEmail" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email Address</label>
-              <input type="email" id="accEmail" value="user@example.com" class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none shadow-sm">
+              <label for="accEmail" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">{{ 'account.email_address' | translate }}</label>
+              <input type="email" id="accEmail" value="user@example.com" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none shadow-2xs">
             </div>
           </div>
           <div>
-            <label for="accPhone" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Number</label>
-            <input type="text" id="accPhone" placeholder="+20 123 456 7890" class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none shadow-sm">
+            <label for="accPhone" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">{{ 'account.phone_number' | translate }}</label>
+            <input type="text" id="accPhone" placeholder="+20 123 456 7890" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 focus:outline-none shadow-2xs">
           </div>
           <div class="pt-4 text-right">
-            <button type="submit" class="bg-[#FF9900] hover:bg-[#DF8300] text-white border border-[#E68A00] rounded-lg px-6 py-2 text-sm font-bold shadow-sm transition-all">Save Changes</button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 py-2.5 text-xs font-medium shadow-xs transition-all cursor-pointer min-h-[44px]">Save Changes</button>
           </div>
         </form>
       </div>
@@ -59,3 +59,4 @@
     </div>
   </div>
 </div>
+

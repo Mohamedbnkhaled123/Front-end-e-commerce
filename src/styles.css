@@ -1,3 +1,382 @@
-/* You can add global styles to this file, and also import other style files */
-
+/* Central CSS Theme Design System, Dark Theme Engine & RTL Support Tokens */
 @import 'tailwindcss';
+
+/* Self-Hosted Variable Web Fonts */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/assets/fonts/inter-variable.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Readex Pro';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/assets/fonts/readexpro-variable.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC4, U+10EFC-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --color-brand-primary: #2563eb;
+    --color-brand-primary-hover: #1d4ed8;
+    --color-brand-dark: #0f172a;
+    --color-brand-accent: #3b82f6;
+
+    /* Viewport Boundaries */
+    --fluid-min-vw: 375;
+    --fluid-max-vw: 1440;
+
+    /* 1. Fluid Typography Engine (Linear Interpolation with 12px WCAG Floor) */
+    --text-xs: clamp(0.75rem, 0.73rem + 0.1vw, 0.8125rem); /* Strict 12px (0.75rem) WCAG floor */
+    --text-sm: clamp(0.875rem, 0.82rem + 0.28vw, 1rem);
+    --text-base: clamp(1rem, 0.93rem + 0.33vw, 1.125rem);
+    --text-lg: clamp(1.125rem, 1rem + 0.6vw, 1.35rem);
+    --text-xl: clamp(1.25rem, 1.05rem + 0.95vw, 1.65rem);
+    --text-2xl: clamp(1.5rem, 1.2rem + 1.45vw, 2.25rem);
+    --text-3xl: clamp(1.75rem, 1.3rem + 2.1vw, 3rem);
+
+    /* Dual Language Font Family Stacks */
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-arabic: 'Readex Pro', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    /* Layout Variables */
+    --grid-gap: 1.5rem;
+
+    /* Container padding — fluid from 1rem at 320px to 2rem at 1440px */
+    /* Best practice: defined here rather than hardcoded per-component (web.dev RWD basics) */
+    --container-padding: clamp(1rem, 4vw, 2rem);
+  }
+
+  html, body {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    max-width: 100vw;
+    overflow-x: clip;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: 0.01em;
+    font-weight: 600;
+  }
+
+  html[dir="rtl"], html[dir="rtl"] body {
+    font-family: var(--font-arabic);
+  }
+
+  /* Dark mode root defaults */
+  html.dark {
+    color-scheme: dark;
+    background-color: #020617;
+    color: #f8fafc;
+  }
+
+  /* 👆 Global Interactive Cursor Pointer System */
+  button:not(:disabled),
+  a:not([disabled]),
+  select,
+  input[type="checkbox"],
+  input[type="radio"],
+  [role="button"],
+  .cursor-pointer {
+    cursor: pointer !important;
+  }
+
+  button:disabled,
+  a[disabled],
+  .cursor-not-allowed {
+    cursor: not-allowed !important;
+  }
+}
+
+/* 🛡️ i18n FOLT Prevention Guard */
+html.i18n-loading body {
+  opacity: 0.98;
+}
+
+/* 🏆 Hierarchical Z-Index Stacking Tokens */
+.z-purchase-bar { z-index: 20; }
+.z-navbar { z-index: 30; }
+.z-drawer-overlay { z-index: 40; }
+.z-modal-overlay { z-index: 50; }
+.z-toast-notification { z-index: 60; }
+
+/* 📐 Fluid Dynamic Math Engine Utilities */
+.fluid-container {
+  width: 100%;
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+  box-sizing: border-box;
+}
+
+.fluid-grid {
+  display: grid;
+  gap: var(--grid-gap);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+
+.fluid-chart-wrapper {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: var(--chart-min-height);
+  overflow: hidden;
+}
+
+.fluid-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-left: var(--btn-px);
+  padding-right: var(--btn-px);
+  padding-top: var(--btn-py);
+  padding-bottom: var(--btn-py);
+  white-space: nowrap;
+  font-weight: 700;
+  border-radius: 0.5rem;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* 🚨 Dynamic Responsive Navbar Breakpoint Engine */
+@media (max-width: 1023px) {
+  .nav-desktop-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nav-desktop-only {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1711px) {
+  .nav-full-desktop {
+    display: none !important;
+  }
+  .nav-priority-laptop {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 1712px) {
+  .nav-full-desktop {
+    display: flex !important;
+  }
+  .nav-priority-laptop {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1480px) {
+  .hide-below-1440 {
+    display: flex !important;
+  }
+  .hide-below-1440-block {
+    display: block !important;
+  }
+}
+
+@media (max-width: 1479px) {
+  .hide-below-1440, .hide-below-1440-block {
+    display: none !important;
+  }
+}
+
+/* Custom Component Utility Classes */
+.btn-tactile {
+  transition: transform 120ms cubic-bezier(0.4, 0, 0.2, 1), background-color 200ms ease;
+}
+.btn-tactile:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* Scrollbar Utility for Header Overflow */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 🌟 Shimmer Skeleton Sweep Animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+html.dark .animate-shimmer {
+  background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%);
+  background-size: 200% 100%;
+}
+
+/* 🛒 Cart Badge Bounce Pulse */
+@keyframes cart-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+}
+
+.animate-cart-pulse {
+  animation: cart-bounce 350ms ease-out;
+}
+
+/* 🔢 Quantity Counter Vertical Slide Animation */
+@keyframes num-slide-up {
+  from { transform: translateY(50%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-num-change {
+  animation: num-slide-up 180ms ease-out;
+}
+
+/* ✅ SVG Checkmark Draw Animation */
+@keyframes checkmark-draw {
+  0% { stroke-dashoffset: 48; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.animate-checkmark {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: checkmark-draw 600ms cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+/* ♿ System Accessibility: Prefers Reduced Motion Overrides */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 🌗 Native View Transitions API Theme & Language Cross-Fade */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*
+  Best practice (MDN transition docs): Avoid applying transitions to '*' selector.
+  Applying transition to every DOM element forces the browser to register style-change
+  listeners on the entire DOM tree — a known INP contributor in large Angular apps.
+  Scoped to: html/body (theme root), structural tags, and interactive elements only.
+  Components that need color transitions can add Tailwind's `transition-colors` class.
+  Source: https://developer.mozilla.org/en-US/docs/Web/CSS/transition
+         https://web.dev/articles/diagnose-slow-interactions-in-the-lab
+*/
+html, body,
+header, footer, nav, aside, article, section,
+button, a, input, select, textarea, label,
+.product-card {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+}
+
+/*
+  Best practice (MDN will-change): Do not apply will-change persistently to page-level
+  selectors. Persistent will-change creates GPU layers for the entire page subtree and
+  consumes VRAM even when no animation is active.
+  Source: https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
+  The i18n transition class below applies its own transform — no persistent hint needed.
+*/
+main, router-outlet + * {
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.i18n-transitioning main,
+html.i18n-transitioning router-outlet + * {
+  opacity: 0.92;
+  transform: translateY(3px);
+}
+
+/* Temporary override for product details amber colors */
+app-product-details .text-amber-600 { color: #2563eb !important; }
+app-product-details .bg-amber-50 { background-color: #eff6ff !important; }
+app-product-details .border-amber-200 { border-color: #bfdbfe !important; }
+app-product-details .ring-amber-500 { --tw-ring-color: #3b82f6 !important; }
+.dark app-product-details .dark\:text-amber-400 { color: #60a5fa !important; }
+.dark app-product-details .dark\:bg-amber-950\/60 { background-color: rgb(23 37 84 / 0.6) !important; }
+.dark app-product-details .dark\:border-amber-800 { border-color: #1e40af !important; }
+/* Temporary override for related product images */
+app-product-details img.object-cover { object-fit: contain !important; }
+
+/* Improve product title text wrapping in related products */
+app-product-details h3.truncate {
+    white-space: normal !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.4 !important;
+    min-height: 2.8em !important;
+}
+
+/* Fix padding for text inside related product image box */
+app-product-details .group a[routerLink] h3 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+}
+app-product-details .group a[routerLink] p {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+/* Fallback robust CSS for text padding */
+app-product-details a h3 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+}
+app-product-details a p {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+/* Cart Pulse Animation */
+@keyframes cartPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.animate-cart-pulse {
+  animation: cartPulse 0.3s ease-in-out;
+}
+
+#cartIcon, [data-cart-icon] {
+  position: relative;
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Hide 'Add' text in product cards for screens <= 435px */
+@media (max-width: 435px) {
+  .cart-text-mobile-hide {
+    display: none !important;
+  }
+}

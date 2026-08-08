@@ -1,66 +1,255 @@
-<header class="bg-slate-900 text-white h-14 flex items-center justify-between px-6 shadow-md border-b border-slate-800">
-  <div class="flex items-center gap-6">
+<header class="w-full max-w-full bg-white dark:bg-slate-950 text-slate-900 dark:text-white min-h-[56px] py-1.5 px-4 sm:px-6 shadow-sm border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50 flex items-center justify-between gap-4 transition-colors duration-200">
+  
+  <!-- Left Side: Brand Logo & Navigation -->
+  <div class="flex items-center me-4 shrink-0 min-w-0">
+    <!-- Mobile Hamburger Button (Strictly <1024px Only) -->
+    <button 
+      (click)="toggleMobileMenu()" 
+      type="button"
+      aria-label="Toggle Admin Navigation" 
+      class="admin-mobile-hamburger-btn lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors cursor-pointer shrink-0 me-2">
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        @if (!isMobileMenuOpen) {
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        } @else {
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        }
+      </svg>
+    </button>
+
     <!-- Brand Title -->
-    <div class="flex items-center space-x-2 border-r border-slate-700 pr-6">
-      <span class="text-lg font-extrabold tracking-wider text-white">
-        VELORA <span class="text-amber-500 font-medium">ADMIN</span>
-      </span>
+    <div class="flex items-center gap-2 border-e border-gray-200 dark:border-slate-800 pe-3 me-3 lg:me-4 shrink-0">
+      <app-logo customLink="/admin/analytics" [isAdmin]="true"></app-logo>
     </div>
-    
-    <!-- Admin Navigation Links -->
-    <nav class="hidden md:flex items-center space-x-6">
-      <a routerLink="/admin/home" 
-         routerLinkActive="text-amber-400 font-bold border-b-2 border-amber-400 py-4 mt-0.5" 
-         [routerLinkActiveOptions]="{ exact: true }"
-         class="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-150 py-4">
-        Dashboard
-      </a>
-      <a routerLink="/admin/orders" 
-         routerLinkActive="text-amber-400 font-bold border-b-2 border-amber-400 py-4 mt-0.5" 
-         class="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-150 py-4">
-        Orders
-      </a>
-      <a routerLink="/admin/products" 
-         routerLinkActive="text-amber-400 font-bold border-b-2 border-amber-400 py-4 mt-0.5" 
-         class="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-150 py-4">
-        Products
-      </a>
-      <a routerLink="/admin/cms" 
-         routerLinkActive="text-amber-400 font-bold border-b-2 border-amber-400 py-4 mt-0.5" 
-         class="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-150 py-4">
-        CMS Pages
-      </a>
-      <a routerLink="/admin/reviews" 
-         routerLinkActive="text-amber-400 font-bold border-b-2 border-amber-400 py-4 mt-0.5" 
-         class="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-150 py-4">
-        Reviews
-      </a>
-      <a routerLink="/admin/listusers" 
-         routerLinkActive="text-amber-400 font-bold border-b-2 border-amber-400 py-4 mt-0.5" 
-         class="text-sm font-medium text-slate-300 hover:text-white transition-colors duration-150 py-4">
-        Admins
-      </a>
-    </nav>
+
+    <!-- Desktop Navigation Container (Strictly ≥1024px Only) -->
+    <div class="nav-desktop-only items-center">
+      <!-- Wide Desktop Admin Navigation Links (≥1440px Mode) -->
+      <nav class="nav-full-desktop items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+        <a routerLink="/admin/analytics" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap flex items-center gap-1">
+          <span>{{ 'admin.nav_analytics' | translate }}</span>
+          <span class="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 text-[9px] font-bold rounded uppercase border border-blue-200 dark:border-blue-400/30">BI</span>
+        </a>
+        <a routerLink="/admin/orders" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'admin.nav_orders' | translate }}</a>
+        <a routerLink="/admin/products" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'admin.nav_products' | translate }}</a>
+        <a routerLink="/admin/messages" (click)="unreadMessagesCount = 0" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap flex items-center gap-1.5">
+          <span>{{ 'admin.nav_inbox' | translate }}</span>
+          @if (unreadMessagesCount > 0) {
+            <span class="bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{{ unreadMessagesCount }}</span>
+          }
+        </a>
+        <a routerLink="/admin/coupons" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'admin.nav_coupons' | translate }}</a>
+        <a routerLink="/admin/cms" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'admin.nav_cms' | translate }}</a>
+        <a routerLink="/admin/reviews" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'admin.nav_reviews' | translate }}</a>
+        <a routerLink="/admin/listusers" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'admin.nav_users' | translate }}</a>
+      </nav>
+
+      <!-- Laptop Clean Collapsed Admin Navigation (1024px - 1439px) -->
+      <nav class="nav-priority-laptop hidden items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 relative">
+        <a routerLink="/admin/analytics" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'admin.nav_analytics' | translate }}</a>
+        <a routerLink="/admin/orders" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'admin.nav_orders' | translate }}</a>
+        <a routerLink="/admin/products" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'admin.nav_products' | translate }}</a>
+        <a routerLink="/admin/messages" (click)="unreadMessagesCount = 0" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 font-bold" class="px-3 py-2 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap flex items-center gap-1.5">
+          <span>{{ 'admin.nav_inbox' | translate }}</span>
+          @if (unreadMessagesCount > 0) {
+            <span class="bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{{ unreadMessagesCount }}</span>
+          }
+        </a>
+        
+        <!-- Dropdown Trigger -->
+        <div class="relative admin-more-dropdown-wrapper">
+          <button 
+            (click)="toggleMoreAdminDropdown()" 
+            type="button" 
+            class="flex items-center gap-1 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 px-3.5 py-2 rounded-lg border border-gray-200 dark:border-slate-700 cursor-pointer min-h-[36px] whitespace-nowrap">
+            <span>{{ 'admin.more' | translate }}</span>
+            <svg class="w-3.5 h-3.5 transition-transform duration-200" [class.rotate-180]="isMoreAdminDropdownOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+
+          <div 
+            class="absolute left-0 rtl:left-auto rtl:right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl z-50 py-2 text-xs font-semibold space-y-1 transition-all duration-200 ease-out origin-top-left rtl:origin-top-right"
+            [class.opacity-100]="isMoreAdminDropdownOpen"
+            [class.scale-100]="isMoreAdminDropdownOpen"
+            [class.translate-y-0]="isMoreAdminDropdownOpen"
+            [class.pointer-events-auto]="isMoreAdminDropdownOpen"
+            [class.opacity-0]="!isMoreAdminDropdownOpen"
+            [class.scale-95]="!isMoreAdminDropdownOpen"
+            [class.-translate-y-2]="!isMoreAdminDropdownOpen"
+            [class.pointer-events-none]="!isMoreAdminDropdownOpen">
+            <a routerLink="/admin/coupons" (click)="closeMoreAdminDropdown()" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white whitespace-nowrap">{{ 'admin.nav_coupons' | translate }}</a>
+            <a routerLink="/admin/cms" (click)="closeMoreAdminDropdown()" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white whitespace-nowrap">{{ 'admin.nav_cms' | translate }}</a>
+            <a routerLink="/admin/reviews" (click)="closeMoreAdminDropdown()" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white whitespace-nowrap">{{ 'admin.nav_reviews' | translate }}</a>
+            <a routerLink="/admin/listusers" (click)="closeMoreAdminDropdown()" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white whitespace-nowrap">{{ 'admin.nav_users' | translate }}</a>
+            <div class="border-t border-gray-100 dark:border-slate-800 my-1"></div>
+            <a routerLink="/home" (click)="closeMoreAdminDropdown()" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white whitespace-nowrap flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+              <span>{{ 'admin.store_user' | translate }}</span>
+            </a>
+            @if (isSuperAdmin) {
+              <a routerLink="/admin/adduser" (click)="closeMoreAdminDropdown()" class="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-blue-600 dark:text-blue-400 hover:text-blue-500 font-medium whitespace-nowrap flex items-center gap-2">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                <span>{{ 'admin.add_admin' | translate }}</span>
+              </a>
+            }
+            <div class="border-t border-gray-100 dark:border-slate-800 my-1"></div>
+            <button (click)="logout(); closeMoreAdminDropdown()" class="block w-full text-left rtl:text-right px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-rose-600 dark:text-rose-400 hover:text-rose-500 font-medium whitespace-nowrap flex items-center gap-2 cursor-pointer">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+              <span>{{ 'admin.logout' | translate }}</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </div>
   </div>
 
-  <div class="flex items-center space-x-4">
-    <!-- Status / User Action -->
-    <div class="hidden sm:flex flex-col text-right">
-      <span class="text-xs text-slate-400">Security Clearance</span>
-      <span class="text-xs font-bold text-emerald-400">System Admin</span>
+  <!-- Right Side: Essential Controls & Quick Actions -->
+  <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+    
+    <!-- Language Switcher Toggle -->
+    <button 
+      (click)="langService.toggleLanguage()" 
+      type="button"
+      aria-label="Toggle Admin Language"
+      class="btn-tactile active:scale-95 hover:scale-105 hidden md:flex px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 transition-all cursor-pointer items-center gap-1 min-h-[38px] shrink-0 whitespace-nowrap">
+      <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+      </svg>
+      <span>{{ langService.currentLang() === 'en' ? 'عربي' : 'EN' }}</span>
+    </button>
+
+    <!-- Dark Mode Switcher Toggle -->
+    <button 
+      (click)="themeService.toggleTheme()" 
+      type="button"
+      aria-label="Toggle Admin Theme"
+      class="btn-tactile active:scale-95 hover:scale-105 hidden md:flex p-2 rounded-lg text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 transition-all cursor-pointer min-h-[38px] min-w-[38px] items-center justify-center shrink-0">
+      @if (!themeService.isDark()) {
+        <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      } @else {
+        <svg class="w-4 h-4 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      }
+    </button>
+
+    <!-- Quick Create Admin Button (Super Admin Only - Desktop ≥1280px Only) -->
+    @if (isSuperAdmin) {
+      <a routerLink="/admin/adduser" 
+         class="hide-below-1440 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 border border-blue-400/40 px-2.5 py-1.5 rounded-lg transition-colors duration-200 focus:outline-none cursor-pointer items-center gap-1 shadow-xs min-h-[38px] shrink-0 whitespace-nowrap">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        <span>{{ 'admin.add_admin' | translate }}</span>
+      </a>
+
+      <span class="hide-below-1440-block h-5 w-px bg-gray-200 dark:bg-slate-700 mx-1"></span>
+    }
+
+    <!-- Status / User Clearance Badge (Desktop ≥1440px Only) -->
+    <div class="hide-below-1440 flex-col text-right rtl:text-left shrink-0">
+      <span class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ 'admin.clearance' | translate }}</span>
+      @if (isSuperAdmin) {
+        <span class="text-xs font-bold text-amber-600 dark:text-amber-400 flex items-center justify-end rtl:justify-start gap-1">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          {{ 'admin.super_admin' | translate }}
+        </span>
+      } @else {
+        <span class="text-xs font-bold text-blue-600 dark:text-blue-400">{{ 'admin.system_admin' | translate }}</span>
+      }
     </div>
 
-    <span class="h-6 w-px bg-slate-700"></span>
-
-    <!-- Actions -->
+    <!-- Storefront View Action (Desktop ≥1440px Only) -->
     <a routerLink="/home" 
-       class="text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 px-3.5 py-1.5 rounded transition-all focus:outline-none">
-      Storefront
+       class="hide-below-1440 text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 px-2.5 py-1.5 rounded-lg transition-all focus:outline-none cursor-pointer items-center gap-1 min-h-[38px] shrink-0 whitespace-nowrap">
+      <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      <span>{{ 'admin.store_user' | translate }}</span>
     </a>
 
+    <!-- Logout Button (Desktop ≥1440px Only) -->
     <button (click)="logout()" 
-            class="text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 px-3.5 py-1.5 rounded transition-all focus:outline-none">
-      Logout
+            class="hide-below-1440 text-xs font-medium text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 bg-rose-50 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-slate-700 border border-rose-200 dark:border-slate-700 px-2.5 py-1.5 rounded-lg transition-all focus:outline-none cursor-pointer min-h-[38px] shrink-0 whitespace-nowrap">
+      {{ 'admin.logout' | translate }}
     </button>
+  </div>
+
+  <!-- Mobile Admin Drawer Overlay (<1024px) -->
+  <div 
+    class="fixed inset-0 z-50 lg:hidden flex transition-all duration-300 ease-in-out admin-mobile-menu-wrapper"
+    [class.pointer-events-auto]="isMobileMenuOpen"
+    [class.pointer-events-none]="!isMobileMenuOpen"
+    [class.invisible]="!isMobileMenuOpen">
+    
+    <!-- Backdrop Overlay -->
+    <div 
+      (click)="closeMobileMenu()" 
+      class="fixed inset-0 bg-slate-950/80 backdrop-blur-md cursor-pointer transition-opacity duration-300 ease-in-out"
+      [class.opacity-100]="isMobileMenuOpen"
+      [class.opacity-0]="!isMobileMenuOpen">
+    </div>
+    
+    <div 
+      class="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-slate-900 shadow-2xl z-10 p-6 gap-6 overflow-y-auto border-e border-gray-200 dark:border-slate-800 text-slate-900 dark:text-white transition-transform duration-300 ease-in-out transform"
+      [class.translate-x-0]="isMobileMenuOpen"
+      [class.-translate-x-full]="!isMobileMenuOpen && langService.currentLang() === 'en'"
+      [class.translate-x-full]="!isMobileMenuOpen && langService.currentLang() === 'ar'">
+      
+      <div class="px-5 py-4 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-950 z-10">
+        <app-logo customLink="/admin" [isAdmin]="true"></app-logo>
+        <button (click)="closeMobileMenu()" class="text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium text-xl p-2 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center">&times;</button>
+      </div>
+
+      <nav class="flex flex-col gap-1.5 text-sm font-bold text-slate-600 dark:text-slate-300">
+        <a routerLink="/admin/analytics" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 dark:border-blue-400 ps-3" class="py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'admin.nav_analytics' | translate }}</a>
+        <a routerLink="/admin/orders" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 dark:border-blue-400 ps-3" class="py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'admin.nav_orders' | translate }}</a>
+        <a routerLink="/admin/products" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 dark:border-blue-400 ps-3" class="py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'admin.nav_products' | translate }}</a>
+        <a routerLink="/admin/messages" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 dark:border-blue-400 ps-3" class="py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'admin.nav_inbox' | translate }}</a>
+        <a routerLink="/admin/coupons" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 dark:border-blue-400 ps-3" class="py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'admin.nav_coupons' | translate }}</a>
+        <a routerLink="/admin/cms" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 dark:border-blue-400 ps-3" class="py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'admin.nav_cms' | translate }}</a>
+        <a routerLink="/admin/reviews" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 dark:border-blue-400 ps-3" class="py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'admin.nav_reviews' | translate }}</a>
+        <a routerLink="/admin/listusers" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 dark:border-blue-400 ps-3" class="py-3 px-4 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'admin.nav_users' | translate }}</a>
+        
+        @if (isSuperAdmin) {
+          <a routerLink="/admin/adduser" (click)="closeMobileMenu()" class="py-3 px-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium rounded-lg transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5 mt-3 min-h-[44px] shadow-xs whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            <span>{{ 'admin.add_admin' | translate }}</span>
+          </a>
+        }
+      </nav>
+
+      <div class="border-t border-gray-200 dark:border-slate-800 pt-6 gap-3 flex flex-col">
+        <!-- Mobile Language & Theme Toggles -->
+        <div class="flex items-center gap-3 w-full">
+          <button (click)="langService.toggleLanguage(); closeMobileMenu()" class="flex-1 text-center py-3 text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-lg transition-all cursor-pointer min-h-[44px] flex items-center justify-center gap-1">
+            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+            </svg>
+            <span>{{ langService.currentLang() === 'en' ? 'عربي' : 'EN' }}</span>
+          </button>
+          <button (click)="themeService.toggleTheme(); closeMobileMenu()" class="flex-1 text-center py-3 text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-lg transition-all cursor-pointer min-h-[44px] flex items-center justify-center gap-1">
+            @if (!themeService.isDark()) {
+              <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span>Dark Mode</span>
+            } @else {
+              <svg class="w-4 h-4 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+              <span>Light Mode</span>
+            }
+          </button>
+        </div>
+        
+        <a routerLink="/home" (click)="closeMobileMenu()" class="w-full text-center py-3 text-xs font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 rounded-lg transition-all cursor-pointer min-h-[44px] flex items-center justify-center gap-1 whitespace-nowrap">
+          <svg class="w-3.5 h-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>{{ 'admin.store_user' | translate }}</span>
+        </a>
+        <button (click)="logout(); closeMobileMenu()" class="w-full text-center font-medium text-xs text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 py-3 cursor-pointer min-h-[44px] whitespace-nowrap">
+          {{ 'admin.logout' | translate }}
+        </button>
+      </div>
+    </div>
   </div>
 </header>

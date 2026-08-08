@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { LocalizeFieldPipe } from '../../core/pipes/localize-field.pipe';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../core/services/product.service';
 import { CartService } from '../../core/services/cart.service';
@@ -9,145 +10,236 @@ import { IProduct } from '../../core/models/product.model';
 import { env } from '../../../env/env';
 import { Subscription } from 'rxjs';
 
+import { SkeletonComponent } from '../../shared/skeleton/skeleton.component';
+import { FlyToCartService } from '../../core/services/fly-to-cart.service';
+import { TranslatePipe } from '../../core/pipes/translate.pipe';
+
 @Component({
   selector: 'app-products-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
-  templateUrl: './products.component.html'
+  imports: [CommonModule, RouterLink, FormsModule, LocalizeFieldPipe, TranslatePipe],
+  templateUrl: './products.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Products implements OnInit, OnDestroy {
   productsList: IProduct[] = [];
   categoriesList: ICategory[] = [];
+  paginatedProducts: IProduct[] = [];
   staticURL = env.staticURL;
+  isLoading = true;
 
-  // Filter state
+  // Filter input form state
   searchQuery: string = '';
   selectedCategoryId: string = '';
   minPrice: number | null = null;
   maxPrice: number | null = null;
 
+  // Applied filter state
+  appliedSearchQuery: string = '';
+  appliedCategoryId: string = '';
+  appliedMinPrice: number | null = null;
+  appliedMaxPrice: number | null = null;
+
   // Pagination state
   currentPage = 1;
-  pageSize = 3;
+  pageSize = 13;
+  totalPages = 1;
+  totalResults = 0;
+  pageNumbers: (number | string)[] = [1];
 
   private subscriptions: Subscription = new Subscription();
 
   constructor(
     private _productService: ProductService, 
     private _cartService: CartService,
+    private _flyToCartService: FlyToCartService,
     private _categoryService: CategoryService,
-    private _cdr: ChangeDetectorRef
+    private _cdr: ChangeDetectorRef,
+    private _router: Router,
+    private _route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
-    const productsSub = this._productService.getAllProducts().subscribe({
-      next: (res) => {
-        const all: IProduct[] = res.data || [];
-        this.productsList = all.filter(p => p.isActive !== false && p.isDeleted !== true);
-        this.currentPage = 1;
-        this._cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error fetching products:', err);
-        this._cdr.detectChanges();
-      }
+    const routeSub = this._route.queryParams.subscribe(params => {
+      this.currentPage = Number(params['page']) || 1;
+      this.appliedSearchQuery = params['search'] || '';
+      this.appliedCategoryId = params['category'] || '';
+      this.appliedMinPrice = params['minPrice'] ? Number(params['minPrice']) : null;
+      this.appliedMaxPrice = params['maxPrice'] ? Number(params['maxPrice']) : null;
+
+      // Sync draft state with applied state
+      this.searchQuery = this.appliedSearchQuery;
+      this.selectedCategoryId = this.appliedCategoryId;
+      this.minPrice = this.appliedMinPrice;
+      this.maxPrice = this.appliedMaxPrice;
+      
+      this.fetchProducts();
     });
 
     const categoriesSub = this._categoryService.getCategories().subscribe({
       next: (res) => {
         this.categoriesList = res.data || [];
         this._cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error fetching categories:', err);
       }
     });
 
-    this.subscriptions.add(productsSub);
+    this.subscriptions.add(routeSub);
     this.subscriptions.add(categoriesSub);
   }
 
-  // Returns list of products matching current search and filter criteria
-  get filteredProducts(): IProduct[] {
-    const query = (this.searchQuery || '').trim().toLowerCase();
+  fetchProducts(): void {
+    this.isLoading = true;
+    this._cdr.detectChanges();
 
-    return this.productsList.filter(p => {
-      const matchesSearch = !query || 
-        (p.name && p.name.toLowerCase().includes(query)) || 
-        (p.desc && p.desc.toLowerCase().includes(query));
+    const params = {
+      page: this.currentPage,
+      limit: this.pageSize,
+      search: this.appliedSearchQuery,
+      category: this.appliedCategoryId,
+      minPrice: this.appliedMinPrice,
+      maxPrice: this.appliedMaxPrice
+    };
 
-      const catId = typeof p.category === 'object' && p.category ? p.category._id : p.category;
-      const matchesCategory = !this.selectedCategoryId || catId === this.selectedCategoryId;
-
-      const matchesMinPrice = this.minPrice === null || this.minPrice === undefined || String(this.minPrice) === '' || p.price >= Number(this.minPrice);
-      const matchesMaxPrice = this.maxPrice === null || this.maxPrice === undefined || String(this.maxPrice) === '' || p.price <= Number(this.maxPrice);
-
-      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice;
+    this._productService.getAllProducts(params).subscribe({
+      next: (res) => {
+        this.productsList = res.data || [];
+        this.paginatedProducts = this.productsList;
+        this.totalPages = res.totalPages || 1;
+        this.totalResults = res.totalResults || 0;
+        this.updatePagination();
+        this.isLoading = false;
+        this._cdr.detectChanges();
+      },
+      error: () => {
+        this.productsList = [];
+        this.paginatedProducts = [];
+        this.totalPages = 1;
+        this.totalResults = 0;
+        this.updatePagination();
+        this.isLoading = false;
+        this._cdr.detectChanges();
+      }
     });
   }
 
-  // Returns paginated products slice from filtered results (3 items per page)
-  get paginatedProducts(): IProduct[] {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    return this.filteredProducts.slice(startIndex, startIndex + this.pageSize);
+  applyFilters(): void {
+    this.appliedSearchQuery = this.searchQuery;
+    this.appliedCategoryId = this.selectedCategoryId;
+    this.appliedMinPrice = this.minPrice;
+    this.appliedMaxPrice = this.maxPrice;
+
+    // Reset to page 1 on new filter and update URL
+    const queryParams = { 
+      page: 1,
+      search: this.appliedSearchQuery || null,
+      category: this.appliedCategoryId || null,
+      minPrice: this.appliedMinPrice !== null ? this.appliedMinPrice : null,
+      maxPrice: this.appliedMaxPrice !== null ? this.appliedMaxPrice : null
+    };
+
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      (document as any).startViewTransition(() => {
+        this._router.navigate([], { relativeTo: this._route, queryParams });
+      });
+    } else {
+      this._router.navigate([], { relativeTo: this._route, queryParams });
+    }
   }
 
-  // Calculates total pages count based on filtered products
-  get totalPages(): number {
-    return Math.ceil(this.filteredProducts.length / this.pageSize) || 1;
+  updatePagination(): void {
+    this.pageNumbers = [];
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const delta = 2; // Number of pages to show before and after current page
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        this.pageNumbers.push(i);
+      }
+    } else {
+      this.pageNumbers.push(1);
+      if (current > delta + 2) {
+        this.pageNumbers.push('...');
+      }
+      
+      const start = Math.max(2, current - delta);
+      const end = Math.min(total - 1, current + delta);
+      
+      for (let i = start; i <= end; i++) {
+        this.pageNumbers.push(i);
+      }
+      
+      if (current < total - delta - 1) {
+        this.pageNumbers.push('...');
+      }
+      this.pageNumbers.push(total);
+    }
   }
 
-  // Generates page numbers array
-  get pageNumbers(): number[] {
-    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
-  }
-
-  // Checks if any filters are currently active
   get hasActiveFilters(): boolean {
     return !!(
-      (this.searchQuery && this.searchQuery.trim()) ||
-      this.selectedCategoryId ||
-      (this.minPrice !== null && this.minPrice !== undefined && String(this.minPrice) !== '') ||
-      (this.maxPrice !== null && this.maxPrice !== undefined && String(this.maxPrice) !== '')
+      (this.appliedSearchQuery && this.appliedSearchQuery.trim()) ||
+      this.appliedCategoryId ||
+      (this.appliedMinPrice !== null && this.appliedMinPrice !== undefined && String(this.appliedMinPrice) !== '') ||
+      (this.appliedMaxPrice !== null && this.appliedMaxPrice !== undefined && String(this.appliedMaxPrice) !== '')
     );
   }
 
-  // Handles input changes to reset pagination to page 1
-  onFilterChange() {
-    this.currentPage = 1;
-    this._cdr.detectChanges();
-  }
-
-  // Resets all filters to initial state
-  resetFilters() {
+  resetFilters(): void {
     this.searchQuery = '';
     this.selectedCategoryId = '';
     this.minPrice = null;
     this.maxPrice = null;
-    this.currentPage = 1;
-    this._cdr.detectChanges();
-  }
+    
+    this.appliedSearchQuery = '';
+    this.appliedCategoryId = '';
+    this.appliedMinPrice = null;
+    this.appliedMaxPrice = null;
 
-  // Navigates to target page
-  setPage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      this._cdr.detectChanges();
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      (document as any).startViewTransition(() => {
+        this._router.navigate([], { relativeTo: this._route, queryParams: { page: 1 } });
+      });
+    } else {
+      this._router.navigate([], { relativeTo: this._route, queryParams: { page: 1 } });
     }
   }
 
-  prevPage() {
+  setPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this._router.navigate([], {
+        relativeTo: this._route,
+        queryParams: { page },
+        queryParamsHandling: 'merge'
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  prevPage(): void {
     this.setPage(this.currentPage - 1);
   }
 
-  nextPage() {
+  nextPage(): void {
     this.setPage(this.currentPage + 1);
   }
 
-  // Adds product to cart
-  addToCart(product: IProduct) {
-    if (!product) return;
+  addToCart(product: IProduct, event?: Event): void {
+    if (!product || product.stock === 0) return;
+    if (event) {
+      const cardEl = (event.target as HTMLElement).closest('.group') || (event.target as HTMLElement);
+      const imgElement = cardEl.querySelector('img') as HTMLImageElement;
+      const cartIconElement = document.querySelector('[data-cart-icon]') as HTMLElement || document.getElementById('cartIcon');
+      
+      if (imgElement && cartIconElement) {
+        this._flyToCartService.fly(imgElement, cartIconElement).then(() => {
+          cartIconElement.classList.add('animate-cart-pulse');
+          setTimeout(() => cartIconElement.classList.remove('animate-cart-pulse'), 300);
+        });
+      } else {
+        this._flyToCartService.fly(cardEl, event);
+      }
+    }
     this._cartService.addToCart(product, 1).subscribe();
   }
 

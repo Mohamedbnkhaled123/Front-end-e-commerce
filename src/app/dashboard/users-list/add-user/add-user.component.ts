@@ -1,14 +1,14 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { env } from '../../../../env/env';
+import { UserService } from '../../../core/services/user-service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-add-user',
   standalone: true,
-  imports: [RouterLink, FormsModule, CommonModule],
+  imports: [RouterLink, FormsModule, CommonModule, TranslatePipe],
   templateUrl: './add-user.component.html'
 })
 export class AddUser {
@@ -22,7 +22,7 @@ export class AddUser {
   successMsg = '';
 
   constructor(
-    private _http: HttpClient,
+    private _userService: UserService,
     private _cdr: ChangeDetectorRef
   ) {}
 
@@ -43,11 +43,6 @@ export class AddUser {
     this.isLoading = true;
     this._cdr.detectChanges();
 
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
     const payload = {
       name: this.name,
       email: this.email,
@@ -55,8 +50,7 @@ export class AddUser {
       role: 'admin'
     };
 
-    // Correct backend route: /api/v1/user/admin (singular) using env.apiURL
-    this._http.post(`${env.apiURL}user/admin`, payload, { headers }).subscribe({
+    this._userService.createAdmin(payload).subscribe({
       next: () => {
         this.isLoading = false;
         this.successMsg = 'Admin account created successfully!';
@@ -66,7 +60,7 @@ export class AddUser {
         this.confirmPassword = '';
         this._cdr.detectChanges();
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isLoading = false;
         this.errorMsg = err?.error?.message || 'Failed to create admin account.';
         this._cdr.detectChanges();
@@ -74,3 +68,5 @@ export class AddUser {
     });
   }
 }
+
+

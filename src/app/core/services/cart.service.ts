@@ -1,26 +1,21 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { env } from '../../../env/env';
 import { IProduct } from '../models/product.model';
-import { BehaviorSubject, Observable, of, tap, map } from 'rxjs';
+import { ICartItem, ICartItemRaw } from '../models/cart.model';
+import { BehaviorSubject, Observable, of, tap, map, from, concatMap, finalize, distinctUntilChanged } from 'rxjs';
 import { AuthService } from './auth-service';
 import { ModalService } from './modal.service';
+import { ToastService } from './toast.service';
 
-export interface ICartItem {
-  productId: string;
-  name: string;
-  priceAtAddition: number;
-  quantity: number;
-  isPriceChanged?: boolean;
-  productImg?: string;
-}
+export type { ICartItem, ICartItemRaw };
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
   private apiURL = env.apiURL + 'cart';
-  private LOCAL_STORAGE_KEY = 'velora_guest_cart';
+  private LOCAL_STORAGE_KEY = 'shopro_guest_cart';
 
   // State using BehaviorSubject & Signal
   cartItems$ = new BehaviorSubject<ICartItem[]>([]);
@@ -29,25 +24,44 @@ export class CartService {
   constructor(
     private _http: HttpClient,
     private _authService: AuthService,
-    private _modalService: ModalService
+    private _modalService: ModalService,
+    private _toastService: ToastService
   ) {
-    this.initCart();
+    this._authService.isLogedIn().pipe(
+      map(() => this._authService.getToken()),
+      distinctUntilChanged()
+    ).subscribe((token) => {
+      if (token) {
+        const role = this._authService.isUser();
+        if (role === 'admin' || role === 'superadmin') {
+          // Admin shouldn't have a cart, clear guest cart if any
+          this.clearCart();
+        } else {
+          // Normal user, fetch from DB
+          this.fetchCartFromDB().subscribe({ error: () => {} });
+        }
+      } else {
+        // Guest or logged out
+        this.loadCartFromLocalStorage();
+      }
+    });
   }
 
-  // Initializes cart based on auth status
-  initCart() {
-    const token = localStorage.getItem('token');
-    if (token) {
-      this.fetchCartFromDB().subscribe();
-    } else {
-      this.loadCartFromLocalStorage();
-    }
-  }
+  private formatCartItems(data: ICartItemRaw[], defaultProduct?: IProduct): ICartItem[] {
+    return (data || []).map(item => {
+      const prodObj = (item.productId && typeof item.productId === 'object') ? item.productId : undefined;
+      const prodIdStr = typeof item.productId === 'string' 
+        ? item.productId 
+        : (prodObj?._id ? String(prodObj._id) : (item.productId ? String(item.productId) : ''));
 
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
+      return {
+        productId: prodIdStr,
+        name: prodObj?.name || item.name || defaultProduct?.name || 'Product Item',
+        priceAtAddition: item.priceAtAddition,
+        quantity: item.quantity,
+        isPriceChanged: item.isPriceChanged,
+        productImg: prodObj?.imgURL || defaultProduct?.imgURL
+      };
     });
   }
 
@@ -71,7 +85,7 @@ export class CartService {
 
   // Adds product item to cart
   addToCart(product: IProduct, quantity: number = 1): Observable<boolean> {
-    const token = localStorage.getItem('token');
+    const token = this._authService.getToken();
 
     if (token) {
       if (this._authService.isUser() === 'admin') {
@@ -87,18 +101,12 @@ export class CartService {
         productId: product._id,
         quantity
       };
-      return this._http.post<{ status: string; data: any[] }>(this.apiURL, payload, { headers: this.getHeaders() }).pipe(
+      return this._http.post<{ status: string; data: ICartItemRaw[] }>(this.apiURL, payload).pipe(
         tap((res) => {
-          const formatted: ICartItem[] = (res.data || []).map(item => ({
-            productId: item.productId?._id || item.productId,
-            name: item.productId?.name || item.name || product.name,
-            priceAtAddition: item.priceAtAddition,
-            quantity: item.quantity,
-            isPriceChanged: item.isPriceChanged,
-            productImg: item.productId?.imgURL || product.imgURL
-          }));
+          const formatted = this.formatCartItems(res.data, product);
           this.cartItems$.next(formatted);
           this.updateCartCount(formatted);
+          this._toastService.show(`Added "${product.name}" to your cart!`, 'success');
         }),
         map(() => true)
       );
@@ -122,29 +130,49 @@ export class CartService {
       }
 
       this.saveCartToLocalStorage(currentItems);
+      this._toastService.show(`Added "${product.name}" to your cart!`, 'success');
+      return of(true);
+    }
+  }
+
+  // Updates quantity of a specific cart item atomically (Independent Product Update)
+  updateQuantity(productId: string, newQuantity: number): Observable<boolean> {
+    const token = this._authService.getToken();
+
+    if (token) {
+      return this._http.patch<{ status: string; data: ICartItemRaw[] }>(`${this.apiURL}/${productId}`, {
+        quantity: newQuantity
+      }).pipe(
+        tap((res) => {
+          const formatted = this.formatCartItems(res.data);
+          this.cartItems$.next(formatted);
+          this.updateCartCount(formatted);
+        }),
+        map(() => true)
+      );
+    } else {
+      const currentItems = [...this.cartItems$.value];
+      const index = currentItems.findIndex(i => i.productId === productId);
+      if (index > -1) {
+        currentItems[index].quantity = newQuantity;
+        this.saveCartToLocalStorage(currentItems);
+      }
       return of(true);
     }
   }
 
   // Fetches cart from database
   fetchCartFromDB() {
-    return this._http.get<{ status: string; data: any[] }>(this.apiURL, { headers: this.getHeaders() }).pipe(
+    return this._http.get<{ status: string; data: ICartItemRaw[] }>(this.apiURL).pipe(
       tap((res) => {
-        const formatted: ICartItem[] = (res.data || []).map(item => ({
-          productId: item.productId?._id || item.productId,
-          name: item.productId?.name || item.name,
-          priceAtAddition: item.priceAtAddition,
-          quantity: item.quantity,
-          isPriceChanged: item.isPriceChanged,
-          productImg: item.productId?.imgURL
-        }));
+        const formatted = this.formatCartItems(res.data);
         this.cartItems$.next(formatted);
         this.updateCartCount(formatted);
       })
     );
   }
 
-  // Syncs local cart to database
+  // Syncs local guest cart to database sequentially
   syncCartOnLogin() {
     const raw = localStorage.getItem(this.LOCAL_STORAGE_KEY);
     if (!raw) return;
@@ -152,34 +180,27 @@ export class CartService {
     const guestItems: ICartItem[] = JSON.parse(raw);
     if (guestItems.length === 0) return;
 
-    guestItems.forEach(item => {
-      this._http.post(this.apiURL, {
-        productId: item.productId,
-        quantity: item.quantity
-      }, { headers: this.getHeaders() }).subscribe({
-        next: () => {
-          this.fetchCartFromDB().subscribe();
-        }
-      });
-    });
-
-    localStorage.removeItem(this.LOCAL_STORAGE_KEY);
+    from(guestItems).pipe(
+      concatMap((item) =>
+        this._http.post(this.apiURL, {
+          productId: item.productId,
+          quantity: item.quantity
+        })
+      ),
+      finalize(() => {
+        localStorage.removeItem(this.LOCAL_STORAGE_KEY);
+        this.fetchCartFromDB().subscribe();
+      })
+    ).subscribe();
   }
 
   // Removes item from cart
   removeFromCart(productId: string) {
-    const token = localStorage.getItem('token');
+    const token = this._authService.getToken();
     if (token) {
-      return this._http.delete<{ status: string; data: any[] }>(`${this.apiURL}/${productId}`, { headers: this.getHeaders() }).pipe(
+      return this._http.delete<{ status: string; data: ICartItemRaw[] }>(`${this.apiURL}/${productId}`).pipe(
         tap((res) => {
-          const formatted: ICartItem[] = (res.data || []).map(item => ({
-            productId: item.productId?._id || item.productId,
-            name: item.productId?.name || item.name,
-            priceAtAddition: item.priceAtAddition,
-            quantity: item.quantity,
-            isPriceChanged: item.isPriceChanged,
-            productImg: item.productId?.imgURL
-          }));
+          const formatted = this.formatCartItems(res.data);
           this.cartItems$.next(formatted);
           this.updateCartCount(formatted);
         })

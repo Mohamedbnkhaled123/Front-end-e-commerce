@@ -1,16 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { env } from '../../../env/env';
+import { IReview, IProductReviewsRes } from '../models/review.model';
 
-export interface IReview {
-  _id: string;
-  userId?: any;
-  productId?: any;
-  text: string;
-  rating: number;
-  status: 'Pending' | 'Approved' | 'Cancelled';
-  createdAt?: string;
-}
+export type { IReview };
 
 @Injectable({
   providedIn: 'root'
@@ -20,38 +14,34 @@ export class ReviewService {
 
   constructor(private _http: HttpClient) { }
 
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
+  // Fetches approved product-level reviews & rating breakdown
+  getProductReviews(productId: string): Observable<IProductReviewsRes> {
+    return this._http.get<IProductReviewsRes>(`${this.apiURL}/product/${productId}`);
   }
 
-  // Fetches approved store testimonials
-  getApprovedReviews() {
-    return this._http.get<{ status: string; data: IReview[] }>(`${this.apiURL}/testimonials`);
+  // Fetches all customer reviews for Admin moderation
+  getAllReviews(): Observable<{ status: string; results: number; data: IReview[] }> {
+    return this._http.get<{ status: string; results: number; data: IReview[] }>(this.apiURL);
   }
 
-  // Fetches all customer reviews
-  getAllReviews() {
-    return this._http.get<{ status: string; data: IReview[] }>(this.apiURL, { headers: this.getHeaders() });
-  }
-
-  // Submits customer review feedback
-  addReview(payload: { text: string; rating: number; productId?: string }) {
+  // Submits verified buyer product review
+  addReview(payload: { productId: string; text: string; rating: number; orderId?: string }): Observable<{ status: string; message: string; data: IReview }> {
     return this._http.post<{ status: string; message: string; data: IReview }>(
       this.apiURL,
-      payload,
-      { headers: this.getHeaders() }
+      payload
     );
   }
 
-  // Updates customer review status
-  updateReviewStatus(id: string, status: 'Pending' | 'Approved' | 'Cancelled') {
-    return this._http.patch<{ status: string; data: IReview }>(
+  // Updates customer review status (Admin)
+  updateReviewStatus(id: string, status: 'Pending' | 'Approved' | 'Cancelled'): Observable<{ status: string; message: string; data: IReview }> {
+    return this._http.patch<{ status: string; message: string; data: IReview }>(
       `${this.apiURL}/${id}/status`,
-      { status },
-      { headers: this.getHeaders() }
+      { status }
     );
+  }
+
+  // Deletes review permanently (Admin)
+  deleteReview(id: string): Observable<{ status: string; message: string }> {
+    return this._http.delete<{ status: string; message: string }>(`${this.apiURL}/${id}`);
   }
 }

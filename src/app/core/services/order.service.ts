@@ -1,20 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { env } from '../../../env/env';
+import { IOrder, IShippingAddress } from '../models/order.model';
 
-export interface IOrder {
-  _id: string;
-  totalPrice: number;
-  orderStatus: string;
-  items: Array<{
-    productId: any;
-    quantity: number;
-    priceAtPurchase: number;
-  }>;
-  shippingAddress?: any;
-  createdAt?: string;
-  user?: any;
-}
+export type { IOrder, IShippingAddress };
+
 
 @Injectable({
   providedIn: 'root'
@@ -24,27 +14,18 @@ export class OrderService {
 
   constructor(private _http: HttpClient) {}
 
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
   // Creates new store order
-  createOrder(shippingAddress: any) {
+  createOrder(shippingAddress: IShippingAddress) {
     return this._http.post<{ status: string; message: string; data: IOrder }>(
       this.apiURL, 
-      { shippingAddress }, 
-      { headers: this.getHeaders() }
+      { shippingAddress }
     );
   }
 
   // Fetches user order history
   getMyOrders() {
     return this._http.get<{ status: string; data: IOrder[] }>(
-      `${this.apiURL}/my-orders`, 
-      { headers: this.getHeaders() }
+      `${this.apiURL}/my-orders`
     );
   }
 
@@ -55,12 +36,17 @@ export class OrderService {
     );
   }
 
-  // Updates order status dynamically
-  updateOrderStatus(orderId: string, status: string) {
+  // Updates order status dynamically (and sends fixed items to bypass backend validation for old orders)
+  updateOrderStatus(orderId: string, status: string, items?: any[]) {
+    const payload: any = { status };
+    if (items) {
+      payload.items = items;
+    }
     return this._http.patch<{ status: string; message: string; data: IOrder }>(
       `${this.apiURL}/${orderId}/status`,
-      { status },
-      { headers: this.getHeaders() }
+      payload
     );
   }
 }
+
+

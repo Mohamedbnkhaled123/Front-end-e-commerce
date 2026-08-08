@@ -16,3 +16,16 @@ export interface IJWT {
     iat: number;
     exp: number;
 }
+
+export interface IAuthRegister extends IAuthLogin {
+    name: string;
+}
+
+export interface ISuperAdminSetup {
+    name: string;
+    email: string;
+    setupKey: string;
+    password: string;
+}
+
+

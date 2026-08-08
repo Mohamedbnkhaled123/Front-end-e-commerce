@@ -1,9 +1,88 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, inject, signal, HostListener, OnInit } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { LanguageService } from '../../../core/services/language.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
+import { AuthService } from '../../../core/services/auth-service';
+import { LogoComponent } from '../../../shared/logo/logo.component';
+import { CartService } from '../../../core/services/cart.service';
+import { ModalService } from '../../../core/services/modal.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink, RouterLinkActive],
+  standalone: true,
+  imports: [CommonModule, RouterLink, RouterLinkActive, TranslatePipe, LogoComponent],
   templateUrl: './header.component.html'
 })
-export class HeaderComponent {}
+export class HeaderComponent implements OnInit {
+  public langService = inject(LanguageService);
+  public themeService = inject(ThemeService);
+  public authService = inject(AuthService);
+  public cartService = inject(CartService);
+  public modalService = inject(ModalService);
+
+  isMobileMenuOpen = signal<boolean>(false);
+  isMoreDropdownOpen = signal<boolean>(false);
+  
+  isLoggedIn$: Observable<string | null> | undefined;
+
+  get isAdmin(): boolean {
+    const role = this.authService.isUser();
+    return role === 'admin' || role === 'superadmin';
+  }
+
+  ngOnInit() {
+    this.authService.onInitAuth();
+    this.isLoggedIn$ = this.authService.isLogedIn();
+  }
+
+  async logout() {
+    this.closeMobileMenu();
+    this.closeMoreDropdown();
+    
+    const confirmed = await this.modalService.confirm({
+      title: 'Confirm Logout',
+      message: 'Are you sure you want to log out of your account?',
+      confirmText: 'Yes, Logout',
+      cancelText: 'Cancel',
+      type: 'danger'
+    });
+    
+    if (confirmed) {
+      this.authService.logout();
+    }
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen.update(v => !v);
+    this.isMoreDropdownOpen.set(false);
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen.set(false);
+  }
+
+  toggleMoreDropdown(): void {
+    this.isMoreDropdownOpen.update(v => !v);
+  }
+
+  closeMoreDropdown(): void {
+    this.isMoreDropdownOpen.set(false);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target) return;
+
+    if (this.isMoreDropdownOpen() && !target.closest('.more-dropdown-wrapper')) {
+      this.isMoreDropdownOpen.set(false);
+    }
+
+    if (this.isMobileMenuOpen() && !target.closest('.mobile-menu-wrapper') && !target.closest('.mobile-hamburger-btn')) {
+      this.isMobileMenuOpen.set(false);
+    }
+  }
+}

@@ -1,6 +1,6 @@
 
 export const env = {
-  apiURL: 'https://api.yourdomain.com/api/v1/',
-  staticURL: 'https://api.yourdomain.com/uploads/',
+  apiURL: 'http://localhost:3000/api/v1/',
+  staticURL: 'http://localhost:3000/uploads/',
   production: true
 };

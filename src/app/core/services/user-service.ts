@@ -2,7 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { IUserListRes } from '../models/user.model';
 import { env } from '../../../env/env';
-import { AuthService } from './auth-service';
+
+export interface ICreateAdminPayload {
+  name: string;
+  email: string;
+  password: string;
+  role?: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +16,7 @@ import { AuthService } from './auth-service';
 export class UserService {
   apiURL = env.apiURL + 'user';
 
-  constructor(private _http: HttpClient, private _authService: AuthService) {}
+  constructor(private _http: HttpClient) {}
 
   // Fetches user list
   getUsers() {
@@ -18,7 +24,24 @@ export class UserService {
   }
 
   // Creates admin user account
-  createAdmin(payload: any) {
-    return this._http.post(`${this.apiURL}/admin`, payload);
+  createAdmin(payload: ICreateAdminPayload) {
+    return this._http.post<{ status: string; message?: string }>(`${this.apiURL}/admin`, payload);
+  }
+
+  // Toggles user account active/disabled status
+  toggleUserStatus(id: string) {
+    return this._http.patch<{ status: string; message: string; data: any }>(`${this.apiURL}/${id}/status`, {});
+  }
+
+  // Toggles sub-admin active/disabled status (Super Admin only)
+  toggleAdminStatus(id: string) {
+    return this._http.patch<{ status: string; message: string; data: any }>(`${this.apiURL}/${id}/admin-status`, {});
+  }
+
+  // Deletes sub-admin account (Super Admin only)
+  deleteAdmin(id: string) {
+    return this._http.delete<{ status: string; message: string }>(`${this.apiURL}/${id}`);
   }
 }
+
+

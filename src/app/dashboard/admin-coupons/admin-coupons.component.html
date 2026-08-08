@@ -1,0 +1,179 @@
+<div class="bg-slate-50 dark:bg-slate-950 min-h-screen py-8 transition-colors duration-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+          <svg class="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+          {{ 'admin.coupons' | translate }}
+        </h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{{ 'admin.overview_status' | translate }}</p>
+      </div>
+
+      <button (click)="openModal()" class="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-xs transition-colors duration-200 flex items-center gap-1.5 cursor-pointer min-h-[44px]">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <span>{{ 'admin.create_coupon' | translate }}</span>
+      </button>
+    </div>
+
+    <!-- Alert Toast -->
+    @if (message) {
+      <div class="mb-4 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold p-3.5 rounded-lg shadow-xs">
+        {{ message }}
+      </div>
+    }
+
+    <!-- Container -->
+    <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden transition-colors duration-200">
+      <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 flex items-center justify-between">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-white">{{ 'admin.promo_codes' | translate }}</h2>
+        <span class="text-xs text-slate-500 dark:text-slate-300 font-semibold bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 px-2.5 py-1 rounded-full shadow-2xs">{{ 'admin.total_codes' | translate }} {{ coupons.length }} {{ 'admin.codes' | translate }}</span>
+      </div>
+
+      @if (isLoading) {
+        <div class="p-8 text-center text-slate-500 dark:text-slate-400 text-sm font-medium">
+          {{ 'admin.loading_coupons' | translate }}
+        </div>
+      }
+
+      @if (!isLoading) {
+        <!-- Card-Based Adaptive Responsive Coupons List -->
+        <div class="divide-y divide-gray-100 dark:divide-slate-800 p-4 sm:p-6 space-y-4">
+          @for (coupon of coupons; track coupon._id; let i = $index) {
+            <div class="bg-slate-50/50 dark:bg-slate-800/40 border border-gray-200/80 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-xs transition-all space-y-4">
+              
+              <!-- Top Row: Code, Discount %, Expiry, Status -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                  <span class="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-md shrink-0">
+                    #{{ i + 1 }}
+                  </span>
+                  <span class="font-mono font-bold text-slate-900 dark:text-white text-base bg-blue-50 dark:bg-blue-950/60 text-blue-900 dark:text-blue-300 border border-blue-300 dark:border-blue-800 px-3 py-1 rounded-lg tracking-wider">
+                    {{ coupon.code }}
+                  </span>
+                  <span class="font-bold text-xs text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 rounded-md border border-indigo-200 dark:border-indigo-800">
+                    {{ coupon.discountPercent }}% {{ 'admin.off' | translate }}
+                  </span>
+                </div>
+
+                <div class="flex items-center justify-between sm:justify-end gap-3 text-xs">
+                  @if (isExpired(coupon.expiresAt)) {
+                    <span class="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">{{ 'admin.expired' | translate }}</span>
+                  } @else if (coupon.isActive) {
+                    <span class="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">{{ 'admin.active' | translate }}</span>
+                  } @else {
+                    <span class="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800">{{ 'admin.deactivated' | translate }}</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Metadata Chips Row: Min Spend, Max Cap, Usage, Expiration -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-slate-600 dark:text-slate-400 font-medium">
+                <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-gray-200 dark:border-slate-800">
+                  <span class="text-[10px] uppercase font-bold text-slate-400 block">{{ 'admin.min_spend' | translate }}</span>
+                  <span class="font-bold text-slate-900 dark:text-white">{{ coupon.minOrderAmount ? 'EGP ' + coupon.minOrderAmount : ('admin.none' | translate) }}</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-gray-200 dark:border-slate-800">
+                  <span class="text-[10px] uppercase font-bold text-slate-400 block">{{ 'admin.max_cap' | translate }}</span>
+                  <span class="font-bold text-slate-900 dark:text-white">{{ coupon.maxDiscountAmount ? 'EGP ' + coupon.maxDiscountAmount : ('admin.no_cap' | translate) }}</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-gray-200 dark:border-slate-800">
+                  <span class="text-[10px] uppercase font-bold text-slate-400 block">{{ 'admin.usage_count' | translate }}</span>
+                  <span class="font-bold text-slate-900 dark:text-white">{{ coupon.usageCount }} {{ coupon.usageLimit ? '/ ' + coupon.usageLimit : '' }}</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-gray-200 dark:border-slate-800">
+                  <span class="text-[10px] uppercase font-bold text-slate-400 block">{{ 'admin.expires_at' | translate }}</span>
+                  <span [class]="isExpired(coupon.expiresAt) ? 'text-rose-600 dark:text-rose-400 font-bold' : 'font-bold text-slate-900 dark:text-white'">
+                    {{ coupon.expiresAt ? (coupon.expiresAt | date:'mediumDate':'':_langService.currentLang()) : ('admin.never' | translate) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Action Triggers Row -->
+              <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100 dark:border-slate-800">
+                <button (click)="toggleStatus(coupon)" 
+                        [class]="coupon.isActive 
+                          ? 'px-3 py-1.5 rounded-lg text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800/80 hover:bg-amber-600 hover:text-white dark:hover:bg-amber-600 dark:hover:text-white transition-all duration-200 cursor-pointer min-h-[38px]' 
+                          : 'px-3 py-1.5 rounded-lg text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-600 dark:hover:text-white transition-all duration-200 cursor-pointer min-h-[38px]'">
+                  {{ coupon.isActive ? ('admin.deactivate_admin' | translate) : ('admin.activate_admin' | translate) }}
+                </button>
+                <button (click)="deleteCoupon(coupon)" 
+                        class="px-3 py-1.5 rounded-lg text-xs font-medium text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/80 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white transition-all duration-200 cursor-pointer min-h-[38px]">
+                  {{ 'action.delete' | translate }}
+                </button>
+              </div>
+
+            </div>
+          } @empty {
+            <div class="py-12 text-center text-slate-400 text-xs font-medium">
+              {{ 'admin.no_coupons_yet' | translate }}
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal: Create Coupon -->
+@if (showCreateModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl max-w-md w-full p-6 border border-gray-200 dark:border-slate-800 space-y-4 transition-colors duration-200">
+      <div class="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
+        <h3 class="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+          <span>{{ 'admin.create_new_coupon' | translate }}</span>
+        </h3>
+        <button (click)="closeModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xl font-medium p-1 cursor-pointer">&times;</button>
+      </div>
+
+      @if (errorMsg) {
+        <div class="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs font-semibold p-2.5 rounded-lg">
+          {{ errorMsg }}
+        </div>
+      }
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'admin.promo_code_label' | translate }}</label>
+          <input type="text" [(ngModel)]="newCode" placeholder="e.g. VELORA10" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-blue-600 font-mono text-sm font-bold uppercase">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'admin.discount_percent_label' | translate }}</label>
+            <input type="number" [(ngModel)]="newDiscountPercent" placeholder="10" min="1" max="100" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-blue-600 font-bold">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'admin.max_cap_label' | translate }}</label>
+            <input type="number" [(ngModel)]="newMaxDiscountAmount" [placeholder]="'admin.optional' | translate" min="0" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-blue-600">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'admin.min_spend_label' | translate }}</label>
+            <input type="number" [(ngModel)]="newMinOrderAmount" placeholder="0" min="0" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-blue-600">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'admin.usage_limit_label' | translate }}</label>
+            <input type="number" [(ngModel)]="newUsageLimit" [placeholder]="'admin.optional' | translate" min="1" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-blue-600">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'admin.expiration_date_label' | translate }}</label>
+          <input type="date" [(ngModel)]="newExpiresAt" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-md px-3 py-2 outline-none focus:ring-1 focus:ring-blue-600 text-xs">
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
+        <button (click)="closeModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-lg transition-colors duration-200 cursor-pointer min-h-[38px]">{{ 'action.cancel' | translate }}</button>
+        <button (click)="onCreateCoupon()" [disabled]="isCreating" class="px-4 py-2 bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-400 dark:hover:text-slate-950 disabled:opacity-50 text-white text-xs font-medium rounded-lg shadow-xs transition-colors duration-200 cursor-pointer min-h-[38px]">
+          {{ isCreating ? ('admin.creating' | translate) : ('admin.save_coupon' | translate) }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

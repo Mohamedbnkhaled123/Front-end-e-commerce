@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, map } from 'rxjs';
 import { env } from '../../../env/env';
-import { IAuthLogin, IAuthLoginRes, IJWT } from '../models/auth.model';
+import { IAuthLogin, IAuthLoginRes, IAuthRegister, IJWT } from '../models/auth.model';
+
 
 @Injectable({
   providedIn: 'root',
@@ -27,6 +28,10 @@ export class AuthService {
     return null;
   }
 
+  isSuperAdmin(): boolean {
+    return this.isUser() === 'superadmin';
+  }
+
   // Observable for auth status
   isLogedIn() {
     return this.isAuthanticate.asObservable();
@@ -46,15 +51,37 @@ export class AuthService {
 
   // Customer login handler
   login(data: IAuthLogin) {
-    return this._http.post<IAuthLoginRes>(this.apiURL, data).pipe(
+    const guestCartRaw = localStorage.getItem('shopro_guest_cart') || localStorage.getItem('velora_guest_cart');
+    let localCart: any[] | undefined = undefined;
+    if (guestCartRaw) {
+      try {
+        const parsed = JSON.parse(guestCartRaw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          localCart = parsed;
+        }
+      } catch {}
+    }
+
+    const payload = {
+      ...data,
+      localCart
+    };
+
+    return this._http.post<IAuthLoginRes>(this.apiURL, payload).pipe(
       map(res => {
         const token = res.JWT;
-        this.storeToken(token);
+        if (token) {
+          this.storeToken(token);
+          if (localCart) {
+            localStorage.removeItem('shopro_guest_cart');
+            localStorage.removeItem('velora_guest_cart');
+          }
+        }
         const decodedToken = this.jwtDecoding(token);
         const role = (decodedToken?.role || '').toLowerCase();
 
         this.setUserLogin(decodedToken?.name || decodedToken?.id || 'User');
-        if (role === 'admin') {
+        if (role === 'admin' || role === 'superadmin') {
           this._router.navigate(['/admin/home']);
         } else {
           this._router.navigate(['/home']);
@@ -72,12 +99,33 @@ export class AuthService {
         const decodedToken = this.jwtDecoding(token);
         const role = (decodedToken?.role || '').toLowerCase();
 
-        if (role === 'admin') {
+        if (role === 'admin' || role === 'superadmin') {
           this.storeToken(token);
-          this.setUserLogin(decodedToken?.name || decodedToken?.id || 'Admin');
+          this.setUserLogin(decodedToken?.name || decodedToken?.id || (role === 'superadmin' ? 'Super Admin' : 'Admin'));
           this._router.navigate(['/admin/home']);
         }
         return role;
+      })
+    );
+  }
+
+  // Checks if Super Admin account has been claimed
+  checkSuperAdminStatus() {
+    return this._http.get<{ status: string; exists: boolean }>(`${env.apiURL}user/superadmin-status`);
+  }
+
+  // First-time Super Admin account claim
+  setupSuperAdmin(data: any) {
+    return this._http.post<IAuthLoginRes>(`${env.apiURL}user/setup-superadmin`, data).pipe(
+      map(res => {
+        const token = res.JWT;
+        if (token) {
+          this.storeToken(token);
+          const decoded = this.jwtDecoding(token);
+          this.setUserLogin(decoded?.name || 'Super Admin');
+          this._router.navigate(['/admin/analytics']);
+        }
+        return res;
       })
     );
   }
@@ -88,7 +136,7 @@ export class AuthService {
 
   // Decodes JWT token payload
   jwtDecoding(token: string): IJWT | null {
-    if (!token) return null;
+    if (!token || token === 'undefined' || token === 'null') return null;
     try {
       const parts = token.split('.');
       if (parts.length < 2) return null;
@@ -104,7 +152,6 @@ export class AuthService {
       if (payload && payload.exp) {
         const isExpired = Math.floor(Date.now() / 1000) >= payload.exp;
         if (isExpired) {
-          this.logout();
           return null;
         }
       }
@@ -115,7 +162,17 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.token_key);
+    const token = localStorage.getItem(this.token_key);
+    if (!token || token === 'undefined' || token === 'null') {
+      localStorage.removeItem(this.token_key);
+      return null;
+    }
+    const decoded = this.jwtDecoding(token);
+    if (!decoded) {
+      localStorage.removeItem(this.token_key);
+      return null;
+    }
+    return token;
   }
 
   storeToken(token: string) {
@@ -127,9 +184,35 @@ export class AuthService {
     this.isAuthanticate.next(null);
   }
 
-  // Resets password by email
-  resetPassword(data: { email: string; newPassword: string }) {
-    return this._http.post<{ status: string; message: string }>(env.apiURL + 'auth/forgot-password', data);
+  // Validates password strength (min 8 chars, 1 uppercase, 1 lowercase, 1 digit)
+  validatePasswordStrength(password: string): boolean {
+    if (!password || typeof password !== 'string') return false;
+    const hasMinLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    return hasMinLength && hasUpper && hasLower && hasNumber;
+  }
+
+  // Step 1: Requests OTP reset code by email
+  forgotPassword(email: string) {
+    return this._http.post<{ status: string; message: string; devOtp?: string }>(
+      `${env.apiURL}auth/forgot-password`,
+      { email }
+    );
+  }
+
+  // Step 2: Verifies OTP code and updates password
+  resetPassword(data: { email: string; otp: string; newPassword: string }) {
+    return this._http.post<{ status: string; message: string }>(
+      `${env.apiURL}auth/reset-password`,
+      data
+    );
+  }
+
+  // Registers new customer account
+  register(data: IAuthRegister) {
+    return this._http.post<{ status: string; message?: string }>(`${env.apiURL}auth/register`, data);
   }
 
   logout() {
@@ -137,3 +220,4 @@ export class AuthService {
     this._router.navigate(['/home']);
   }
 }
+

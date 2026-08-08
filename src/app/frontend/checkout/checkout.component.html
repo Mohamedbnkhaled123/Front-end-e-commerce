@@ -1,19 +1,19 @@
-<div class="bg-gray-100 min-h-screen py-10">
+<div class="bg-blue-50/30 dark:bg-slate-950 min-h-screen py-10 transition-colors">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="mb-8">
-      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Checkout</h1>
-      <p class="text-xs text-slate-500 mt-1">Input address details and place your order securely.</p>
+      <h1 class="text-2xl font-semibold text-slate-900 dark:text-white ">{{ 'checkout.title' | translate }}</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{{ 'checkout.subtitle' | translate }}</p>
     </div>
 
     <!-- Alerts -->
     @if (successMessage) {
-      <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold p-4 rounded-md">
+      <div class="mb-6 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold p-4 rounded-xl">
         {{ successMessage }}
       </div>
     }
 
     @if (errorMessage) {
-      <div class="mb-6 bg-red-50 border border-red-200 text-red-700 text-sm font-semibold p-4 rounded-md">
+      <div class="mb-6 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-300 text-xs font-bold p-4 rounded-xl">
         {{ errorMessage }}
       </div>
     }
@@ -24,45 +24,168 @@
       <form (ngSubmit)="onPlaceOrder()" class="lg:col-span-2 space-y-6">
 
         <!-- Shipping Address -->
-        <div class="bg-white border border-gray-200 rounded-md p-6 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">1. Shipping Address</h2>
+        <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl p-6 shadow-xs transition-colors space-y-4">
+          <h2 class="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider border-b border-gray-100 dark:border-slate-800 pb-3">1. Shipping Address</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label for="title" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Address Label</label>
-              <input type="text" id="title" name="title" [(ngModel)]="title" placeholder="Home / Work" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none">
+              <label for="title" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Address Label</label>
+              <input type="text" id="title" name="title" [(ngModel)]="title" placeholder="Home / Work" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 outline-none">
             </div>
             <div>
-              <label for="phone" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Phone Number <span class="text-red-500">*</span></label>
-              <input type="text" id="phone" name="phone" [(ngModel)]="phone" required placeholder="+20 123 456 7890" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none">
+              <label for="phoneNumber" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'auth.phone' | translate }} <span class="text-rose-500">*</span></label>
+              <div class="relative">
+                <input type="text" id="phoneNumber" name="phoneNumber" [(ngModel)]="phoneNumber" required placeholder="+20 123 456 7890" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-3.5 py-2 pr-9 rtl:pr-3.5 rtl:pl-9 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 outline-none">
+                @if (isPhoneValid) {
+                  <svg class="w-5 h-5 text-emerald-500 absolute right-2.5 rtl:right-auto rtl:left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path class="animate-checkmark" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                  </svg>
+                }
+              </div>
             </div>
             <div class="col-span-full">
-              <label for="street" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Street Address <span class="text-red-500">*</span></label>
-              <input type="text" id="street" name="street" [(ngModel)]="street" required placeholder="123 Main St, Apt 4B" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none">
+              <label for="street" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'checkout.street' | translate }} <span class="text-rose-500">*</span></label>
+              <div class="relative">
+                <input type="text" id="street" name="street" [(ngModel)]="street" required placeholder="123 Main St" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-3.5 py-2 pr-9 rtl:pr-3.5 rtl:pl-9 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 outline-none">
+                @if (isStreetValid) {
+                  <svg class="w-5 h-5 text-emerald-500 absolute right-2.5 rtl:right-auto rtl:left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path class="animate-checkmark" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                  </svg>
+                }
+              </div>
             </div>
             <div>
-              <label for="city" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">City <span class="text-red-500">*</span></label>
-              <input type="text" id="city" name="city" [(ngModel)]="city" required placeholder="Cairo" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-1 focus:ring-amber-500 focus:border-amber-500 outline-none">
+              <label for="city" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'checkout.city' | translate }} <span class="text-rose-500">*</span></label>
+              <div class="relative">
+                <input type="text" id="city" name="city" [(ngModel)]="city" required placeholder="Cairo" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-3.5 py-2 pr-9 rtl:pr-3.5 rtl:pl-9 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 outline-none">
+                @if (isCityValid) {
+                  <svg class="w-5 h-5 text-emerald-500 absolute right-2.5 rtl:right-auto rtl:left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path class="animate-checkmark" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                  </svg>
+                }
+              </div>
+            </div>
+            <div>
+              <label for="buildingNumber" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'checkout.building' | translate }}</label>
+              <input type="text" id="buildingNumber" name="buildingNumber" [(ngModel)]="buildingNumber" placeholder="Bldg 12" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 outline-none">
+            </div>
+            <div>
+              <label for="floorNumber" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ 'checkout.floor' | translate }}</label>
+              <input type="text" id="floorNumber" name="floorNumber" [(ngModel)]="floorNumber" placeholder="Floor 3, Apt 4B" class="w-full bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 outline-none">
             </div>
           </div>
         </div>
 
         <!-- Payment Option -->
-        <div class="bg-white border border-gray-200 rounded-md p-6 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">2. Payment Method</h2>
-          <div class="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
-            <input type="radio" checked id="cod" name="payment" class="accent-amber-600">
-            <label for="cod" class="text-xs font-bold text-slate-900">Cash on Delivery (COD)</label>
+        <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl p-6 shadow-xs transition-colors space-y-4">
+          <h2 class="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider border-b border-gray-100 dark:border-slate-800 pb-3">2. {{ 'checkout.payment_method' | translate }}</h2>
+          <div class="flex items-center gap-3 p-3.5 bg-blue-50/50 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-lg">
+            <input type="radio" checked id="cod" name="payment" class="accent-blue-600">
+            <label for="cod" class="text-xs font-bold text-slate-900 dark:text-white">{{ 'checkout.cod' | translate }}</label>
           </div>
         </div>
 
         <button 
           type="submit" 
           [disabled]="isLoading"
-          class="w-full bg-[#FFD814] hover:bg-[#F7CA00] text-black border border-[#FCD200] rounded-lg py-3 text-sm font-bold shadow-sm transition-all disabled:opacity-50">
-          {{ isLoading ? 'Processing Order...' : 'Place Your Order' }}
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-3 text-xs font-medium shadow-md transition-all disabled:opacity-50 min-h-[44px] cursor-pointer">
+          {{ isLoading ? 'Processing Order...' : ('checkout.place_order' | translate) }}
         </button>
 
       </form>
+
+      <!-- Order Summary Sidebar (Column 3) -->
+      <aside class="lg:col-span-1 space-y-6">
+        <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl p-6 shadow-xs space-y-4 transition-colors">
+          <h2 class="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider border-b border-gray-100 dark:border-slate-800 pb-3">
+            {{ 'cart.order_summary' | translate }} ({{ totalItemsCount }})
+          </h2>
+
+          <div class="divide-y divide-gray-100 dark:divide-slate-800 max-h-80 overflow-y-auto pr-1">
+            @for (item of cartItems; track item.productId) {
+              <div class="py-3 flex items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2.5">
+                  @if (item.productImg) {
+                    <img [src]="item.productImg && item.productImg.startsWith('http') ? item.productImg : staticURL + item.productImg" [alt]="item | localizeField:'name'" class="w-10 h-10 object-cover rounded-lg border border-gray-200 dark:border-slate-800 shrink-0">
+                  } @else {
+                    <div class="w-10 h-10 rounded-lg bg-blue-900 flex items-center justify-center shrink-0 text-white font-bold text-[10px]">
+                      BAG
+                    </div>
+                  }
+                  <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white line-clamp-1 max-w-[120px]">{{ item | localizeField:'name' }}</h4>
+                    <span class="text-slate-500 dark:text-slate-400 text-[11px]">Qty: {{ item.quantity }}</span>
+                  </div>
+                </div>
+                <div class="font-bold text-slate-900 dark:text-white text-right rtl:text-left">
+                  {{ (item.priceAtAddition * item.quantity).toFixed(2) }} EGP
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="border-t border-gray-200 dark:border-slate-800 pt-4 space-y-2 text-xs">
+            <div class="flex justify-between text-slate-600 dark:text-slate-400 font-medium">
+              <span>{{ 'cart.subtotal' | translate }}:</span>
+              <span class="font-bold text-slate-900 dark:text-white">{{ subtotal.toFixed(2) }} EGP</span>
+            </div>
+            
+            <!-- Coupon Discount Line -->
+            @if (appliedCoupon) {
+              <div class="flex justify-between text-blue-700 dark:text-blue-400 font-bold bg-blue-50 dark:bg-slate-800 p-2 rounded-lg border border-blue-200 dark:border-slate-700">
+                <span>Coupon ({{ appliedCoupon.code }} -{{ appliedCoupon.discountPercent }}%):</span>
+                <span>-{{ appliedCoupon.discountAmount.toFixed(2) }} EGP</span>
+              </div>
+            }
+
+            <div class="flex justify-between text-slate-600 dark:text-slate-400 font-medium">
+              <span>{{ 'cart.shipping' | translate }}:</span>
+              <span class="font-bold text-emerald-600 dark:text-emerald-400 uppercase flex items-center gap-1">
+                <span>{{ subtotal >= 1000 ? ('cart.free' | translate) : '50.00 EGP' }}</span>
+              </span>
+            </div>
+
+            <!-- Promo Code Coupon Input Box -->
+            <div class="border-t border-gray-100 dark:border-slate-800 pt-3 space-y-2">
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Promo Coupon Code</label>
+              <div class="flex items-center gap-1.5">
+                <input 
+                  type="text" 
+                  [(ngModel)]="couponCode" 
+                  name="couponCode" 
+                  placeholder="PROMO CODE" 
+                  class="flex-1 bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold uppercase outline-none focus:ring-1 focus:ring-blue-600 text-slate-900 dark:text-white">
+                <button 
+                  type="button" 
+                  (click)="applyCoupon()" 
+                  [disabled]="isValidatingCoupon || !couponCode" 
+                  class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-all cursor-pointer">
+                  {{ isValidatingCoupon ? '...' : ('action.filter' | translate) }}
+                </button>
+              </div>
+              @if (couponMessage) {
+                <div class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800 p-2 rounded-lg">
+                  {{ couponMessage }}
+                </div>
+              }
+              @if (couponError) {
+                <div class="text-[11px] font-bold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-slate-800 border border-rose-200 dark:border-rose-800 p-2 rounded-lg">
+                  {{ couponError }}
+                </div>
+              }
+            </div>
+
+            <div class="border-t border-gray-100 dark:border-slate-800 pt-2 flex justify-between items-baseline text-slate-900 dark:text-white">
+              <span class="font-bold text-sm">{{ 'cart.total' | translate }}:</span>
+              <span class="font-bold text-lg text-slate-950 dark:text-white">{{ grandTotal.toFixed(2) }} EGP</span>
+            </div>
+          </div>
+
+          <div class="bg-blue-50/50 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 p-3 rounded-lg text-[11px] text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span>{{ 'feature.returns_desc' | translate }}</span>
+          </div>
+        </div>
+      </aside>
 
     </div>
   </div>

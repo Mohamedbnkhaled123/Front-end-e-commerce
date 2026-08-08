@@ -1,0 +1,45 @@
+<a 
+  [routerLink]="customLink" 
+  dir="ltr"
+  class="logo-transition group inline-flex items-center gap-2 select-none cursor-pointer transform will-change-transform hover:-translate-y-1 hover:scale-110"
+  [attr.aria-label]="ariaLabel">
+  
+  <!-- Modern Neon Line-Art Shopping Cart Icon -->
+  <div class="relative flex items-center justify-center shrink-0">
+    <svg 
+      class="w-6 h-6 sm:w-7 sm:h-7 stroke-[#22D3EE] text-[#22D3EE] drop-shadow-[0_0_8px_rgba(34,211,238,0.55)] transition-all duration-500" 
+      fill="none" 
+      viewBox="0 0 24 24" 
+      stroke-width="2"
+      stroke-linecap="round" 
+      stroke-linejoin="round">
+      <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+  </div>
+
+  <div class="flex items-center gap-1.5 mt-0.5">
+    <!-- Typography Wordmark: Equal Hierarchy Alignment -->
+    <div class="flex items-baseline leading-none tracking-tight text-xl sm:text-2xl font-bold font-sans">
+      <span class="font-bold transition-colors duration-500" 
+            [style.color]="lightText ? '#ffffff' : ''"
+            [ngClass]="!lightText ? 'text-slate-900 dark:text-white' : ''">sho</span>
+      <span class="font-extrabold uppercase text-blue-400 ms-0.5 transition-colors duration-500">PRO</span>
+    </div>
+
+    <!-- Optional Admin Badge -->
+    @if (isAdmin) {
+      <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-1.5 py-[2px] rounded border shrink-0 shadow-xs ms-1 transition-colors duration-500"
+            [class.text-white]="lightText"
+            [class.border-white/30]="lightText"
+            [class.bg-white/10]="lightText"
+            [class.text-blue-600]="!lightText"
+            [class.border-blue-200]="!lightText"
+            [class.bg-blue-50]="!lightText"
+            [class.dark:text-blue-400]="!lightText"
+            [class.dark:border-blue-500/30]="!lightText"
+            [class.dark:bg-blue-500/10]="!lightText">
+        ADMIN
+      </span>
+    }
+  </div>
+</a>

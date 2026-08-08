@@ -1,31 +1,34 @@
 <!-- ===== ADMIN PRODUCTS LIST ===== -->
-<div class="bg-slate-50 min-h-screen py-8">
+<div class="bg-slate-50 dark:bg-slate-950 min-h-screen py-8 transition-colors duration-200">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <!-- Page Header -->
     <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
       <div>
-        <h1 class="text-2xl font-extrabold text-slate-900">Product Management</h1>
-        <p class="text-xs text-slate-500 mt-1">Add, edit, or remove products from your store catalog.</p>
+        <h1 class="text-2xl font-semibold text-slate-900 dark:text-white ">{{ 'admin.products' | translate }}</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{{ 'admin.overview_status' | translate }}</p>
       </div>
-      <a routerLink="/admin/products/add"
-         class="inline-flex items-center gap-2 bg-[#FF9900] hover:bg-[#DF8300] text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow-sm transition-all">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        Add New Product
-      </a>
+      <div class="flex items-center gap-2">
+        <button (click)="exportCSV()" class="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-medium px-3.5 py-2.5 rounded-lg shadow-xs transition-colors duration-200 flex items-center gap-1.5 cursor-pointer min-h-[44px]">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span>{{ 'action.export_csv' | translate }}</span>
+        </button>
+        <a routerLink="/admin/products/add"
+           class="inline-flex items-center bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-xs transition-colors duration-200 min-h-[44px] cursor-pointer">
+          {{ 'admin.add_new_product' | translate }}
+        </a>
+      </div>
     </div>
 
     <!-- Alert message -->
     @if (message) {
-      <div class="mb-4 p-3 bg-emerald-100 text-emerald-800 rounded-md text-sm font-semibold flex items-center gap-2">
+      <div class="mb-4 p-3.5 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-lg text-xs font-semibold flex items-center gap-2 shadow-xs">
         <span></span> {{ message }}
       </div>
     }
 
     <!-- Search & Filter Bar -->
-    <div class="bg-white border border-gray-200 rounded-md shadow-sm px-5 py-4 mb-5 flex flex-wrap gap-3 items-center justify-between">
+    <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs px-5 py-4 mb-5 flex flex-wrap gap-3 items-center justify-between transition-colors duration-200">
       <div class="flex items-center gap-2 flex-1 min-w-[200px]">
         <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
@@ -34,138 +37,156 @@
           type="text" 
           [(ngModel)]="searchTerm" 
           (ngModelChange)="applyFilter()"
-          placeholder="Search by product name or slug..."
-          class="w-full text-sm text-slate-700 placeholder-slate-400 border-none outline-none bg-transparent"
+          [placeholder]="'admin.search_product_placeholder' | translate"
+          class="w-full text-sm text-slate-900 dark:text-white placeholder-slate-400 border-none outline-none bg-transparent"
         >
       </div>
       <div class="flex items-center gap-3 flex-wrap">
         <select 
           [(ngModel)]="selectedStatus" 
           (ngModelChange)="applyFilter()"
-          class="text-xs bg-white border border-gray-300 rounded-md px-3 py-1.5 text-slate-700 font-medium outline-none">
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="outofstock">Out of Stock</option>
-          <option value="archived">Archived / Disabled</option>
+          class="text-xs bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-6 rtl:pl-10 ltr:pr-10 py-2 text-slate-900 dark:text-white font-medium outline-none min-h-[36px]">
+          <option value="">{{ 'admin.all_status' | translate }}</option>
+          <option value="active">{{ 'admin.active' | translate }}</option>
+          <option value="lowstock">{{ 'admin.low_stock' | translate }}</option>
+          <option value="outofstock">{{ 'product.out_of_stock' | translate }}</option>
+          <option value="archived">{{ 'admin.archived_disabled' | translate }}</option>
+          <option value="deleted">{{ 'admin.deleted_recycle_bin' | translate }}</option>
         </select>
       </div>
     </div>
 
-    <!-- Products Table -->
-    <div class="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-        <h2 class="text-sm font-bold text-slate-700">Catalog Products</h2>
-        <span class="text-xs text-slate-500 font-medium">{{ filteredProducts.length }} items</span>
+    <!-- Products Container -->
+    <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden transition-colors duration-200">
+      <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 flex items-center justify-between">
+        <h2 class="text-xs font-semibold text-slate-800 dark:text-white">{{ 'admin.catalog_products' | translate }}</h2>
+        <span class="text-xs text-slate-500 dark:text-slate-300 font-semibold bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 px-2.5 py-1 rounded-full shadow-2xs">{{ filteredProducts.length }} {{ 'admin.items' | translate }}</span>
       </div>
 
       @if (isLoading) {
-        <div class="p-8 text-center text-slate-500 text-sm font-medium">
-          Loading products...
+        <div class="p-8 text-center text-slate-500 dark:text-slate-400 text-sm font-medium">
+          {{ 'admin.loading_products' | translate }}
         </div>
       } @else {
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200 text-left">
-            <thead class="bg-gray-50 text-xs font-bold text-slate-600 uppercase tracking-wider">
-              <tr>
-                <th class="px-6 py-4 w-16">Image</th>
-                <th class="px-6 py-4">Product Name</th>
-                <th class="px-6 py-4">Slug</th>
-                <th class="px-6 py-4">Price</th>
-                <th class="px-6 py-4">Stock</th>
-                <th class="px-6 py-4">Status</th>
-                <th class="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 bg-white text-sm text-slate-700">
-                           @for (product of paginatedProducts; track product._id) {
-                <tr>
-                  <td class="px-6 py-4">
-                    <img [src]="staticURL + product.imgURL" class="w-10 h-10 rounded-md object-cover border border-slate-200" [alt]="product.name">
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="font-semibold text-slate-900">{{ product.name }}</div>
-                    <div class="text-xs text-slate-400 truncate max-w-xs">{{ product.desc }}</div>
-                  </td>
-                  <td class="px-6 py-4 font-mono text-xs text-slate-500">{{ product.slug }}</td>
-                  <td class="px-6 py-4 font-bold text-slate-900">{{ product.price }} EGP</td>
-                  <td class="px-6 py-4 font-semibold" [ngClass]="{'text-emerald-600': product.stock > 3, 'text-amber-600': product.stock <= 3 && product.stock > 0, 'text-rose-600': product.stock === 0}">
-                    {{ product.stock }}
-                  </td>
-                  <td class="px-6 py-4">
-                    @if (product.isActive !== false && product.isDeleted !== true && product.stock > 0) {
-                      <span class="px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider border bg-emerald-50 text-emerald-800 border-emerald-200">
-                        Active
-                      </span>
-                    }
-                    @if (product.stock === 0 && product.isActive !== false && product.isDeleted !== true) {
-                      <span class="px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider border bg-amber-50 text-amber-800 border-amber-200">
-                        Out of Stock
-                      </span>
-                    }
-                    @if (product.isActive === false || product.isDeleted === true) {
-                      <span class="px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider border bg-rose-50 text-rose-800 border-rose-200">
-                        Disabled
-                      </span>
-                    }
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <div class="flex items-center justify-end gap-2">
-                      <a [routerLink]="['/admin/products/edit', product._id]"
-                         class="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded transition-all">
-                        Edit
-                      </a>
-                      <button 
-                        (click)="deleteProduct(product._id)"
-                        class="text-xs font-semibold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1 rounded transition-all">
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              }
+        <!-- Card-Based Adaptive Responsive Products List (Reviews Moderation Style) -->
+        <div class="divide-y divide-gray-100 dark:divide-slate-800 p-4 sm:p-6 space-y-4">
+          @for (product of paginatedProducts; track product._id; let i = $index) {
+            <div class="bg-slate-50/50 dark:bg-slate-800/40 border border-gray-200/80 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-xs transition-all space-y-4">
+              
+              <!-- Product Main Info Row -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-gray-100 dark:border-slate-800">
+                <div class="flex items-center gap-3">
+                  <img [src]="product.imgURL.startsWith('http') ? product.imgURL : staticURL + product.imgURL" class="w-14 h-14 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shadow-2xs shrink-0" [alt]="product | localizeField:'name'">
+                  <div>
+                    <h3 class="font-semibold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                      <span>{{ product | localizeField:'name' }}</span>
+                      <span class="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800">#{{ (currentPage - 1) * pageSize + i + 1 }}</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium line-clamp-1 max-w-lg mt-0.5">{{ product | localizeField:'desc' }}</p>
+                    <span class="font-mono text-[11px] text-slate-400 block mt-1">Slug: {{ product.slug }}</span>
+                  </div>
+                </div>
 
-              <!-- Empty state -->
-              @if (filteredProducts.length === 0) {
-                <tr>
-                  <td colspan="7" class="px-6 py-16 text-center text-slate-500">
-                    No products found matching your search.
-                  </td>
-                </tr>
-              }
+                <div class="flex items-center justify-between sm:justify-end gap-3 text-xs shrink-0">
+                  <div class="text-right rtl:text-left">
+                    <div class="text-base font-bold text-slate-900 dark:text-white">{{ product.price }} EGP</div>
+                    @if (product.discount) {
+                      <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 px-1.5 py-0.5 rounded inline-block">
+                        -{{ product.discount }}% {{ 'admin.off' | translate }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
 
-            </tbody>
-          </table>
+              <!-- Metadata & Action Row -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ 'admin.stock' | translate }}</span>
+                  <span class="font-bold text-xs px-2.5 py-1 rounded-md border" [ngClass]="{'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800': product.stock > 3, 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800': product.stock <= 3 && product.stock > 0, 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800': product.stock === 0}">
+                    {{ product.stock }} {{ 'admin.units' | translate }}
+                  </span>
+
+                  @if (product.isActive !== false && product.isDeleted !== true && product.stock > 0) {
+                    <span class="px-2.5 py-1 rounded-md text-xs font-bold border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800">
+                      {{ 'admin.active' | translate }}
+                    </span>
+                  }
+                  @if (product.stock === 0 && product.isActive !== false && product.isDeleted !== true) {
+                    <span class="px-2.5 py-1 rounded-md text-xs font-bold border bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800">
+                      {{ 'product.out_of_stock' | translate }}
+                    </span>
+                  }
+                  @if (product.isActive === false || product.isDeleted === true) {
+                    <span class="px-2.5 py-1 rounded-md text-xs font-bold border bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800">
+                      {{ 'admin.deactivated' | translate }}
+                    </span>
+                  }
+                </div>
+
+                <div class="flex items-center justify-between w-full sm:w-auto sm:justify-end gap-2">
+                  <a [routerLink]="['/admin/products/edit', product._id]"
+                     class="text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/80 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white px-4 py-2 rounded-lg transition-all duration-200 min-h-[38px] flex items-center justify-center w-[clamp(85px,22vw,140px)] sm:w-auto shrink-0 cursor-pointer">
+                    {{ 'action.edit' | translate }}
+                  </a>
+                  
+                  @if (product.isDeleted) {
+                    <button 
+                      (click)="restoreProduct(product._id)"
+                      class="text-xs font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-600 dark:hover:text-white px-4 py-2 rounded-lg transition-all duration-200 min-h-[38px] flex items-center justify-center w-[clamp(85px,22vw,140px)] sm:w-auto shrink-0 cursor-pointer">
+                      {{ 'admin.restore' | translate }}
+                    </button>
+                  } @else {
+                    <button 
+                      (click)="deleteProduct(product._id)"
+                      class="text-xs font-medium text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/80 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white px-4 py-2 rounded-lg transition-all duration-200 min-h-[38px] flex items-center justify-center w-[clamp(85px,22vw,140px)] sm:w-auto shrink-0 cursor-pointer">
+                      {{ 'action.delete' | translate }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+            </div>
+          } @empty {
+            <div class="py-12 text-center text-slate-400 text-xs font-medium">
+              {{ 'admin.no_products_found' | translate }}
+            </div>
+          }
         </div>
 
-        <!--  Admin Table Pagination Controls (3 items per page) -->
+        <!-- Admin Table Pagination Controls -->
         @if (totalPages > 1) {
-          <div class="p-4 border-t border-gray-200 flex items-center justify-between bg-slate-50 rounded-b-xl">
-            <div class="text-xs font-semibold text-slate-500">
-              Page {{ currentPage }} of {{ totalPages }} ({{ filteredProducts.length }} items)
+          <div class="p-4 border-t border-gray-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80 rounded-b-xl">
+            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {{ 'admin.page' | translate }} {{ currentPage }} {{ 'admin.of' | translate }} {{ totalPages }} ({{ filteredProducts.length }} {{ 'admin.items' | translate }})
             </div>
             <div class="flex items-center gap-2">
               <button 
                 (click)="prevPage()" 
                 [disabled]="currentPage === 1"
-                class="px-3 py-1.5 text-xs font-bold rounded border border-gray-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm">
-                ← Prev
+                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-200 shadow-2xs">
+                ← {{ 'admin.prev' | translate }}
               </button>
 
-              @for (pageNum of pageNumbers; track pageNum) {
-                <button 
-                  (click)="setPage(pageNum)"
-                  [class]="pageNum === currentPage 
-                    ? 'px-3 py-1.5 text-xs font-black rounded bg-slate-900 text-white shadow-sm' 
-                    : 'px-3 py-1.5 text-xs font-semibold rounded bg-white border border-gray-300 text-slate-700 hover:bg-slate-100 transition-all shadow-sm'">
-                  {{ pageNum }}
-                </button>
+              @for (pageNum of pageNumbers; track $index) {
+                @if (pageNum === '...') {
+                  <span class="px-3 py-1.5 text-xs font-bold text-slate-500 dark:text-slate-400">...</span>
+                } @else {
+                  <button 
+                    (click)="setPage($any(pageNum))"
+                    [class]="pageNum === currentPage 
+                      ? 'px-3 py-1.5 text-xs font-bold rounded-lg bg-blue-600 text-white shadow-2xs' 
+                      : 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 shadow-2xs'">
+                    {{ pageNum }}
+                  </button>
+                }
               }
 
               <button 
                 (click)="nextPage()" 
                 [disabled]="currentPage === totalPages"
-                class="px-3 py-1.5 text-xs font-bold rounded border border-gray-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm">
-                Next →
+                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-200 shadow-2xs">
+                {{ 'admin.next' | translate }} →
               </button>
             </div>
           </div>

@@ -1,13 +1,76 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>VeloraFrontend</title>
-    <base href="/" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  </head>
-  <body>
-    <app-root></app-root>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <title>shoPRO | Premium Modern E-Commerce Platform</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Discover modern tech, accessories, and premium products built for supreme quality and effortless reliability on shoPRO.">
+  <meta name="theme-color" content="#020617">
+  
+  <!-- Local Fonts Preload (Inter is critical for LCP) -->
+  <link rel="preload" href="/assets/fonts/inter-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="http://localhost:3000" crossorigin>
+
+
+  <!-- Inline Critical CSS for instant above-the-fold layout -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f0f9ff; color: #0f172a; }
+    html.dark body { background-color: #020617; color: #f1f5f9; }
+    app-root { display: block; min-height: 100vh; }
+    /* GPU-composited hero image wrapper — fixed dimensions prevent CLS on dynamic image load */
+    .hero-img-wrapper { contain: layout style; width: 100%; max-width: 24rem; min-height: 16rem; aspect-ratio: 1 / 1; transform: translateZ(0); will-change: transform; position: relative; }
+    /* GPU-composited image zoom — scale only, no layout properties */
+    .product-img-zoom { transition: transform 300ms ease-out; will-change: transform; transform: translateZ(0); }
+    .product-card-hover-img:hover .product-img-zoom { transform: scale3d(1.05, 1.05, 1); }
+    /* GPU-composited hero image hover scale */
+    .hero-product-img { transition: transform 500ms cubic-bezier(0.4,0,0.2,1); will-change: transform; transform: translateZ(0); }
+    .hero-img-wrapper:hover .hero-product-img { transform: scale3d(1.05, 1.05, 1); }
+    /* === Hero Skeleton Shimmer — renders before API resolves, zero CLS === */
+    @keyframes hero-shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+    .hero-skeleton {
+      position: absolute; inset: 0; border-radius: 1rem;
+      background: linear-gradient(90deg, rgba(148,163,184,0.15) 25%, rgba(148,163,184,0.3) 50%, rgba(148,163,184,0.15) 75%);
+      background-size: 800px 100%;
+      animation: hero-shimmer 1.4s ease-in-out infinite;
+      transition: opacity 0.4s ease;
+    }
+    html.dark .hero-skeleton {
+      background: linear-gradient(90deg, rgba(30,41,59,0.6) 25%, rgba(51,65,85,0.8) 50%, rgba(30,41,59,0.6) 75%);
+      background-size: 800px 100%;
+      animation: hero-shimmer 1.4s ease-in-out infinite;
+    }
+    .hero-skeleton.loaded { opacity: 0; pointer-events: none; }
+  </style>
+  
+  <!-- Synchronous Blocking Script for Zero-FOUT Theme & Zero-FOLT Language Detection -->
+  <script>
+    (function() {
+      try {
+        var savedTheme = localStorage.getItem('shoPRO_theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        var savedLang = localStorage.getItem('shoPRO_lang');
+        var isArabic = savedLang === 'ar' || (!savedLang && navigator.language.startsWith('ar'));
+        if (isArabic) {
+          document.documentElement.dir = 'rtl';
+          document.documentElement.lang = 'ar';
+          document.documentElement.classList.add('i18n-loading');
+        } else {
+          document.documentElement.dir = 'ltr';
+          document.documentElement.lang = 'en';
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body class="bg-blue-50/30 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased font-sans transition-colors duration-200">
+  <app-root></app-root>
+</body>
 </html>

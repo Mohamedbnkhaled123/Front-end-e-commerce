@@ -6,10 +6,12 @@ export const adminGuard: CanActivateFn = (route, state) => {
   const _authService = inject(AuthService);
   const _router = inject(Router);
   
-  if (_authService.isUser() === 'admin') {
+  const role = _authService.isUser();
+  if (role === 'admin' || role === 'superadmin') {
     return true;
   }
   
-  _router.navigate(['/dashboard-login'], { queryParams: { error: 'unauthorized' } });
+  // Redirect non-admin users directly to 404 Not Found page
+  _router.navigate(['/404']);
   return false;
 };

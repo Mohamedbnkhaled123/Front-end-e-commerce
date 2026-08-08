@@ -1,0 +1,347 @@
+<div class="bg-blue-50/20 dark:bg-slate-950 min-h-screen py-6 px-4 sm:px-6 lg:px-8 print:bg-white print:py-0 transition-colors duration-200 w-full max-w-full box-border min-w-0">
+  
+  <!-- Header Section & Controls -->
+  <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8 print:hidden w-full min-w-0">
+    
+    <!-- Title & Executive Badge Container -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2.5 flex-wrap min-w-0">
+          <h1 class="font-semibold text-slate-900 dark:text-white flex items-center gap-2 sm:gap-2.5 text-xl sm:text-2xl leading-snug">
+            <svg class="w-6 h-6 sm:w-7 sm:h-7 text-blue-600 dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            <span>{{ 'admin.analytics' | translate }}</span>
+          </h1>
+          <span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-950/80 text-blue-900 dark:text-blue-300 text-[10px] sm:text-[11px] font-bold rounded-full uppercase border border-blue-300 dark:border-blue-800 tracking-wider shrink-0">Executive BI</span>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium leading-normal">{{ 'admin.overview_status' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Filter Controls & Action Triggers Cluster -->
+    <div class="flex flex-col xl:flex-row items-stretch xl:items-center gap-3 w-full xl:w-auto min-w-0">
+      <!-- Fluid Range Filter Segmented Control -->
+      <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-1 shadow-xs flex flex-wrap sm:flex-nowrap items-center gap-1 text-xs font-bold transition-colors min-w-0 w-full xl:w-auto">
+        <button (click)="setRange('today')" [ngClass]="selectedRange() === 'today' ? 'bg-blue-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'" class="flex-1 sm:flex-initial px-3 py-2 rounded-lg transition-all cursor-pointer whitespace-nowrap text-center text-[11px] sm:text-xs">{{ 'admin.today' | translate }}</button>
+        <button (click)="setRange('week')" [ngClass]="selectedRange() === 'week' ? 'bg-blue-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'" class="flex-1 sm:flex-initial px-3 py-2 rounded-lg transition-all cursor-pointer whitespace-nowrap text-center text-[11px] sm:text-xs">{{ 'admin.this_week' | translate }}</button>
+        <button (click)="setRange('month')" [ngClass]="selectedRange() === 'month' ? 'bg-blue-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'" class="flex-1 sm:flex-initial px-3 py-2 rounded-lg transition-all cursor-pointer whitespace-nowrap text-center text-[11px] sm:text-xs">{{ 'admin.this_month' | translate }}</button>
+        <button (click)="setRange('year')" [ngClass]="selectedRange() === 'year' ? 'bg-blue-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'" class="flex-1 sm:flex-initial px-3 py-2 rounded-lg transition-all cursor-pointer whitespace-nowrap text-center text-[11px] sm:text-xs">{{ 'admin.this_year' | translate }}</button>
+        <button (click)="setRange('custom')" [ngClass]="selectedRange() === 'custom' ? 'bg-blue-600 text-white shadow-xs font-bold' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'" class="flex-1 sm:flex-initial px-3 py-2 rounded-lg transition-all cursor-pointer whitespace-nowrap text-center text-[11px] sm:text-xs">{{ 'admin.custom' | translate }}</button>
+      </div>
+
+      @if (selectedRange() === 'custom') {
+        <div class="flex items-center justify-center gap-2 bg-white dark:bg-slate-900/90 p-1.5 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xs text-xs min-w-0 w-full xl:w-auto">
+          <input type="date" [ngModel]="customFrom()" (ngModelChange)="setCustomFrom($event)" class="bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-2 py-1 outline-none text-xs flex-1">
+          <span class="text-slate-400 font-bold shrink-0">{{ 'admin.to' | translate }}</span>
+          <input type="date" [ngModel]="customTo()" (ngModelChange)="setCustomTo($event)" class="bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-2 py-1 outline-none text-xs flex-1">
+        </div>
+      }
+
+      <!-- Unified Export & Refresh Action Cluster -->
+      <div class="flex items-center gap-2 w-full xl:w-auto min-w-0">
+        <button (click)="refreshAllData()" [disabled]="isLoading()" class="flex-1 xl:flex-none bg-slate-800 dark:bg-slate-800 hover:bg-slate-900 dark:hover:bg-slate-700 active:scale-95 text-white text-xs font-medium px-3 py-2 rounded-xl border border-slate-700 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 min-h-[38px]">
+          <svg class="w-4 h-4 shrink-0" [class.animate-spin]="isLoading()" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span>{{ 'admin.refresh' | translate }}</span>
+        </button>
+
+        <button (click)="exportCSV()" class="flex-1 xl:flex-none bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 active:scale-95 text-white text-xs font-medium px-3.5 py-2 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1 cursor-pointer min-h-[38px]">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span>{{ 'action.export_csv' | translate }}</span>
+        </button>
+
+        <button (click)="exportPDF()" class="flex-1 xl:flex-none bg-slate-700 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-medium px-3.5 py-2 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1 cursor-pointer min-h-[38px]">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          <span>{{ 'admin.print' | translate }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Responsive Tab Grid Container -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-8 print:hidden bg-white dark:bg-slate-900/60 border border-gray-200 dark:border-slate-800 p-1.5 rounded-2xl shadow-xs w-full min-w-0 box-border" role="tablist">
+    <button (click)="switchTab('financial')" 
+      [class.bg-blue-600]="activeTab() === 'financial'" 
+      [class.text-white]="activeTab() === 'financial'"
+      [class.shadow-md]="activeTab() === 'financial'"
+      [class.bg-white]="activeTab() !== 'financial'"
+      [class.dark:bg-slate-900]="activeTab() !== 'financial'"
+      [class.text-slate-700]="activeTab() !== 'financial'"
+      [class.dark:text-slate-300]="activeTab() !== 'financial'"
+      class="py-2.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-medium transition-colors duration-200 flex items-center justify-center gap-1.5 cursor-pointer min-h-[42px] text-center leading-tight">
+      <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span>{{ 'admin.financial_overview' | translate }}</span>
+    </button>
+    <button (click)="switchTab('products')"
+      [class.bg-blue-600]="activeTab() === 'products'" 
+      [class.text-white]="activeTab() === 'products'"
+      [class.shadow-md]="activeTab() === 'products'"
+      [class.bg-white]="activeTab() !== 'products'"
+      [class.dark:bg-slate-900]="activeTab() !== 'products'"
+      [class.text-slate-700]="activeTab() !== 'products'"
+      [class.dark:text-slate-300]="activeTab() !== 'products'"
+      class="py-2.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-medium transition-colors duration-200 flex items-center justify-center gap-1.5 cursor-pointer min-h-[42px] text-center leading-tight">
+      <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+      <span>{{ 'admin.product_performance' | translate }}</span>
+    </button>
+    <button (click)="switchTab('transactions')"
+      [class.bg-blue-600]="activeTab() === 'transactions'" 
+      [class.text-white]="activeTab() === 'transactions'"
+      [class.shadow-md]="activeTab() === 'transactions'"
+      [class.bg-white]="activeTab() !== 'transactions'"
+      [class.dark:bg-slate-900]="activeTab() !== 'transactions'"
+      [class.text-slate-700]="activeTab() !== 'transactions'"
+      [class.dark:text-slate-300]="activeTab() !== 'transactions'"
+      class="py-2.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-medium transition-colors duration-200 flex items-center justify-center gap-1.5 cursor-pointer min-h-[42px] text-center leading-tight">
+      <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <span>{{ 'admin.audit_log_tab' | translate }}</span>
+    </button>
+    <button (click)="switchTab('sentiment')"
+      [class.bg-blue-600]="activeTab() === 'sentiment'" 
+      [class.text-white]="activeTab() === 'sentiment'"
+      [class.shadow-md]="activeTab() === 'sentiment'"
+      [class.bg-white]="activeTab() !== 'sentiment'"
+      [class.dark:bg-slate-900]="activeTab() !== 'sentiment'"
+      [class.text-slate-700]="activeTab() !== 'sentiment'"
+      [class.dark:text-slate-300]="activeTab() !== 'sentiment'"
+      class="py-2.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-medium transition-colors duration-200 flex items-center justify-center gap-1.5 cursor-pointer min-h-[42px] text-center leading-tight">
+      <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+      <span>{{ 'admin.customer_sentiment' | translate }}</span>
+    </button>
+  </div>
+
+  <!-- ── TAB 1: FINANCIAL OVERVIEW ── -->
+  @if (activeTab() === 'financial') {
+    <div role="tabpanel" class="space-y-8 w-full min-w-0 min-h-[600px]">
+      
+      <!-- Financial KPIs Cards Fluid Grid -->
+      <div class="fluid-grid w-full min-w-0">
+        
+        <!-- Card 1: Gross Sales -->
+        <div class="bg-white dark:bg-slate-900/90 border border-gray-200/80 dark:border-slate-800/80 rounded-xl p-5 shadow-lg border-l-4 border-l-blue-600 space-y-2 transition-colors duration-200 min-w-0">
+          <div class="flex items-center justify-between min-w-0">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">{{ 'admin.gross_sales' | translate }}</span>
+            <div class="p-2.5 bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-lg shrink-0"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+          </div>
+          <h3 #kpiValue [attr.data-target]="kpis()?.grossRevenue || 0" data-prefix="EGP " class="font-semibold text-slate-900 dark:text-white truncate" style="font-size: var(--text-2xl)">
+            EGP {{ (kpis()?.grossRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+          </h3>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 pt-1 border-t border-gray-100 dark:border-slate-800 min-w-0">
+            <span class="truncate shrink-0 me-2">{{ 'admin.before_discounts' | translate }}</span>
+            <span class="text-blue-600 dark:text-blue-400 font-bold shrink-0 ms-auto">{{ kpis()?.approvedOrderCount || 0 }} {{ 'admin.orders_count' | translate }}</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Total Discounts Applied -->
+        <div class="bg-white dark:bg-slate-900/90 border border-gray-200/80 dark:border-slate-800/80 rounded-xl p-5 shadow-lg border-l-4 border-l-indigo-500 space-y-2 transition-colors duration-200 min-w-0">
+          <div class="flex items-center justify-between min-w-0">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">{{ 'admin.total_discounts' | translate }}</span>
+            <div class="p-2.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-lg shrink-0"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg></div>
+          </div>
+          <h3 #kpiValue [attr.data-target]="kpis()?.totalDiscounts || 0" data-prefix="EGP " class="font-semibold text-indigo-900 dark:text-indigo-300 truncate" style="font-size: var(--text-2xl)">
+            EGP {{ (kpis()?.totalDiscounts || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+          </h3>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 pt-1 border-t border-gray-100 dark:border-slate-800 min-w-0">
+            <span class="truncate shrink-0 me-2">{{ 'admin.product_savings' | translate }}</span>
+            <span class="text-indigo-600 dark:text-indigo-400 font-bold shrink-0 ms-auto">{{ 'admin.promotional' | translate }}</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Net Revenue -->
+        <div class="bg-white dark:bg-slate-900/90 border border-gray-200/80 dark:border-slate-800/80 rounded-xl p-5 shadow-lg border-l-4 border-l-emerald-600 space-y-2 transition-colors duration-200 min-w-0">
+          <div class="flex items-center justify-between min-w-0">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">{{ 'admin.net_revenue' | translate }}</span>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <div class="p-2.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 rounded-lg"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg></div>
+            </div>
+          </div>
+          <h3 #kpiValue [attr.data-target]="kpis()?.netRevenue || 0" data-prefix="EGP " class="font-semibold text-slate-900 dark:text-white truncate" style="font-size: var(--text-2xl)">
+            EGP {{ (kpis()?.netRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+          </h3>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 pt-1 border-t border-gray-100 dark:border-slate-800 min-w-0">
+            <span class="truncate shrink-0 me-2">{{ 'admin.net_profit_base' | translate }}</span>
+            <span class="text-emerald-700 dark:text-emerald-400 font-bold shrink-0 ms-auto">{{ 'admin.gross_minus_disc' | translate }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Revenue Trend Line Chart -->
+      <div class="bg-white dark:bg-slate-900/90 border border-gray-200/80 dark:border-slate-800/80 rounded-xl p-6 shadow-lg transition-colors space-y-4 w-full min-w-0">
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider" style="font-size: var(--text-sm)">{{ 'admin.revenue_trend' | translate }}</h3>
+        <div class="fluid-chart-wrapper">
+          <canvas #revenueCanvas></canvas>
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- ── TAB 2: PRODUCT PERFORMANCE ── -->
+  @if (activeTab() === 'products') {
+    <div role="tabpanel" class="space-y-8 w-full min-w-0 min-h-[600px]">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full min-w-0">
+        <div class="bg-white dark:bg-slate-900/90 border border-gray-200/80 dark:border-slate-800/80 rounded-xl p-6 shadow-lg transition-colors space-y-4 min-w-0">
+          <h3 class="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider" style="font-size: var(--text-sm)">{{ 'admin.top_sellers' | translate }}</h3>
+          <div class="divide-y divide-gray-100 dark:divide-slate-800">
+            @for (prod of topProducts(); track prod._id) {
+              <div class="py-3 flex items-center justify-between gap-3 text-xs min-w-0">
+                <div class="flex items-center gap-3 min-w-0">
+                  <img [src]="prod.imgURL && prod.imgURL.startsWith('http') ? prod.imgURL : staticURL + prod.imgURL" [alt]="prod | localizeField:'name'" class="w-10 h-10 object-cover rounded-lg border border-gray-200 dark:border-slate-800 shrink-0">
+                  <div class="min-w-0">
+                    <h4 class="font-bold text-slate-900 dark:text-white truncate">{{ prod | localizeField:'name' }}</h4>
+                    <span class="text-slate-500 dark:text-slate-400 text-[11px] truncate block">{{ 'admin.units_sold' | translate }}: {{ prod.totalQuantitySold }}</span>
+                  </div>
+                </div>
+                <span class="font-bold text-slate-900 dark:text-white shrink-0">EGP {{ prod.totalRevenue.toFixed(2) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900/90 border border-gray-200/80 dark:border-slate-800/80 rounded-xl p-6 shadow-lg transition-colors space-y-4 min-w-0">
+          <h3 class="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-wider" style="font-size: var(--text-sm)">{{ 'admin.category_share' | translate }}</h3>
+          <div class="fluid-chart-wrapper">
+            <canvas #categoryCanvas [class.cursor-pointer]="isCategoryHovered()"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ── TAB 3: AUDIT LOG (TRANSACTIONS) ── -->
+  @if (activeTab() === 'transactions') {
+    <div role="tabpanel" class="space-y-6 w-full min-w-0 min-h-[600px]">
+      
+      <!-- Funnel Metrics -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div (click)="setAuditFilter('approved')" class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800/50 shadow-xs cursor-pointer hover:border-emerald-500 transition-all">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ 'admin.approved' | translate }}</span>
+          <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{{ funnelMetrics().approved }}</p>
+        </div>
+        <div (click)="setAuditFilter('pending')" class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-amber-200 dark:border-amber-800/50 shadow-xs cursor-pointer hover:border-amber-500 transition-all">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ 'admin.pending' | translate }}</span>
+          <p class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">{{ funnelMetrics().pending }}</p>
+        </div>
+        <div (click)="setAuditFilter('cancelled')" class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-rose-200 dark:border-rose-800/50 shadow-xs cursor-pointer hover:border-rose-500 transition-all">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ 'admin.cancelled' | translate }}</span>
+          <p class="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">{{ funnelMetrics().cancelled }}</p>
+        </div>
+        <div (click)="setAuditFilter('returned')" class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-indigo-200 dark:border-indigo-800/50 shadow-xs cursor-pointer hover:border-indigo-500 transition-all">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ 'admin.returned' | translate }}</span>
+          <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{{ funnelMetrics().returned }}</p>
+        </div>
+      </div>
+
+      @if (auditOrders().length > 0) {
+        <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center flex-wrap gap-4">
+            <h3 class="font-semibold text-slate-900 dark:text-white text-sm">{{ 'admin.audit_log' | translate }} ({{ auditTotalCount() }})</h3>
+            <div class="flex items-center gap-2">
+              <button (click)="setAuditFilter('all')" [class.bg-blue-600]="auditStatusFilter() === 'all'" [class.text-white]="auditStatusFilter() === 'all'" class="px-2.5 py-1 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer">{{ 'admin.all_status' | translate }}</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left rtl:text-right text-xs">
+              <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                <tr>
+                  <th class="px-6 py-3.5">{{ 'admin.order_id' | translate }}</th>
+                  <th class="px-6 py-3.5">{{ 'admin.customer' | translate }}</th>
+                  <th class="px-6 py-3.5">{{ 'admin.date' | translate }}</th>
+                  <th class="px-6 py-3.5">{{ 'admin.total' | translate }}</th>
+                  <th class="px-6 py-3.5">{{ 'admin.status' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-slate-800 font-medium text-slate-700 dark:text-slate-300">
+                @for (ord of auditOrders(); track ord._id) {
+                  <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                    <td class="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">#{{ ord._id.substring(ord._id.length - 8) }}</td>
+                    <td class="px-6 py-4">
+                      <div class="font-bold text-slate-900 dark:text-white">{{ ord.shippingAddress?.title || ord.user?.name || 'N/A' }}</div>
+                      <div class="text-[11px] text-slate-400">{{ ord.shippingAddress?.phoneNumber || '' }}</div>
+                    </td>
+                    <td class="px-6 py-4 text-slate-500">{{ ord.createdAt | date:'short':'':_langService.currentLang() }}</td>
+                    <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">EGP {{ ord.totalPrice }}</td>
+                    <td class="px-6 py-4">
+                      <span class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase border"
+                        [ngClass]="{
+                          'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800': ord.orderStatus === 'Approved' || ord.orderStatus === 'Delivered',
+                          'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-800': ord.orderStatus === 'Pending',
+                          'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-400 dark:border-rose-800': ord.orderStatus === 'Cancelled'
+                        }">
+                        {{ ord.orderStatus }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (auditTotalPages() > 1) {
+            <div class="p-4 border-t border-gray-100 dark:border-slate-800 flex justify-between items-center text-xs">
+              <span class="text-slate-500 font-medium">Page {{ auditPage() }} of {{ auditTotalPages() }}</span>
+              <div class="flex gap-2">
+                <button (click)="changeAuditPage(auditPage() - 1)" [disabled]="auditPage() === 1" class="px-3 py-1.5 rounded-lg border bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium disabled:opacity-40 cursor-pointer">Prev</button>
+                <button (click)="changeAuditPage(auditPage() + 1)" [disabled]="auditPage() === auditTotalPages()" class="px-3 py-1.5 rounded-lg border bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium disabled:opacity-40 cursor-pointer">Next</button>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- Empty State for Audit Log -->
+        <div class="flex flex-col items-center justify-center py-20 px-4 text-center bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs">
+          <div class="bg-slate-100 dark:bg-slate-800/50 p-6 rounded-full mb-6 text-slate-400 dark:text-slate-500">
+            <svg class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-3">{{ 'admin.audit_empty_title' | translate }}</h2>
+          <p class="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-8 font-medium">{{ 'admin.audit_empty_desc' | translate }}</p>
+          <button (click)="setRange('year')" class="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium py-3 px-8 rounded-xl shadow-lg shadow-blue-600/30 transition-all transform hover:scale-105 cursor-pointer">
+            {{ 'admin.view_all_logs' | translate }}
+          </button>
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- ── TAB 4: CUSTOMER SENTIMENT ── -->
+  @if (activeTab() === 'sentiment') {
+    <div role="tabpanel" class="space-y-6 w-full min-w-0 min-h-[600px]">
+      @if (reviewSentiment() && (reviewSentiment()?.totalAllReviews || 0) > 0) {
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-gray-200/80 dark:border-slate-800 shadow-xs text-center flex flex-col justify-center items-center">
+            <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ 'admin.rating' | translate }}</span>
+            <div class="text-5xl font-bold text-amber-500 my-2 flex items-center justify-center gap-2">
+              <span>{{ reviewSentiment()?.averageRating || '0.0' }}</span>
+              <span class="text-3xl">&#9733;</span>
+            </div>
+            <p class="text-xs text-slate-400 font-semibold">{{ reviewSentiment()?.totalAllReviews }} {{ 'admin.total_reviews' | translate }}</p>
+          </div>
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-gray-200/80 dark:border-slate-800 shadow-xs md:col-span-2 space-y-4">
+            <h3 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Rating Distribution</h3>
+            <div class="fluid-chart-wrapper">
+              <canvas #starCanvas></canvas>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- Empty State for Sentiment -->
+        <div class="flex flex-col items-center justify-center py-20 px-4 text-center bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs">
+          <div class="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-full mb-6 text-indigo-400 dark:text-indigo-500">
+            <svg class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-semibold text-slate-900 dark:text-white mb-3">{{ 'admin.sentiment_empty_title' | translate }}</h2>
+          <p class="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-8 font-medium">{{ 'admin.sentiment_empty_desc' | translate }}</p>
+          <button (click)="setRange('year')" class="bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-medium py-3 px-8 rounded-xl shadow-lg shadow-indigo-600/30 transition-all transform hover:scale-105 cursor-pointer">
+            {{ 'admin.expand_date_range' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+</div>

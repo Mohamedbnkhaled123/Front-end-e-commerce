@@ -1,105 +1,601 @@
-<div class="bg-slate-50 min-h-screen py-8">
+<!-- ===== ADMIN CMS VISUAL BUILDER ===== -->
+<div class="bg-slate-50 dark:bg-slate-950 min-h-screen py-8 transition-colors duration-200">
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    <!-- Header -->
+    <!-- Page Header -->
     <div class="mb-6">
-      <h1 class="text-2xl font-extrabold text-slate-900">CMS Pages Management</h1>
-      <p class="text-xs text-slate-500 mt-1">Configure user-facing static pages — About, Policy, FAQ, and Contact.</p>
+      <h1 class="text-2xl font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        {{ 'admin.cms' | translate }}
+      </h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Visually edit each public page. Changes are saved as structured content to the backend.</p>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-
-      <!-- Tab Bar -->
-      <div class="border-b border-gray-200 bg-gray-50 flex items-end">
-        <div class="flex overflow-x-auto px-4">
-          @for (page of pages; track page) {
-            <button
-              (click)="selectTab(page)"
-              [class]="activeTab === page
-                ? 'border-b-2 border-orange-500 text-slate-900 font-bold px-6 py-4 text-sm focus:outline-none capitalize transition-colors'
-                : 'border-b-2 border-transparent text-slate-500 hover:text-slate-800 px-6 py-4 text-sm focus:outline-none capitalize transition-colors'">
-              {{ page }}
-            </button>
-          }
-        </div>
+        <!-- Language Switcher & Defaults Action Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div class="flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-1.5 shadow-sm">
+        <button (click)="setLang('en')" [class.bg-blue-600]="activeLang === 'en'" [class.text-white]="activeLang === 'en'" [class.text-slate-600]="activeLang !== 'en'" [class.dark:text-slate-300]="activeLang !== 'en'" class="px-4 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer">
+          English
+        </button>
+        <button (click)="setLang('ar')" [class.bg-blue-600]="activeLang === 'ar'" [class.text-white]="activeLang === 'ar'" [class.text-slate-600]="activeLang !== 'ar'" [class.dark:text-slate-300]="activeLang !== 'ar'" class="px-4 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer">
+          العربية (Arabic)
+        </button>
       </div>
 
-      <!-- Loading State -->
-      @if (isLoading) {
-        <div class="p-6 flex items-center gap-3 text-slate-500 text-sm">
-          <svg class="animate-spin h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-          </svg>
-          Loading {{ activeTab }} page content...
-        </div>
+      <button (click)="resetToDefaults()"
+        class="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-700/50 px-3.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shadow-2xs">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        تحميل النصوص الافتراضية الثنائية (Load Defaults)
+      </button>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="bg-white dark:bg-slate-900/60 border border-gray-200 dark:border-slate-800 rounded-2xl p-1.5 mb-6 flex gap-1 shadow-xs">
+      @for (page of pages; track page) {
+        <button
+          (click)="selectTab(page)"
+          class="flex-1 py-2.5 px-3 rounded-xl text-xs font-medium transition-colors duration-200 flex items-center justify-center gap-1.5 cursor-pointer min-h-[40px]"
+          [class.bg-blue-600]="activeTab === page"
+          [class.text-white]="activeTab === page"
+          [class.bg-slate-100]="activeTab !== page"
+          [class.dark:bg-slate-800]="activeTab !== page"
+          [class.text-slate-600]="activeTab !== page"
+          [class.dark:text-slate-300]="activeTab !== page">
+          {{ page }}
+        </button>
       }
+    </div>
 
-      <!-- Editor -->
-      @if (!isLoading) {
-        <div class="p-6">
-          <div>
+    <!-- Alerts -->
+    @if (successMsg) {
+      <div class="mb-4 flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-sm font-medium px-4 py-3 rounded-xl">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        {{ successMsg }}
+      </div>
+    }
+    @if (errorMsg) {
+      <div class="mb-4 flex items-center gap-2 bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-sm font-medium px-4 py-3 rounded-xl">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        {{ errorMsg }}
+      </div>
+    }
 
-            <!-- Success Alert -->
-            @if (successMsg) {
-              <div class="mb-4 flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium px-4 py-3 rounded-md animate-fade-in">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                {{ successMsg }}
+    <!-- Loading Spinner -->
+    @if (isLoading) {
+      <div class="py-12 flex flex-col items-center justify-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+        <span class="text-xs text-slate-500 font-medium">Loading CMS data...</span>
+      </div>
+    } @else {
+
+      <!-- ─── HOME PAGE EDITOR ────────────────────────────────────────────── -->
+      @if (activeTab === 'Home') {
+        <div class="space-y-6">
+          <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl p-5 md:p-6 shadow-xs">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">Hero Section Content</h3>
+                <p class="text-xs text-slate-500 mt-1">Configure the main banner on the homepage.</p>
               </div>
-            }
-
-            <!-- Error Alert -->
-            @if (errorMsg) {
-              <div class="mb-4 flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm font-medium px-4 py-3 rounded-md animate-fade-in">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                {{ errorMsg }}
-              </div>
-            }
-
-            <!-- Textarea -->
-            <div>
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                {{ activeTab }} Page Content
-              </label>
-              <textarea
-                [value]="currentContent"
-                (input)="currentContent = $any($event.target).value"
-                rows="16"
-                [placeholder]="'Write the content for the ' + activeTab + ' page here...'"
-                class="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-[#FF9900] focus:border-[#FF9900] outline-none shadow-sm transition-shadow resize-y font-mono">
-              </textarea>
-              <p class="text-xs text-slate-400 mt-1">{{ currentContent.length }} characters</p>
             </div>
 
-            <!-- Footer Actions -->
-            <div class="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
-              <span class="text-xs text-slate-400">
-                Editing: <span class="font-semibold text-slate-600">{{ activeTab }}</span> page
-              </span>
-              <button
-                (click)="saveContent()"
-                [disabled]="isSaving"
-                class="bg-[#FF9900] hover:bg-[#DF8300] disabled:opacity-60 disabled:cursor-not-allowed text-white border border-[#E68A00] rounded-lg px-6 py-2.5 text-sm font-bold shadow-sm transition-all flex items-center gap-2">
-                @if (isSaving) {
-                  <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                  </svg>
-                  Saving...
+            <div class="space-y-6">
+              <!-- Hero Title -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Hero Title ({{ activeLang === 'en' ? 'English' : 'Arabic' }})</label>
+                @if (activeLang === 'en') {
+                  <input type="text" 
+                         [(ngModel)]="homeData.heroTitle.en" 
+                         class="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all outline-none">
                 } @else {
-                  Save Updates
+                  <input type="text" 
+                         [(ngModel)]="homeData.heroTitle.ar" 
+                         class="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all outline-none">
                 }
-              </button>
-            </div>
+              </div>
 
+              <!-- Hero Subtitle -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Hero Subtitle ({{ activeLang === 'en' ? 'English' : 'Arabic' }})</label>
+                @if (activeLang === 'en') {
+                  <textarea rows="3" 
+                            [(ngModel)]="homeData.heroSubtitle.en" 
+                            class="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all outline-none resize-y"></textarea>
+                } @else {
+                  <textarea rows="3" 
+                            [(ngModel)]="homeData.heroSubtitle.ar" 
+                            class="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all outline-none resize-y"></textarea>
+                }
+              </div>
+
+              <!-- Hero Image Manager -->
+              <div class="border-t border-gray-200 dark:border-slate-800 pt-6 mt-6">
+                <div class="flex items-center justify-between mb-3">
+                  <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Hero Banner Image
+                  </label>
+                  
+                  <!-- Mode Switcher -->
+                  <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-lg border border-gray-200 dark:border-slate-800 text-xs">
+                    <button type="button" (click)="setHeroMode('file')"
+                            [class.bg-blue-600]="heroImageMode === 'file'"
+                            [class.text-white]="heroImageMode === 'file'"
+                            [class.text-slate-600]="heroImageMode !== 'file'"
+                            [class.dark:text-slate-400]="heroImageMode !== 'file'"
+                            class="px-3 py-1 rounded-md font-medium transition-all cursor-pointer">
+                      📁 Direct File Upload
+                    </button>
+                    <button type="button" (click)="setHeroMode('url')"
+                            [class.bg-blue-600]="heroImageMode === 'url'"
+                            [class.text-white]="heroImageMode === 'url'"
+                            [class.text-slate-600]="heroImageMode !== 'url'"
+                            [class.dark:text-slate-400]="heroImageMode !== 'url'"
+                            class="px-3 py-1 rounded-md font-medium transition-all cursor-pointer">
+                      🔗 Image URL
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Mode 1: File Upload Dropzone -->
+                @if (heroImageMode === 'file') {
+                  <div class="space-y-3">
+                    <div 
+                      (dragover)="onDragOver($event)"
+                      (dragleave)="onDragLeave($event)"
+                      (drop)="onFileDrop($event)"
+                      [class.border-blue-500]="heroUploadState === 'dragging'"
+                      [class.bg-blue-50/50]="heroUploadState === 'dragging'"
+                      [class.dark:bg-blue-950/20]="heroUploadState === 'dragging'"
+                      class="border-2 border-dashed border-gray-300 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500 rounded-2xl p-6 text-center bg-slate-50/50 dark:bg-slate-950/50 transition-all group relative cursor-pointer">
+                      
+                      <input type="file" (change)="onFileSelected($event)" accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+
+                      <div class="flex flex-col items-center justify-center space-y-2 pointer-events-none">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        </div>
+                        <div class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                          Click to browse or drag & drop image
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                          Supports JPG, PNG, WebP, SVG (Max 5MB). Re-encoded losslessly for maximum security.
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Upload State Feedback -->
+                    @if (heroUploadState === 'validating' || heroUploadState === 'sanitizing') {
+                      <div class="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 rounded-xl flex items-center gap-3 text-xs font-medium text-blue-700 dark:text-blue-300">
+                        <div class="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                        <span>Verifying magic bytes & re-encoding image for security...</span>
+                      </div>
+                    }
+
+                    @if (heroUploadState === 'uploading') {
+                      <div class="p-4 bg-slate-100 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl space-y-2">
+                        <div class="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          <span>Uploading image to server...</span>
+                          <button (click)="cancelUpload()" type="button" class="text-rose-600 hover:underline">Cancel</button>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                          <div class="bg-blue-600 h-full transition-all duration-300" [style.width.%]="heroUploadProgress"></div>
+                        </div>
+                      </div>
+                    }
+
+                    @if (heroUploadState === 'success') {
+                      <div class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 rounded-xl flex items-center justify-between text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                        <div class="flex items-center gap-2">
+                          <svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                          <span>Image uploaded and applied successfully!</span>
+                        </div>
+                        <button (click)="clearHeroUpload()" type="button" class="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 underline">Upload Another</button>
+                      </div>
+                    }
+
+                    @if (heroUploadState === 'error') {
+                      <div class="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-xl flex items-center justify-between text-xs font-semibold text-rose-800 dark:text-rose-300">
+                        <div class="flex items-center gap-2">
+                          <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                          <span>{{ heroUploadError }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                          <button (click)="retryUpload()" type="button" class="text-blue-600 dark:text-blue-400 underline">Retry</button>
+                          <button (click)="clearHeroUpload()" type="button" class="text-slate-500 underline">Dismiss</button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <!-- Mode 2: URL Input -->
+                @if (heroImageMode === 'url') {
+                  <div>
+                    <input type="text" [(ngModel)]="homeData.heroImage" (ngModelChange)="onUrlInputChange()"
+                           placeholder="https://..."
+                           class="w-full bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all outline-none font-mono">
+                    @if (heroUploadError && heroImageMode === 'url') {
+                      <p class="mt-1.5 text-xs text-rose-600 dark:text-rose-400 font-semibold">{{ heroUploadError }}</p>
+                    }
+                  </div>
+                }
+
+                <!-- Live Preview Box -->
+                @if (homeData.heroImage) {
+                  <div class="mt-4 border border-gray-200 dark:border-slate-800 rounded-xl p-3 bg-slate-100 dark:bg-slate-900 w-full max-w-md">
+                    <div class="flex items-center justify-between mb-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                      <span>Live Banner Preview</span>
+                      <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Active</span>
+                    </div>
+                    <div class="rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-950 border border-gray-200 dark:border-slate-800">
+                      <img [src]="homeData.heroImage" alt="Hero Preview" class="w-full h-auto object-cover max-h-48">
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
           </div>
         </div>
       }
 
-    </div>
+      <!-- ═══════════════════════════ ABOUT BUILDER ═══════════════════════════ -->
+      @if (activeTab === 'About') {
+        <div class="space-y-5">
+
+          <!-- Hero Block -->
+          <div class="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-900 text-white rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-800/50">
+            <div class="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-widest">Hero Section</div>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Hero Title</label>
+                <input type="text" [(ngModel)]="aboutData.heroTitle[activeLang]"
+                  class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 rounded-lg px-3 py-2 text-xl font-bold focus:outline-none focus:border-blue-400 transition-colors">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Hero Subtitle</label>
+                <textarea [(ngModel)]="aboutData.heroSubtitle[activeLang]" (input)="autoExpand($event)" rows="2"
+                  class="w-full bg-white/10 border border-white/20 text-slate-200 placeholder-white/40 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-blue-400 resize-none transition-colors" style="field-sizing: content; overflow: hidden;"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Block -->
+          <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl shadow-xs p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-semibold text-slate-800 dark:text-white">Stats Cards</h3>
+              <button (click)="addAboutStat()" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg> Add Stat
+              </button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              @for (stat of aboutData.stats; track $index; let i = $index) {
+                <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 border border-gray-200 dark:border-slate-700 relative group">
+                  <button (click)="removeAboutStat(i)" class="absolute top-1.5 right-1.5 w-5 h-5 bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">✕</button>
+                  <input type="text" [(ngModel)]="stat.value[activeLang]"
+                    class="w-full text-center text-2xl font-bold text-blue-600 dark:text-blue-400 bg-transparent border-b border-dashed border-blue-300 dark:border-blue-700 focus:outline-none pb-1 mb-1">
+                  <input type="text" [(ngModel)]="stat.label[activeLang]"
+                    class="w-full text-center text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-transparent focus:outline-none">
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Our Story Section -->
+          <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl shadow-xs p-6">
+            <div class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-4">
+              <div class="w-0.5 h-4 bg-blue-600 dark:bg-blue-400 rounded-full"></div> Our Story Section
+            </div>
+            <input type="text" [(ngModel)]="aboutData.storyTitle[activeLang]"
+              class="w-full text-lg font-bold text-slate-900 dark:text-white bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:outline-none focus:border-blue-500 pb-1 mb-3 transition-colors">
+            <textarea [(ngModel)]="aboutData.storyBody[activeLang]" (input)="autoExpand($event)" rows="3"
+              class="w-full text-sm text-slate-600 dark:text-slate-300 font-medium bg-transparent border border-dashed border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 resize-none transition-colors" style="field-sizing: content; overflow: hidden;"></textarea>
+          </div>
+
+          <!-- Team Section -->
+          <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl shadow-xs p-6">
+            <div class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-4">
+              <div class="w-0.5 h-4 bg-blue-600 dark:bg-blue-400 rounded-full"></div> Team Section
+            </div>
+            <input type="text" [(ngModel)]="aboutData.teamTitle[activeLang]"
+              class="w-full text-lg font-bold text-slate-900 dark:text-white bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:outline-none focus:border-blue-500 pb-1 mb-3 transition-colors">
+            <textarea [(ngModel)]="aboutData.teamBody[activeLang]" (input)="autoExpand($event)" rows="3"
+              class="w-full text-sm text-slate-600 dark:text-slate-300 font-medium bg-transparent border border-dashed border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 resize-none transition-colors" style="field-sizing: content; overflow: hidden;"></textarea>
+          </div>
+
+          <!-- Mission Section -->
+          <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl shadow-xs p-6">
+            <div class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-4">
+              <div class="w-0.5 h-4 bg-blue-600 dark:bg-blue-400 rounded-full"></div> Mission Section
+            </div>
+            <input type="text" [(ngModel)]="aboutData.missionTitle[activeLang]"
+              class="w-full text-lg font-bold text-slate-900 dark:text-white bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:outline-none focus:border-blue-500 pb-1 mb-3 transition-colors">
+            <textarea [(ngModel)]="aboutData.missionBody[activeLang]" (input)="autoExpand($event)" rows="3"
+              class="w-full text-sm text-slate-600 dark:text-slate-300 font-medium bg-transparent border border-dashed border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 resize-none transition-colors" style="field-sizing: content; overflow: hidden;"></textarea>
+          </div>
+
+          <!-- Features Block -->
+          <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl shadow-xs p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-widest">
+                <div class="w-0.5 h-4 bg-blue-600 dark:bg-blue-400 rounded-full"></div> Why Choose Us — Features
+              </div>
+              <button (click)="addAboutFeature()" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg> Add Feature
+              </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              @for (feature of aboutData.features; track $index; let i = $index) {
+                <div class="bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 rounded-xl p-4 relative group">
+                  <button (click)="removeAboutFeature(i)" class="absolute top-2 right-2 w-5 h-5 bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">✕</button>
+                  <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mb-3 shadow-sm">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="feature.icon"/></svg>
+                  </div>
+                  <label class="block text-[9px] font-bold text-blue-500 uppercase tracking-widest mb-0.5">Title</label>
+                  <input type="text" [(ngModel)]="feature.title[activeLang]" class="w-full text-sm font-bold text-slate-900 dark:text-white bg-transparent border-b border-dashed border-slate-300 dark:border-slate-600 focus:outline-none mb-2">
+                  <label class="block text-[9px] font-bold text-blue-500 uppercase tracking-widest mb-0.5">Description</label>
+                  <textarea [(ngModel)]="feature.description[activeLang]" (input)="autoExpand($event)" rows="2"
+                    class="w-full text-xs text-slate-500 dark:text-slate-400 bg-transparent border border-dashed border-slate-200 dark:border-slate-700 rounded px-2 py-1 focus:outline-none resize-none" style="field-sizing: content; overflow: hidden;"></textarea>
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+      }
+
+      <!-- ════════════════════════════ FAQ BUILDER ════════════════════════════ -->
+      @if (activeTab === 'FAQ') {
+        <div class="space-y-5">
+
+          <!-- Hero Block -->
+          <div class="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-900 text-white rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-800/50">
+            <div class="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-widest">Hero Section</div>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Page Title</label>
+                <input type="text" [(ngModel)]="faqData.heroTitle[activeLang]"
+                  class="w-full bg-white/10 border border-white/20 text-white placeholder-white/40 rounded-lg px-3 py-2 text-xl font-bold focus:outline-none focus:border-blue-400 transition-colors">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Subtitle</label>
+                <textarea [(ngModel)]="faqData.heroSubtitle[activeLang]" (input)="autoExpand($event)" rows="2"
+                  class="w-full bg-white/10 border border-white/20 text-slate-200 placeholder-white/40 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-blue-400 resize-none transition-colors" style="field-sizing: content; overflow: hidden;"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Category Button -->
+          <div class="flex justify-end">
+            <button (click)="addFaqCategory()" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+              Add Category
+            </button>
+          </div>
+
+          <!-- FAQ Categories -->
+          @for (category of faqData.categories; track category.id) {
+            <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+              <!-- Category Header -->
+              <div class="flex items-center gap-3 px-5 py-4 bg-slate-50/80 dark:bg-slate-800/60 border-b border-gray-100 dark:border-slate-800">
+                <div class="w-1.5 h-5 bg-blue-600 rounded-full shrink-0"></div>
+                <input type="text" [(ngModel)]="category.title[activeLang]"
+                  class="flex-1 text-sm font-bold text-slate-900 dark:text-white bg-transparent border-b border-dashed border-slate-300 dark:border-slate-600 focus:outline-none">
+                <button (click)="toggleFaqCategory(category.id)" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer">
+                  <svg class="w-5 h-5 transition-transform duration-300" [class.rotate-180]="openFaqCategoryId === category.id" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <button (click)="removeFaqCategory(category.id)" class="w-6 h-6 bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium flex items-center justify-center hover:bg-rose-200 transition-colors cursor-pointer">✕</button>
+              </div>
+
+              @if (openFaqCategoryId === category.id) {
+                <div class="divide-y divide-gray-100 dark:divide-slate-800">
+                  @for (item of category.items; track item.id) {
+                    <div class="p-4 sm:p-5 space-y-2">
+                      <div class="flex items-start gap-3">
+                        <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-2 shrink-0 w-6">Q</span>
+                        <input type="text" [(ngModel)]="item.question[activeLang]"
+                          class="flex-1 text-sm font-bold text-slate-800 dark:text-white bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 focus:outline-none focus:border-blue-500 py-1">
+                        <button (click)="removeFaqItem(category.id, item.id)" class="w-6 h-6 bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium flex items-center justify-center hover:bg-rose-200 transition-colors cursor-pointer shrink-0 mt-0.5">✕</button>
+                      </div>
+                      <div class="flex items-start gap-3">
+                        <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-2 shrink-0 w-6">A</span>
+                        <textarea [(ngModel)]="item.answer[activeLang]" (input)="autoExpand($event)" rows="2"
+                          class="flex-1 text-sm text-slate-600 dark:text-slate-300 font-medium bg-blue-50/50 dark:bg-blue-950/10 border border-dashed border-blue-200 dark:border-blue-900/40 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 resize-none transition-colors" style="field-sizing: content; overflow: hidden;"></textarea>
+                      </div>
+                    </div>
+                  }
+                  <div class="px-5 py-3 bg-slate-50/50 dark:bg-slate-800/30">
+                    <button (click)="addFaqItem(category.id)" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                      Add Question to "{{ category.title }}"
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+        </div>
+      }
+
+      <!-- ══════════════════════════ POLICY BUILDER ═══════════════════════════ -->
+      @if (activeTab === 'Policy') {
+        <div class="space-y-5">
+
+          <!-- Hero Block -->
+          <div class="bg-gradient-to-r from-blue-950 via-slate-900 to-blue-900 text-white rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-800/50">
+            <div class="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-widest">Hero Section</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Page Title</label>
+                <input type="text" [(ngModel)]="policyData.heroTitle[activeLang]"
+                  class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-3 py-2 text-xl font-bold focus:outline-none focus:border-blue-400 transition-colors">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Effective Date</label>
+                <input type="text" [(ngModel)]="policyData.effectiveDate[activeLang]"
+                  class="w-full bg-white/10 border border-white/20 text-blue-300 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-blue-400 transition-colors">
+              </div>
+            </div>
+          </div>
+
+          <!-- Intro -->
+          <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl shadow-xs p-6">
+            <label class="block text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Introduction Paragraph</label>
+            <textarea [(ngModel)]="policyData.intro[activeLang]" (input)="autoExpand($event)" rows="3"
+              class="w-full text-sm text-slate-600 dark:text-slate-300 font-medium bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 resize-none transition-colors" style="field-sizing: content; overflow: hidden;"></textarea>
+          </div>
+
+          <!-- Sections -->
+          @for (section of policyData.sections; track section.id) {
+            <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+              <div class="flex items-center gap-3 px-5 py-4 bg-slate-50/80 dark:bg-slate-800/60 border-b border-gray-100 dark:border-slate-800">
+                <div class="w-1.5 h-5 bg-blue-600 rounded-full shrink-0"></div>
+                <input type="text" [(ngModel)]="section.title[activeLang]"
+                  class="flex-1 text-sm font-bold text-slate-900 dark:text-white bg-transparent border-b border-dashed border-slate-300 dark:border-slate-600 focus:outline-none">
+                <button (click)="removePolicySection(section.id)" class="w-6 h-6 bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 rounded-full text-xs font-medium flex items-center justify-center hover:bg-rose-200 transition-colors cursor-pointer">✕</button>
+              </div>
+              <div class="p-5">
+                <textarea [(ngModel)]="section.body[activeLang]" (input)="autoExpand($event)" rows="3"
+                  class="w-full text-sm text-slate-600 dark:text-slate-300 font-medium bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 resize-none transition-colors" style="field-sizing: content; overflow: hidden;"></textarea>
+              </div>
+            </div>
+          }
+
+          <div class="flex justify-center">
+            <button (click)="addPolicySection()" class="inline-flex items-center gap-2 border-2 border-dashed border-blue-300 dark:border-blue-800 text-blue-600 dark:text-blue-400 text-xs font-medium px-6 py-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+              Add New Section
+            </button>
+          </div>
+
+        </div>
+      }
+
+      <!-- ═════════════════════════ CONTACT BUILDER ═══════════════════════════ -->
+      @if (activeTab === 'Contact') {
+        <div class="space-y-5">
+
+          <!-- Hero Block (Preview Style) -->
+          <div class="bg-gradient-to-br from-blue-950 via-slate-900 to-blue-900 text-white rounded-2xl shadow-xl p-6 sm:p-8 border border-blue-800/50">
+            <div class="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-widest">Info Card Preview</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Hero Title</label>
+                <input type="text" [(ngModel)]="contactData.heroTitle[activeLang]"
+                  class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-3 py-2 text-xl font-bold focus:outline-none focus:border-blue-400">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Subtitle</label>
+                <textarea [(ngModel)]="contactData.heroSubtitle[activeLang]" (input)="autoExpand($event)" rows="2"
+                  class="w-full bg-white/10 border border-white/20 text-slate-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-blue-400 resize-none" style="field-sizing: content; overflow: hidden;"></textarea>
+              </div>
+            </div>
+
+            <!-- Contact Details Inline -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-white/10 pt-5">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-blue-500/20 border border-blue-400/30 rounded-lg flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">Email</label>
+                  <input type="text" [(ngModel)]="contactData.email" class="w-full bg-white/10 border-b border-white/20 text-slate-200 text-sm font-medium focus:outline-none px-1 py-0.5">
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-blue-500/20 border border-blue-400/30 rounded-lg flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">Phone</label>
+                  <input type="text" [(ngModel)]="contactData.phone" class="w-full bg-white/10 border-b border-white/20 text-slate-200 text-sm font-medium focus:outline-none px-1 py-0.5">
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-blue-500/20 border border-blue-400/30 rounded-lg flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">Address</label>
+                  <input type="text" [(ngModel)]="contactData.address[activeLang]" class="w-full bg-white/10 border-b border-white/20 text-slate-200 text-sm font-medium focus:outline-none px-1 py-0.5">
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-blue-500/20 border border-blue-400/30 rounded-lg flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-0.5">Working Hours</label>
+                  <input type="text" [(ngModel)]="contactData.workingHours[activeLang]" class="w-full bg-white/10 border-b border-white/20 text-slate-200 text-sm font-medium focus:outline-none px-1 py-0.5">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Map Note -->
+          <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl shadow-xs p-6">
+            <label class="block text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-2">Location Note (shown below address)</label>
+            <textarea [(ngModel)]="contactData.mapEmbedNote[activeLang]" (input)="autoExpand($event)" rows="2"
+              class="w-full text-sm text-slate-600 dark:text-slate-300 font-medium bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 resize-none transition-colors" style="field-sizing: content; overflow: hidden;"></textarea>
+          </div>
+
+        </div>
+      }
+
+      <!-- Save Button (Sticky Footer) -->
+      <div class="mt-8 pt-5 border-t border-gray-200 dark:border-slate-800 flex items-center justify-between">
+        <span class="text-xs text-slate-400 dark:text-slate-500">
+          Editing: <span class="font-semibold text-slate-600 dark:text-slate-200">{{ activeTab }}</span> page
+        </span>
+        <button
+          (click)="saveContent()"
+          [disabled]="isSaving"
+          class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl px-8 py-3 text-sm font-medium shadow-xs transition-colors duration-200 flex items-center gap-2 cursor-pointer min-h-[44px]">
+          @if (isSaving) {
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            Saving...
+          } @else {
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            {{ 'action.save' | translate }} Changes
+          }
+        </button>
+      </div>
+
+    }
+
   </div>
 </div>
+
+<!-- Save Confirmation Modal -->
+@if (showConfirmModal) {
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+    <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center gap-3 text-blue-600 dark:text-blue-400">
+        <div class="p-2.5 bg-blue-50 dark:bg-blue-950/60 rounded-xl">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Save Changes to {{ activeTab }}?</h3>
+      </div>
+      
+      <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+        Are you sure you want to update the live store content for the <strong class="text-blue-600 dark:text-blue-400">{{ activeTab }}</strong> page? This will immediately reflect on the public website.
+      </p>
+
+      <div class="flex items-center justify-end gap-3 pt-3 border-t border-gray-100 dark:border-slate-800">
+        <button
+          (click)="cancelSave()"
+          class="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer min-h-[40px]">
+          Cancel
+        </button>
+        <button
+          (click)="confirmSave()"
+          class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-xl text-xs font-medium shadow-xs transition-colors cursor-pointer min-h-[40px] flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          Confirm & Save
+        </button>
+      </div>
+    </div>
+  </div>
+}
+

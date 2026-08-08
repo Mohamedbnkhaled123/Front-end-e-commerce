@@ -1,0 +1,69 @@
+<div class="border border-gray-300 dark:border-slate-700 rounded-lg overflow-hidden bg-white dark:bg-slate-900 shadow-sm focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 transition-colors">
+  
+  <!-- Toolbar -->
+  <div class="bg-slate-100 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 p-2 flex flex-wrap items-center gap-1 text-slate-700 dark:text-slate-200">
+    
+    <!-- Bold -->
+    <button type="button" (click)="exec('bold')" title="Bold" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 font-medium text-xs cursor-pointer">
+      <strong>B</strong>
+    </button>
+
+    <!-- Italic -->
+    <button type="button" (click)="exec('italic')" title="Italic" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 italic text-xs font-serif cursor-pointer">
+      I
+    </button>
+
+    <!-- Underline -->
+    <button type="button" (click)="exec('underline')" title="Underline" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 underline text-xs cursor-pointer">
+      U
+    </button>
+
+    <span class="h-4 w-px bg-gray-300 dark:bg-slate-600 mx-1"></span>
+
+    <!-- Heading 2 -->
+    <button type="button" (click)="insertHeading()" title="Heading 2" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 font-medium text-xs cursor-pointer">
+      H2
+    </button>
+
+    <!-- Blockquote -->
+    <button type="button" (click)="insertBlockquote()" title="Quote" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 font-serif text-xs cursor-pointer">
+      " "
+    </button>
+
+    <span class="h-4 w-px bg-gray-300 dark:bg-slate-600 mx-1"></span>
+
+    <!-- Unordered List -->
+    <button type="button" (click)="exec('insertUnorderedList')" title="Bullet List" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+
+    <!-- Ordered List -->
+    <button type="button" (click)="exec('insertOrderedList')" title="Numbered List" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 font-medium text-xs cursor-pointer">
+      1.
+    </button>
+
+    <span class="h-4 w-px bg-gray-300 dark:bg-slate-600 mx-1"></span>
+
+    <!-- Hyperlink -->
+    <button type="button" (click)="promptLink()" title="Add Link" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+    </button>
+
+    <!-- Clear Formatting -->
+    <button type="button" (click)="exec('removeFormat')" title="Clear Formatting" class="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-rose-500 dark:text-rose-400 text-xs font-medium cursor-pointer ml-auto">
+      Clear
+    </button>
+
+  </div>
+
+  <!-- Editable Content Area -->
+  <div 
+    #editorArea 
+    contenteditable="true" 
+    (input)="onContentInput()" 
+    (blur)="onBlur()" 
+    [style.min-height]="minHeight"
+    class="p-4 outline-none prose dark:prose-invert max-w-none text-sm text-slate-800 dark:text-slate-100 leading-relaxed font-sans cursor-text bg-white dark:bg-slate-900 transition-colors">
+  </div>
+
+</div>

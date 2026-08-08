@@ -1,88 +1,63 @@
 import { Routes } from '@angular/router';
-import { Frontend } from './frontend/frontend';
-import { Dashboard } from './dashboard/dashboard';
 
-// Storefront Components
-import { Home } from './frontend/home/home.component';
-import { Products } from './frontend/products/products.component';
-import { ProductDetails } from './frontend/product-details/product-details.component';
-import { Login } from './frontend/login/login.component';
-import { Signup } from './frontend/signup/signup.component';
-import { Account } from './frontend/account/account.component';
-import { Cart } from './frontend/cart/cart.component';
-import { Checkout } from './frontend/checkout/checkout.component';
-import { MyOrders } from './frontend/my-orders/my-orders.component';
-import { About } from './frontend/about/about.component';
-import { Policy } from './frontend/policy/policy.component';
-import { Faq } from './frontend/faq/faq.component';
-import { Contact } from './frontend/contact/contact.component';
-
-// Admin / Dashboard Components
-import { DashboardLogin } from './dashboard/dashboard-login/dashboard-login.component';
-import { Home as AdminHome } from './dashboard/home/home.component';
-import { UsersList } from './dashboard/users-list/users-list.component';
-import { AddUser } from './dashboard/users-list/add-user/add-user.component';
-import { AdminOrders } from './dashboard/admin-orders/admin-orders.component';
-import { AdminCms } from './dashboard/admin-cms/admin-cms.component';
-import { AdminReviews } from './dashboard/admin-reviews/admin-reviews.component';
-import { AdminProducts } from './dashboard/admin-products/admin-products.component';
-import { AddProduct } from './dashboard/admin-products/add-product/add-product.component';
-import { EditProduct } from './dashboard/admin-products/edit-product/edit-product.component';
-
-// Shared Components
-import { NotFound } from './shared/not-found/not-found.component';
-
-// Guards & Resolvers
+// Guards & Resolvers only (these are tiny, always needed)
 import { adminGuard } from './core/guards/admin-guard';
+import { dashboardLoginGuard } from './core/guards/dashboard-login-guard';
 import { mathuserGuard } from './core/guards/mathuser-guard';
 import { deactivateGuard } from './core/guards/deactivate-guard';
 import { authGuard } from './core/guards/auth-guard';
+import { superadminSetupGuard } from './core/guards/superadmin-setup-guard';
 import { productResolver } from './core/resolvers/product.resolver';
+
 
 export const routes: Routes = [
   // --- Storefront Routes ---
   {
     path: '',
-    component: Frontend,
+    loadComponent: () => import('./frontend/frontend').then(m => m.Frontend),
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
-      { path: 'home', component: Home },
-      { path: 'products', component: Products },
-      { path: 'products/:slug', component: ProductDetails, resolve: { productData: productResolver } },
-      { path: 'login', component: Login },
-      { path: 'dashboard-login', component: DashboardLogin },
-      { path: 'signup', component: Signup, canDeactivate: [deactivateGuard] },
-      { path: 'account', component: Account, canMatch: [mathuserGuard] },
-      { path: 'cart', component: Cart },
-      { path: 'checkout', component: Checkout, canActivate: [authGuard] },
-      { path: 'my-orders', component: MyOrders, canActivate: [authGuard] },
-      { path: 'about', component: About },
-      { path: 'policy', component: Policy },
-      { path: 'faq', component: Faq },
-      { path: 'contact', component: Contact },
+      { path: 'home', loadComponent: () => import('./frontend/home/home.component').then(m => m.Home) },
+      { path: 'products', loadComponent: () => import('./frontend/products/products.component').then(m => m.Products) },
+      { path: 'products/:slug', loadComponent: () => import('./frontend/product-details/product-details.component').then(m => m.ProductDetails), resolve: { productData: productResolver } },
+      { path: 'login', loadComponent: () => import('./frontend/login/login.component').then(m => m.Login) },
+      { path: 'dashboard-login', loadComponent: () => import('./dashboard/dashboard-login/dashboard-login.component').then(m => m.DashboardLogin), canActivate: [dashboardLoginGuard] },
+      { path: 'superadmin-setup', loadComponent: () => import('./dashboard/superadmin-setup/superadmin-setup.component').then(m => m.SuperadminSetup), canActivate: [superadminSetupGuard] },
+      { path: 'signup', loadComponent: () => import('./frontend/signup/signup.component').then(m => m.Signup), canDeactivate: [deactivateGuard] },
+      { path: 'account', loadComponent: () => import('./frontend/account/account.component').then(m => m.Account), canMatch: [mathuserGuard] },
+      { path: 'cart', loadComponent: () => import('./frontend/cart/cart.component').then(m => m.Cart) },
+      { path: 'checkout', loadComponent: () => import('./frontend/checkout/checkout.component').then(m => m.Checkout), canActivate: [authGuard] },
+      { path: 'my-orders', loadComponent: () => import('./frontend/my-orders/my-orders.component').then(m => m.MyOrders), canActivate: [authGuard] },
+      { path: 'about', loadComponent: () => import('./frontend/about/about.component').then(m => m.About) },
+      { path: 'policy', loadComponent: () => import('./frontend/policy/policy.component').then(m => m.Policy) },
+      { path: 'faq', loadComponent: () => import('./frontend/faq/faq.component').then(m => m.Faq) },
+      { path: 'contact', loadComponent: () => import('./frontend/contact/contact.component').then(m => m.Contact) },
     ]
   },
 
-  // --- Admin / Dashboard Routes ---
+  // --- Admin / Dashboard Routes (lazy-loaded as a group) ---
   {
     path: 'admin',
-    component: Dashboard,
+    loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard),
     canActivate: [adminGuard],
     children: [
-      { path: '', redirectTo: 'home', pathMatch: 'full' },
-      { path: 'home', component: AdminHome },
-      { path: 'listusers', component: UsersList },
-      { path: 'adduser', component: AddUser },
-      { path: 'orders', component: AdminOrders },
-      { path: 'cms', component: AdminCms },
-      { path: 'reviews', component: AdminReviews },
-      { path: 'products', component: AdminProducts },
-      { path: 'products/add', component: AddProduct },
-      { path: 'products/edit/:id', component: EditProduct },
+      { path: '', redirectTo: 'analytics', pathMatch: 'full' },
+      { path: 'home', redirectTo: 'analytics', pathMatch: 'full' },
+      { path: 'analytics', loadComponent: () => import('./dashboard/admin-analytics/admin-analytics.component').then(m => m.AdminAnalytics) },
+      { path: 'coupons', loadComponent: () => import('./dashboard/admin-coupons/admin-coupons.component').then(m => m.AdminCoupons) },
+      { path: 'listusers', loadComponent: () => import('./dashboard/users-list/users-list.component').then(m => m.UsersList) },
+      { path: 'adduser', loadComponent: () => import('./dashboard/users-list/add-user/add-user.component').then(m => m.AddUser) },
+      { path: 'orders', loadComponent: () => import('./dashboard/admin-orders/admin-orders.component').then(m => m.AdminOrders) },
+      { path: 'cms', loadComponent: () => import('./dashboard/admin-cms/admin-cms.component').then(m => m.AdminCms) },
+      { path: 'reviews', loadComponent: () => import('./dashboard/admin-reviews/admin-reviews.component').then(m => m.AdminReviews) },
+      { path: 'products', loadComponent: () => import('./dashboard/admin-products/admin-products.component').then(m => m.AdminProducts) },
+      { path: 'products/add', loadComponent: () => import('./dashboard/admin-products/add-product/add-product.component').then(m => m.AddProduct) },
+      { path: 'products/edit/:id', loadComponent: () => import('./dashboard/admin-products/edit-product/edit-product.component').then(m => m.EditProduct) },
+      { path: 'messages', loadComponent: () => import('./dashboard/admin-messages/admin-messages.component').then(m => m.AdminMessages) },
     ]
   },
   { path: 'dashboard', redirectTo: 'admin', pathMatch: 'prefix' },
 
   // --- 404 Wildcard ---
-  { path: '**', component: NotFound }
+  { path: '**', loadComponent: () => import('./shared/not-found/not-found.component').then(m => m.NotFound) }
 ];

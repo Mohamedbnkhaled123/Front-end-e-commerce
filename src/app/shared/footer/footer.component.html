@@ -1,34 +1,37 @@
-<footer class="bg-slate-900 text-white py-10 mt-auto border-t border-slate-800">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
+<footer class="bg-slate-900 text-slate-300 border-t border-slate-800 transition-colors duration-300" style="content-visibility: auto; contain-intrinsic-size: 500px;">
+  <div class="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center sm:text-left">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
       <div>
-        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Get to Know Us</h3>
-        <ul class="mt-4 space-y-2 text-xs text-slate-300">
-          <li><a href="/about" class="hover:underline">About Velora</a></li>
-          <li><a href="#" class="hover:underline">Careers</a></li>
-          <li><a href="#" class="hover:underline">Press Releases</a></li>
+        <h3 class="text-slate-100 font-semibold text-sm tracking-wider uppercase mb-4">{{ 'footer.get_to_know' | translate }}</h3>
+        <ul class="space-y-2.5">
+          <li><a routerLink="/about" class="text-slate-400 hover:text-white transition-colors duration-200 text-sm">{{ 'footer.about' | translate }}</a></li>
+          <li><a routerLink="/policy" class="text-slate-400 hover:text-white transition-colors duration-200 text-sm">{{ 'footer.quality' | translate }}</a></li>
+          <li><a routerLink="/faq" class="text-slate-400 hover:text-white transition-colors duration-200 text-sm">{{ 'footer.faq' | translate }}</a></li>
         </ul>
       </div>
       <div>
-        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Customer Service</h3>
-        <ul class="mt-4 space-y-2 text-xs text-slate-300">
-          <li><a href="/contact" class="hover:underline">Contact Support</a></li>
-          <li><a href="/faq" class="hover:underline">FAQ Help Center</a></li>
-          <li><a href="/policy" class="hover:underline">Store Policies</a></li>
+        <h3 class="text-slate-100 font-semibold text-sm tracking-wider uppercase mb-4">{{ 'footer.support' | translate }}</h3>
+        <ul class="space-y-2.5">
+          <li><a routerLink="/contact" class="text-slate-400 hover:text-white transition-colors duration-200 text-sm">{{ 'footer.contact' | translate }}</a></li>
+          <li><a routerLink="/my-orders" class="text-slate-400 hover:text-white transition-colors duration-200 text-sm">{{ 'footer.returns' | translate }}</a></li>
+          <li><a routerLink="/policy" class="text-slate-400 hover:text-white transition-colors duration-200 text-sm">{{ 'footer.policies' | translate }}</a></li>
         </ul>
       </div>
       <div>
-        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Velora Store</h3>
-        <p class="mt-4 text-xs text-slate-300 leading-relaxed">
-          Premium bags and fashion accessories. High quality, clean design, and high contrast aesthetics.
+        <!-- Modern Brand Logo -->
+        <div class="mb-6 flex justify-center lg:justify-start">
+          <app-logo customLink="/home" [lightText]="true"></app-logo>
+        </div>
+        <p class="mt-3 text-sm text-slate-400 leading-relaxed">
+          {{ 'footer.desc' | translate }}
         </p>
       </div>
     </div>
-    <div class="mt-8 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400 gap-4">
-      <p>&copy; 2026 Velora Store. All rights reserved.</p>
+    <div class="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
+      <p>{{ 'footer.copyright' | translate }}</p>
       <div class="flex space-x-6">
-        <a href="/policy" class="hover:underline">Conditions of Use</a>
-        <a href="/policy" class="hover:underline">Privacy Notice</a>
+        <a routerLink="/policy" class="hover:text-slate-300 transition-colors">{{ 'footer.conditions' | translate }}</a>
+        <a routerLink="/policy" class="hover:text-slate-300 transition-colors">{{ 'footer.privacy' | translate }}</a>
       </div>
     </div>
   </div>

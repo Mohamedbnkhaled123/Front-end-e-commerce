@@ -1,45 +1,210 @@
-<header class="bg-white border-b border-gray-200">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16">
+<header class="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-xs sticky top-0 z-30 transition-colors duration-200">
+  <div class="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16 gap-4 min-w-0">
       
-      <!-- Logo and Brand -->
-      <a routerLink="/" class="text-xl font-black tracking-tight text-slate-900 flex items-center">
-        VELORA <span class="text-amber-500 font-medium ml-1">STORE</span>
-      </a>
+      <!-- Brand Logo & Main Nav Container -->
+      <div class="flex items-center shrink-0 min-w-0">
+        <!-- Logo Component -->
+        <app-logo class="me-4 lg:me-12 shrink-0"></app-logo>
 
-      <!-- Navigation Links -->
-      <nav class="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-700">
-        <a routerLink="/home" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">Home</a>
-        <a routerLink="/products" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">Products</a>
-        <a routerLink="/about" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">About</a>
-        <a routerLink="/policy" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">Policy</a>
-        <a routerLink="/faq" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">FAQ</a>
-        <a routerLink="/contact" routerLinkActive="text-orange-500" class="hover:text-orange-600 transition-colors">Contact</a>
-      </nav>
+        <!-- Wide Desktop Full Mode (≥1536px Only) -->
+        <nav class="hidden 2xl:flex items-center gap-3 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <a routerLink="/home" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800" class="px-3.5 py-2 rounded-lg hover:text-blue-600 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'nav.home' | translate }}</a>
+          <a routerLink="/products" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800" class="px-3.5 py-2 rounded-lg hover:text-blue-600 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'nav.products' | translate }}</a>
+          <a routerLink="/about" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800" class="px-3.5 py-2 rounded-lg hover:text-blue-600 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'nav.about' | translate }}</a>
+          <a routerLink="/policy" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800" class="px-3.5 py-2 rounded-lg hover:text-blue-600 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'nav.policy' | translate }}</a>
+          <a routerLink="/faq" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800" class="px-3.5 py-2 rounded-lg hover:text-blue-600 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'nav.faq' | translate }}</a>
+          <a routerLink="/contact" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800" class="px-3.5 py-2 rounded-lg hover:text-blue-600 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'nav.contact' | translate }}</a>
+        </nav>
 
-      <!-- Account, Cart & Admin Area -->
-      <div class="flex items-center space-x-6">
-        <a routerLink="/my-orders" routerLinkActive="text-orange-500 font-bold" class="text-sm font-medium text-slate-700 hover:text-orange-600 transition-colors">
-          Returns &amp; Orders
-        </a>
+        <!-- Laptop / Tablet Collapsed Priority Navigation (1024px - 1535px) -->
+        <nav class="hidden lg:flex 2xl:hidden items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 relative">
+          <a routerLink="/home" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800" class="px-3.5 py-2 rounded-lg hover:text-blue-600 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'nav.home' | translate }}</a>
+          <a routerLink="/products" routerLinkActive="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800" class="px-3.5 py-2 rounded-lg hover:text-blue-600 dark:hover:text-white hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap">{{ 'nav.products' | translate }}</a>
+          
+          <!-- Dropdown Trigger for Secondary Links -->
+          <div class="relative more-dropdown-wrapper">
+            <button 
+              (click)="toggleMoreDropdown()" 
+              type="button" 
+              class="flex items-center gap-1 hover:text-blue-600 dark:hover:text-white transition-colors cursor-pointer text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3.5 py-2 rounded-lg border border-gray-200 dark:border-slate-700 min-h-[36px] whitespace-nowrap">
+              <span>{{ 'nav.more' | translate }}</span>
+              <svg class="w-3.5 h-3.5 transition-transform duration-200" [class.rotate-180]="isMoreDropdownOpen()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
 
-        <!-- Cart with Badge -->
-        <a routerLink="/cart" routerLinkActive="text-orange-500 font-bold" class="relative text-sm font-medium text-slate-700 hover:text-orange-600 transition-colors flex items-center space-x-1.5">
-          <svg class="h-6 w-6 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          <span class="absolute -top-2 left-3 bg-[#FF9900] text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full min-w-[18px] text-center border border-white">
-            0
-          </span>
-          <span class="text-xs font-bold text-slate-800 self-end">Cart</span>
-        </a>
-
-        <span class="h-4 w-px bg-gray-300"></span>
-
-        <!-- Admin Quick Access -->
-        <a routerLink="/admin" class="text-xs text-slate-400 hover:underline">Admin Panel</a>
+            <div 
+              class="absolute left-0 rtl:left-auto rtl:right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl z-50 py-2 text-xs font-semibold space-y-1 transition-all duration-200 ease-out origin-top-left rtl:origin-top-right"
+              [class.opacity-100]="isMoreDropdownOpen()"
+              [class.scale-100]="isMoreDropdownOpen()"
+              [class.translate-y-0]="isMoreDropdownOpen()"
+              [class.pointer-events-auto]="isMoreDropdownOpen()"
+              [class.opacity-0]="!isMoreDropdownOpen()"
+              [class.scale-95]="!isMoreDropdownOpen()"
+              [class.-translate-y-2]="!isMoreDropdownOpen()"
+              [class.pointer-events-none]="!isMoreDropdownOpen()">
+              <a routerLink="/about" (click)="closeMoreDropdown()" class="block px-4 py-2 hover:bg-blue-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 whitespace-nowrap">{{ 'nav.about' | translate }}</a>
+              <a routerLink="/policy" (click)="closeMoreDropdown()" class="block px-4 py-2 hover:bg-blue-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 whitespace-nowrap">{{ 'nav.policy' | translate }}</a>
+              <a routerLink="/faq" (click)="closeMoreDropdown()" class="block px-4 py-2 hover:bg-blue-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 whitespace-nowrap">{{ 'nav.faq' | translate }}</a>
+              <a routerLink="/contact" (click)="closeMoreDropdown()" class="block px-4 py-2 hover:bg-blue-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 whitespace-nowrap">{{ 'nav.contact' | translate }}</a>
+              <a routerLink="/my-orders" (click)="closeMoreDropdown()" class="block px-4 py-2 hover:bg-blue-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 whitespace-nowrap">{{ 'nav.returns_orders' | translate }}</a>
+              <div class="border-t border-gray-100 dark:border-slate-800 my-1"></div>
+              @if (isAdmin) {
+                <a routerLink="/admin" (click)="closeMoreDropdown()" class="block px-4 py-2 hover:bg-blue-50 dark:hover:bg-slate-800 text-blue-600 dark:text-blue-400 font-medium whitespace-nowrap">{{ 'nav.admin_panel' | translate }}</a>
+              }
+            </div>
+          </div>
+        </nav>
       </div>
 
+      <!-- Controls & Actions Cluster -->
+      <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        
+        <!-- Language Switcher Toggle -->
+        <button 
+          (click)="langService.toggleLanguage()" 
+          type="button"
+          aria-label="Toggle Language"
+          class="btn-tactile active:scale-95 hover:scale-105 flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 transition-all min-h-[38px] cursor-pointer shrink-0 whitespace-nowrap">
+          <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 transition-transform duration-300 group-hover:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+          </svg>
+          <span>{{ langService.currentLang() === 'en' ? 'عربي' : 'EN' }}</span>
+        </button>
+
+        <!-- Dark Mode Switcher Toggle -->
+        <button 
+          (click)="themeService.toggleTheme()" 
+          type="button"
+          aria-label="Toggle Theme"
+          class="btn-tactile active:scale-95 hover:scale-105 p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 transition-all min-h-[38px] min-w-[38px] flex items-center justify-center cursor-pointer shrink-0">
+          @if (!themeService.isDark()) {
+            <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          } @else {
+            <svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          }
+        </button>
+
+        <!-- Returns & Orders (Visible on Large Desktop ≥1536px) -->
+        <a routerLink="/my-orders" routerLinkActive="text-blue-600 dark:text-blue-400 font-bold" class="hidden 2xl:inline-block text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap px-2 py-1">
+          {{ 'nav.returns_orders' | translate }}
+        </a>
+
+        <!-- Cart Icon with Badge -->
+        <a id="cartIcon" data-cart-icon routerLink="/cart" routerLinkActive="text-blue-600 dark:text-blue-400 font-bold" class="relative text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5 min-h-[44px] px-2 shrink-0">
+          <svg class="h-6 w-6 text-slate-700 dark:text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <span class="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center border-2 border-white dark:border-slate-900 shadow-sm leading-none">
+            {{ cartService.cartCount() }}
+          </span>
+          <span class="text-xs font-bold text-slate-800 dark:text-slate-100 hidden sm:inline-block whitespace-nowrap">{{ 'nav.cart' | translate }}</span>
+        </a>
+
+        <!-- User Auth / Profile -->
+        @if (isLoggedIn$ | async; as user) {
+          <div class="relative group hidden sm:block">
+            <button class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+              <span>{{ user }}</span>
+            </button>
+            <div class="absolute right-0 rtl:right-auto rtl:left-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+              <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl py-2">
+                <a routerLink="/my-orders" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">{{ 'nav.returns_orders' | translate }}</a>
+                <button (click)="logout()" class="block w-full text-left rtl:text-right px-4 py-2 text-sm text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 mt-1 border-t border-gray-100 dark:border-slate-800">{{ 'nav.logout' | translate }}</button>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <a routerLink="/login" class="hidden sm:inline-block text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors px-2.5 py-1.5 rounded-lg whitespace-nowrap">
+            {{ 'nav.login' | translate }}
+          </a>
+          <a routerLink="/signup" class="hidden sm:inline-flex items-center text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition-all px-3 py-1.5 rounded-lg shadow-xs shrink-0 whitespace-nowrap">
+            {{ 'nav.signup' | translate }}
+          </a>
+        }
+
+        <!-- Admin Portal Shortcut (Visible on Large Desktop ≥1536px) -->
+        @if (isAdmin) {
+          <a routerLink="/admin" class="hidden 2xl:inline-block text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800/60 shrink-0 whitespace-nowrap">{{ 'nav.admin_panel' | translate }}</a>
+        }
+
+        <!-- Mobile Drawer Hamburger Toggle (<1024px) -->
+        <button 
+          (click)="toggleMobileMenu()" 
+          type="button"
+          aria-label="Toggle Mobile Navigation" 
+          class="mobile-hamburger-btn lg:hidden p-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-300 shrink-0">
+          <svg class="h-6 w-6 transition-transform duration-300 ease-out transform" [class.rotate-90]="isMobileMenuOpen()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            @if (!isMobileMenuOpen()) {
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            } @else {
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            }
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Overlay (z-40) -->
+  <div 
+    class="fixed inset-0 z-40 lg:hidden flex mobile-menu-wrapper"
+    style="transition: visibility 450ms ease-out;"
+    [class.pointer-events-auto]="isMobileMenuOpen()"
+    [class.pointer-events-none]="!isMobileMenuOpen()"
+    [class.invisible]="!isMobileMenuOpen()">
+    
+    <!-- Backdrop Overlay -->
+    <div 
+      (click)="closeMobileMenu()" 
+      class="fixed inset-0 bg-slate-950/80 backdrop-blur-md cursor-pointer will-change-[opacity]"
+      style="transition: opacity 400ms cubic-bezier(0.16, 1, 0.3, 1);"
+      [class.opacity-100]="isMobileMenuOpen()"
+      [class.opacity-0]="!isMobileMenuOpen()">
+    </div>
+    
+    <div 
+      class="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-slate-900 shadow-2xl z-10 p-6 gap-6 overflow-y-auto border-e border-gray-200 dark:border-slate-800 text-slate-900 dark:text-white transform will-change-transform"
+      style="transition: transform 450ms cubic-bezier(0.16, 1, 0.3, 1), opacity 350ms ease-out;"
+      [class.translate-x-0]="isMobileMenuOpen()"
+      [class.opacity-100]="isMobileMenuOpen()"
+      [class.-translate-x-full]="!isMobileMenuOpen() && langService.currentLang() !== 'ar'"
+      [class.translate-x-full]="!isMobileMenuOpen() && langService.currentLang() === 'ar'"
+      [class.opacity-0]="!isMobileMenuOpen()">
+      
+      <div class="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
+        <app-logo (click)="closeMobileMenu()"></app-logo>
+        <button (click)="closeMobileMenu()" aria-label="Close menu" class="text-slate-400 hover:text-slate-700 dark:hover:text-white font-medium text-xl p-2 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center">&times;</button>
+      </div>
+
+      <nav class="flex flex-col gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
+        <a routerLink="/home" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 ps-3" class="py-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'nav.home' | translate }}</a>
+        <a routerLink="/products" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 ps-3" class="py-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'nav.products' | translate }}</a>
+        <a routerLink="/about" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 ps-3" class="py-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'nav.about' | translate }}</a>
+        <a routerLink="/policy" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 ps-3" class="py-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'nav.policy' | translate }}</a>
+        <a routerLink="/faq" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 ps-3" class="py-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'nav.faq' | translate }}</a>
+        <a routerLink="/contact" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 ps-3" class="py-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'nav.contact' | translate }}</a>
+        <a routerLink="/my-orders" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 ps-3" class="py-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'nav.returns_orders' | translate }}</a>
+        @if (isAdmin) {
+          <a routerLink="/admin" (click)="closeMobileMenu()" routerLinkActive="text-blue-600 bg-blue-50 dark:bg-slate-800 border-s-4 border-blue-600 ps-3" class="py-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap text-blue-600 dark:text-blue-400 font-medium">{{ 'nav.admin_panel' | translate }}</a>
+        }
+        
+        <div class="border-t border-gray-100 dark:border-slate-800 my-2"></div>
+        @if (isLoggedIn$ | async; as user) {
+          <div class="px-4 py-2 text-sm text-slate-500 dark:text-slate-400 font-normal">Welcome, {{ user }}</div>
+          <button (click)="logout()" class="w-full text-left rtl:text-right py-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors text-rose-600 cursor-pointer min-h-[44px] flex items-center whitespace-nowrap">{{ 'nav.logout' | translate }}</button>
+        } @else {
+          <a routerLink="/login" (click)="closeMobileMenu()" class="py-3 px-4 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center whitespace-nowrap text-slate-700 dark:text-slate-200">{{ 'nav.login' | translate }}</a>
+          <a routerLink="/signup" (click)="closeMobileMenu()" class="py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors cursor-pointer min-h-[44px] flex items-center justify-center font-bold whitespace-nowrap mt-1">{{ 'nav.signup' | translate }}</a>
+        }
+      </nav>
     </div>
   </div>
 </header>

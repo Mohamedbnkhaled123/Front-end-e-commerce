@@ -4,6 +4,9 @@ export interface IUser {
     email: string;
     role: string;
     isActive?: boolean;
+    canPurchase?: boolean;
+    lastActiveAt?: string;
+    isOnline?: boolean;
     createdAt?: string;
 }
 

@@ -46,6 +46,7 @@ export class AddProduct implements OnInit {
       slug:        [''],
       desc:        ['', Validators.required],
       price:       [null, [Validators.required, Validators.min(0)]],
+      discount:    [0, [Validators.min(0), Validators.max(100)]],
       stock:       [null, [Validators.required, Validators.min(0)]],
       newArrived:  [false],
       mostPopular: [false],
@@ -149,55 +150,9 @@ export class AddProduct implements OnInit {
 
   // === Submit Product ===
   onSubmit() {
-    this.errorMessage = '';
+    this.errorMessage = 'لا يمكن للأدمن إضافة المنتجات';
     this.successMessage = '';
-
-    if (this.productForm.invalid) {
-      this.productForm.markAllAsTouched();
-      this.errorMessage = 'Please fill in all required fields (Name, Description, Price, Stock).';
-      return;
-    }
-
-    if (!this.selectedCategoryId) {
-      this.errorMessage = 'Please select a category for this product.';
-      return;
-    }
-
-    if (!this.selectedFile) {
-      this.errorMessage = 'Please select a product image file.';
-      return;
-    }
-
-    this.isLoading = true;
+    this.isLoading = false;
     this._cdr.detectChanges();
-
-    const v = this.productForm.value;
-    const slug = v.slug?.trim() || v.name.toLowerCase().replace(/[\s_-]+/g, '-') + '-' + Date.now();
-
-    const formData = new FormData();
-    formData.append('name',        v.name);
-    formData.append('desc',        v.desc || '');
-    formData.append('price',       v.price.toString());
-    formData.append('stock',       v.stock.toString());
-    formData.append('slug',        slug);
-    formData.append('category',    this.selectedCategoryId);
-    formData.append('newArrived',  v.newArrived.toString());
-    formData.append('mostPopular', v.mostPopular.toString());
-
-    if (this.selectedFile) formData.append('img', this.selectedFile);
-
-    this._productService.addProduct(formData).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.successMessage = 'Product created successfully! Redirecting...';
-        this._cdr.detectChanges();
-        setTimeout(() => this._router.navigate(['/admin/products']), 1500);
-      },
-      error: (err: any) => {
-        this.isLoading = false;
-        this.errorMessage = err?.error?.message || 'Failed to create product.';
-        this._cdr.detectChanges();
-      }
-    });
   }
 }

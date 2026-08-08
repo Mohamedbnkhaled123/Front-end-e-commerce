@@ -1,18 +1,22 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { RouterOutlet, Router } from '@angular/router';
 import { ConfirmModalComponent } from '../shared/confirm-modal/confirm-modal.component';
 import { ModalService } from '../core/services/modal.service';
 import { AuthService } from '../core/services/auth-service';
 import { CartService } from '../core/services/cart.service';
+import { HeaderComponent } from './shared/header/header.component';
+import { FooterComponent } from '../shared/footer/footer.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-frontend',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ConfirmModalComponent],
+  imports: [RouterOutlet, ConfirmModalComponent, HeaderComponent, FooterComponent],
   templateUrl: './frontend.html'
 })
-export class Frontend implements OnInit {
+export class Frontend implements OnInit, OnDestroy {
   isLoggedIn = false;
+  private _routerSub?: Subscription;
 
   constructor(
     private _router: Router, 
@@ -24,9 +28,15 @@ export class Frontend implements OnInit {
 
   ngOnInit(): void {
     this.checkLoginStatus();
-    this._router.events.subscribe(() => {
+    this._routerSub = this._router.events.subscribe(() => {
       this.checkLoginStatus();
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this._routerSub) {
+      this._routerSub.unsubscribe();
+    }
   }
 
   checkLoginStatus(): void {

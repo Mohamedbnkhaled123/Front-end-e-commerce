@@ -1,65 +1,209 @@
-<div class="bg-slate-50 min-h-screen py-8">
+<!-- ===== ADMIN USER & GOVERNANCE MANAGEMENT LIST ===== -->
+<div class="bg-slate-50 dark:bg-slate-950 min-h-screen py-8 transition-colors duration-200">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Page Header -->
     <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
       <div>
-        <h1 class="text-2xl font-extrabold text-slate-900">Admin & User Management</h1>
-        <p class="text-xs text-slate-500 mt-1">Manage system accounts and administrators.</p>
+        <h1 class="text-2xl font-semibold text-slate-900 dark:text-white ">{{ 'admin.user_mgmt_title' | translate }}</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{{ 'admin.user_mgmt_subtitle' | translate }}</p>
       </div>
-      <a routerLink="/admin/adduser" class="bg-[#FF9900] hover:bg-[#DF8300] text-white text-xs font-bold py-2 px-4 rounded-lg shadow-sm border border-[#E68A00] transition-colors">+ Add New Admin</a>
+      <div class="flex items-center gap-2">
+        <a routerLink="/admin/adduser"
+           class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-xs transition-colors duration-200 min-h-[44px] cursor-pointer">
+          {{ 'admin.add_new_admin_btn' | translate }}
+        </a>
+      </div>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded-md shadow-sm overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-        <h2 class="text-sm font-bold text-slate-700">Registered Accounts</h2>
-        <span class="text-xs text-slate-500 font-medium">Total: {{ users.length }} accounts</span>
+    <!-- Search & Filter Bar -->
+    <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs px-5 py-4 mb-5 flex flex-wrap gap-3 items-center justify-between transition-colors duration-200">
+      <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+        <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+        </svg>
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (ngModelChange)="applyFilter()"
+          [placeholder]="'admin.search_user_placeholder' | translate"
+          class="w-full text-sm text-slate-900 dark:text-white placeholder-slate-400 border-none outline-none bg-transparent"
+        >
+      </div>
+      <div class="flex items-center gap-3 flex-wrap">
+        <!-- Role Filter -->
+        <select 
+          [(ngModel)]="selectedRole" 
+          (ngModelChange)="applyFilter()"
+          class="text-xs bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-6 rtl:pl-10 ltr:pr-10 py-2 text-slate-900 dark:text-white font-medium outline-none min-h-[36px]">
+          <option value="">{{ 'admin.all_roles' | translate }}</option>
+          <option value="superadmin">{{ 'admin.role_superadmin' | translate }}</option>
+          <option value="admin">{{ 'admin.role_admin' | translate }}</option>
+          <option value="user">{{ 'admin.role_user' | translate }}</option>
+        </select>
+
+        <!-- Status Filter -->
+        <select 
+          [(ngModel)]="selectedStatus" 
+          (ngModelChange)="applyFilter()"
+          class="text-xs bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-6 rtl:pl-10 ltr:pr-10 py-2 text-slate-900 dark:text-white font-medium outline-none min-h-[36px]">
+          <option value="">{{ 'admin.all_status' | translate }}</option>
+          <option value="active">{{ 'admin.active' | translate }}</option>
+          <option value="deactivated">{{ 'admin.deactivated' | translate }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Users Container -->
+    <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden transition-colors duration-200">
+      <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 flex items-center justify-between">
+        <h2 class="text-xs font-semibold text-slate-800 dark:text-white">{{ 'admin.registered_accounts' | translate }}</h2>
+        <span class="text-xs text-slate-500 dark:text-slate-300 font-semibold bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 px-2.5 py-1 rounded-full shadow-2xs">{{ filteredUsers.length }} {{ 'admin.accounts' | translate }}</span>
       </div>
 
-      <div *ngIf="isLoading" class="p-8 text-center text-slate-500 text-sm font-medium">
-        Loading accounts...
-      </div>
-
-      <div *ngIf="!isLoading" class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 text-left">
-          <thead class="bg-gray-50 text-xs font-bold text-slate-600 uppercase tracking-wider">
-            <tr>
-              <th class="px-6 py-4">Name</th>
-              <th class="px-6 py-4">Email</th>
-              <th class="px-6 py-4">Role</th>
-              <th class="px-6 py-4">Status</th>
-              <th class="px-6 py-4">Joined Date</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 bg-white text-sm text-slate-700">
-            <tr *ngFor="let u of users">
-              <td class="px-6 py-4">
+      @if (isLoading) {
+        <div class="p-8 text-center text-slate-500 dark:text-slate-400 text-sm font-medium">
+          {{ 'admin.loading_accounts' | translate }}
+        </div>
+      } @else {
+        <!-- Card-Based Adaptive Responsive Users List (Products Management Style) -->
+        <div class="divide-y divide-gray-100 dark:divide-slate-800 p-4 sm:p-6 space-y-4">
+          @for (u of paginatedUsers; track u._id; let i = $index) {
+            <div class="bg-slate-50/50 dark:bg-slate-800/40 border border-gray-200/80 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-xs transition-all space-y-4">
+              
+              <!-- User Main Info Row -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-gray-100 dark:border-slate-800">
                 <div class="flex items-center gap-3">
-                  <span class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-700 text-sm border border-gray-200 uppercase">
-                    {{ u.name.charAt(0) }}
+                  <span class="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-700 dark:text-slate-200 text-base border border-slate-200 dark:border-slate-700 uppercase shrink-0">
+                    {{ u.name ? u.name.charAt(0) : 'U' }}
                   </span>
-                  <span class="font-bold text-slate-900">{{ u.name }}</span>
+                  <div>
+                    <h3 class="font-semibold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                      <span>{{ u.name }}</span>
+                      <span class="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800">#{{ (currentPage - 1) * pageSize + i + 1 }}</span>
+                    </h3>
+                    <p class="text-xs font-mono text-slate-500 dark:text-slate-400 font-medium line-clamp-1 mt-0.5">{{ u.email }}</p>
+                  </div>
                 </div>
-              </td>
-              <td class="px-6 py-4 text-slate-600 font-medium">{{ u.email }}</td>
-              <td class="px-6 py-4">
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border"
-                  [ngClass]="u.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'">
-                  {{ u.role }}
-                </span>
-              </td>
-              <td class="px-6 py-4">
-                <span class="px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider border bg-emerald-50 text-emerald-800 border-emerald-200">
-                  Active
-                </span>
-              </td>
-              <td class="px-6 py-4 text-slate-500 text-xs">{{ u.createdAt | date:'mediumDate' }}</td>
-            </tr>
 
-            <tr *ngIf="users.length === 0">
-              <td colspan="5" class="px-6 py-12 text-center text-slate-400 text-xs">No user accounts found.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <div class="flex items-center justify-between sm:justify-end gap-3 text-xs shrink-0">
+                  <div class="text-right rtl:text-left">
+                    @if (u.role === 'superadmin') {
+                      <span class="px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800">
+                        {{ 'admin.system_owner' | translate }}
+                      </span>
+                    } @else if (u.role === 'admin') {
+                      <span class="px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800">
+                        {{ 'admin.badge_admin' | translate }}
+                      </span>
+                    } @else {
+                      <span class="px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider border bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                        {{ 'admin.badge_user' | translate }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Metadata & Action Row -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ 'admin.col_status' | translate }}:</span>
+
+                  @if (u.isActive === false) {
+                    <span class="px-2.5 py-1 rounded-md text-xs font-bold border bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800">
+                      {{ 'admin.deactivated' | translate }}
+                    </span>
+                  } @else {
+                    <span class="px-2.5 py-1 rounded-md text-xs font-bold border bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800">
+                      {{ 'admin.active' | translate }}
+                    </span>
+                  }
+
+                  @if (u.role === 'user') {
+                    <span class="px-2.5 py-1 rounded-md text-xs font-bold border" 
+                      [ngClass]="u.canPurchase !== false ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'">
+                      {{ (u.canPurchase !== false ? 'admin.purchases_allowed' : 'admin.purchases_restricted') | translate }}
+                    </span>
+                  }
+
+                  <span class="text-[11px] text-slate-400 font-mono ms-2">
+                    {{ 'admin.col_joined' | translate }}: {{ u.createdAt ? (u.createdAt | date:'mediumDate':'':_langService.currentLang()) : '-' }}
+                  </span>
+                </div>
+
+                <div class="flex items-center justify-between w-full sm:w-auto sm:justify-end gap-2">
+                  @if (u.role === 'admin' && isSuperAdmin) {
+                    <button 
+                      (click)="toggleAdminStatus(u)"
+                      [disabled]="togglingUserId === u._id"
+                      class="text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 px-4 py-2 rounded-lg transition-all duration-200 min-h-[38px] flex items-center justify-center w-[clamp(85px,22vw,140px)] sm:w-auto shrink-0 cursor-pointer disabled:opacity-50">
+                      {{ (u.isActive !== false ? 'admin.deactivate_admin' : 'admin.activate_admin') | translate }}
+                    </button>
+                    <button 
+                      (click)="deleteAdmin(u)"
+                      [disabled]="deletingUserId === u._id"
+                      class="text-xs font-medium text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/80 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white px-4 py-2 rounded-lg transition-all duration-200 min-h-[38px] flex items-center justify-center w-[clamp(85px,22vw,140px)] sm:w-auto shrink-0 cursor-pointer disabled:opacity-50">
+                      {{ 'admin.delete_admin' | translate }}
+                    </button>
+                  } @else if (u.role === 'user') {
+                    <button 
+                      (click)="toggleStatus(u)"
+                      [disabled]="togglingUserId === u._id"
+                      class="text-xs font-medium px-4 py-2 rounded-lg transition-all duration-200 min-h-[38px] flex items-center justify-center w-[clamp(85px,22vw,140px)] sm:w-auto shrink-0 cursor-pointer border disabled:opacity-50"
+                      [ngClass]="u.canPurchase !== false ? 'text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800/80 hover:bg-rose-600 hover:text-white dark:hover:bg-rose-600 dark:hover:text-white' : 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800/80 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-600 dark:hover:text-white'">
+                      {{ (u.canPurchase !== false ? 'admin.restrict_purchases' : 'admin.allow_purchases') | translate }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+            </div>
+          } @empty {
+            <div class="py-12 text-center text-slate-400 text-xs font-medium">
+              {{ 'admin.no_user_accounts' | translate }}
+            </div>
+          }
+        </div>
+
+        <!-- Admin Table Pagination Controls -->
+        @if (totalPages > 1) {
+          <div class="p-4 border-t border-gray-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/80 rounded-b-xl">
+            <div class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {{ 'admin.page' | translate }} {{ currentPage }} {{ 'admin.of' | translate }} {{ totalPages }} ({{ filteredUsers.length }} {{ 'admin.accounts' | translate }})
+            </div>
+            <div class="flex items-center gap-2">
+              <button 
+                (click)="prevPage()" 
+                [disabled]="currentPage === 1"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-200 shadow-2xs">
+                ← {{ 'admin.prev' | translate }}
+              </button>
+
+              @for (pageNum of pageNumbers; track $index) {
+                @if (pageNum === '...') {
+                  <span class="px-3 py-1.5 text-xs font-bold text-slate-500 dark:text-slate-400">...</span>
+                } @else {
+                  <button 
+                    (click)="setPage($any(pageNum))"
+                    [class]="pageNum === currentPage 
+                      ? 'px-3 py-1.5 text-xs font-bold rounded-lg bg-blue-600 text-white shadow-2xs' 
+                      : 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 shadow-2xs'">
+                    {{ pageNum }}
+                  </button>
+                }
+              }
+
+              <button 
+                (click)="nextPage()" 
+                [disabled]="currentPage === totalPages"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-200 shadow-2xs">
+                {{ 'admin.next' | translate }} →
+              </button>
+            </div>
+          </div>
+        }
+      }
     </div>
   </div>
 </div>
