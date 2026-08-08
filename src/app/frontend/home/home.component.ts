@@ -1,78 +1,122 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { LocalizeFieldPipe } from '../../core/pipes/localize-field.pipe';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { ProductService } from '../../core/services/product.service';
-import { ReviewService, IReview } from '../../core/services/review.service';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
 import { IProduct } from '../../core/models/product.model';
 import { env } from '../../../env/env';
 import { Subscription } from 'rxjs';
+import { LanguageService } from '../../core/services/language.service';
+
+import { ProductCacheService } from '../../core/services/product-cache.service';
+import { FlyToCartService } from '../../core/services/fly-to-cart.service';
+
+import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { CmsService } from '../../core/services/cms.service';
+import { HomePageData, DEFAULT_HOME, parseCmsContent } from '../../core/models/cms.model';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './home.component.html'
+  imports: [CommonModule, RouterLink, TranslatePipe, LocalizeFieldPipe],
+  templateUrl: './home.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Home implements OnInit, OnDestroy {
   newArrivals: IProduct[] = [];
   mostPopular: IProduct[] = [];
-  testimonials: IReview[] = [];
   staticURL = env.staticURL;
+
+  cmsData: HomePageData = DEFAULT_HOME;
+  isCmsLoading: boolean = true;
+
+  currentLang: any;
 
   private subscriptions = new Subscription();
 
   constructor(
-    private _productService: ProductService,
-    private _reviewService: ReviewService,
+    private _productCacheService: ProductCacheService,
     private _cartService: CartService,
-    private _cdr: ChangeDetectorRef
-  ) {}
+    private _flyToCartService: FlyToCartService,
+    private _cdr: ChangeDetectorRef,
+    private _route: ActivatedRoute,
+    private _languageService: LanguageService,
+    private _cmsService: CmsService
+  ) {
+    this.currentLang = this._languageService.currentLang;
+  }
+
+  get localized() {
+    const lang = this.currentLang();
+    return (val: any) => {
+      if (!val) return '';
+      if (typeof val === 'string') return val;
+      return val[lang] || val['en'] || '';
+    };
+  }
 
   ngOnInit(): void {
-    const prodSub = this._productService.getAllProducts().subscribe({
-      next: (res: any) => {
-        const all: IProduct[] = res.data || [];
-        const activeProducts = all.filter(p => p.isActive !== false && p.isDeleted !== true);
-
-        this.newArrivals = activeProducts.filter(p => p.newArrived === true);
-        if (this.newArrivals.length === 0) {
-          this.newArrivals = activeProducts.slice(0, 4);
+    const preFetchedProducts = this._route.snapshot.data['products'] as IProduct[];
+    
+    if (preFetchedProducts && preFetchedProducts.length > 0) {
+      this.handleProductsData(preFetchedProducts);
+    } else {
+      const prodSub = this._productCacheService.getProducts().subscribe({
+        next: (activeProducts: IProduct[]) => {
+          this.handleProductsData(activeProducts);
         }
+      });
+      this.subscriptions.add(prodSub);
+    }
 
-        this.mostPopular = activeProducts.filter(p => p.mostPopular === true);
-        if (this.mostPopular.length === 0) {
-          this.mostPopular = activeProducts.slice(4, 8).length ? activeProducts.slice(4, 8) : activeProducts.slice(0, 4);
-        }
-        this._cdr.detectChanges();
-      }
-    });
-
-    const reviewSub = this._reviewService.getApprovedReviews().subscribe({
-      next: (res: any) => {
-        this.testimonials = res.data || [];
-        this._cdr.detectChanges();
+    // Fetch CMS Data
+    this.isCmsLoading = true;
+    const cmsSub = this._cmsService.getPage('Home').subscribe({
+      next: (res) => {
+        const raw = res.data?.content ?? '';
+        this.cmsData = parseCmsContent<HomePageData>(raw, DEFAULT_HOME);
+        this.isCmsLoading = false;
+        this._cdr.markForCheck();
       },
       error: () => {
-        this.testimonials = [];
-        this._cdr.detectChanges();
+        this.isCmsLoading = false;
+        this._cdr.markForCheck();
       }
     });
-
-    this.subscriptions.add(prodSub);
-    this.subscriptions.add(reviewSub);
+    this.subscriptions.add(cmsSub);
   }
 
-  addToCart(product: IProduct) {
-    if (!product) return;
+  handleProductsData(activeProducts: IProduct[]): void {
+    this.newArrivals = activeProducts.filter(p => p.newArrived === true);
+    if (this.newArrivals.length === 0) {
+      this.newArrivals = activeProducts.slice(0, 4);
+    }
+    this.newArrivals.forEach(p => p.fullImgUrl = p.imgURL ? this.getImageUrl(p.imgURL) : '');
+
+    this.mostPopular = activeProducts.filter(p => p.mostPopular === true);
+    if (this.mostPopular.length === 0) {
+      this.mostPopular = activeProducts.slice(4, 8).length ? activeProducts.slice(4, 8) : activeProducts.slice(0, 4);
+    }
+    this.mostPopular.forEach(p => p.fullImgUrl = p.imgURL ? this.getImageUrl(p.imgURL) : '');
+
+    this._cdr.markForCheck();
+  }
+
+  addToCart(product: IProduct, event?: Event) {
+    if (!product || product.stock === 0) return;
+    if (event) {
+      const cardEl = (event.target as HTMLElement).closest('.group') || (event.target as HTMLElement);
+      this._flyToCartService.fly(cardEl, event);
+    }
     this._cartService.addToCart(product, 1).subscribe();
-  }
-
-  getStars(rating: number): number[] {
-    return Array(rating || 5).fill(0);
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  getImageUrl(url: string): string {
+    if (!url) return '';
+    return url.startsWith('http') ? url : this.staticURL + url;
   }
 }
