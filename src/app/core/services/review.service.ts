@@ -19,6 +19,11 @@ export class ReviewService {
     return this._http.get<IProductReviewsRes>(`${this.apiURL}/product/${productId}`);
   }
 
+  // Fetches approved store testimonials
+  getApprovedReviews(): Observable<{ status: string; data: IReview[] }> {
+    return this._http.get<{ status: string; data: IReview[] }>(`${this.apiURL}/testimonials`);
+  }
+
   // Fetches all customer reviews for Admin moderation
   getAllReviews(): Observable<{ status: string; results: number; data: IReview[] }> {
     return this._http.get<{ status: string; results: number; data: IReview[] }>(this.apiURL);

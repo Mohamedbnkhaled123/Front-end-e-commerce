@@ -24,4 +24,16 @@ export class CmsService {
     });
     return this._http.post<ICmsUpdateRes>(`${API_BASE}/update`, { pageName, content }, { headers });
   }
+
+  // Uploads CMS hero image
+  uploadHeroImage(blob: Blob, fileName: string) {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    const formData = new FormData();
+    formData.append('heroImage', blob, fileName);
+
+    return this._http.post<{ status: string; message: string; url: string }>(`${API_BASE}/upload-hero`, formData, { headers });
+  }
 }
