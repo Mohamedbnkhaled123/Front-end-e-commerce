@@ -53,7 +53,7 @@
           @for (product of newArrivals; track product._id) {
             <div class="bg-white p-4 rounded-md border border-gray-200 shadow-sm flex flex-col justify-between">
               <a [routerLink]="['/products', product.slug || product._id]">
-                <img [src]="staticURL + product.imgURL" class="w-full h-40 object-cover rounded mb-3" [alt]="product.name">
+                <img [src]="product.imgURL.startsWith('http') ? product.imgURL : staticURL + product.imgURL" class="w-full h-40 object-cover rounded mb-3" [alt]="product.name">
                 <h3 class="text-sm font-bold text-slate-900 truncate">{{ product.name }}</h3>
                 <p class="text-xs text-slate-500 line-clamp-2 mt-1">{{ product.desc }}</p>
               </a>
@@ -86,7 +86,7 @@
           @for (product of mostPopular; track product._id) {
             <div class="bg-white p-4 rounded-md border border-gray-200 shadow-sm flex flex-col justify-between">
               <a [routerLink]="['/products', product.slug || product._id]">
-                <img [src]="staticURL + product.imgURL" class="w-full h-40 object-cover rounded mb-3" [alt]="product.name">
+                <img [src]="product.imgURL.startsWith('http') ? product.imgURL : staticURL + product.imgURL" class="w-full h-40 object-cover rounded mb-3" [alt]="product.name">
                 <h3 class="text-sm font-bold text-slate-900 truncate">{{ product.name }}</h3>
                 <p class="text-xs text-slate-500 line-clamp-2 mt-1">{{ product.desc }}</p>
               </a>
