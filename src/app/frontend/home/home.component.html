@@ -109,7 +109,7 @@
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             @for (product of newArrivals; track product._id) {
               <div 
-                class="product-card group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between h-full min-w-0 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out">
+                class="group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between h-full min-w-0 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out">
                 <div>
                   <a [routerLink]="['/products', product.slug || product._id]" class="block overflow-hidden rounded-lg mb-4 aspect-square relative bg-slate-50 dark:bg-slate-800/80 p-4 flex items-center justify-center">
                     <img 
@@ -162,7 +162,7 @@
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             @for (product of mostPopular; track product._id) {
               <div 
-                class="product-card group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between h-full min-w-0 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out">
+                class="group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between h-full min-w-0 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out">
                 <div>
                   <a [routerLink]="['/products', product.slug || product._id]" class="block overflow-hidden rounded-lg mb-4 aspect-square relative bg-slate-50 dark:bg-slate-800/80 p-4 flex items-center justify-center">
                     <img 
