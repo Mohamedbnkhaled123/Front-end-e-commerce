@@ -102,11 +102,22 @@ export class Home implements OnInit, OnDestroy {
     this._cdr.markForCheck();
   }
 
-  addToCart(product: IProduct, event?: Event) {
+  addToCart(product: IProduct, event?: Event): void {
     if (!product || product.stock === 0) return;
     if (event) {
+      event.stopPropagation();
       const cardEl = (event.target as HTMLElement).closest('.group') || (event.target as HTMLElement);
-      this._flyToCartService.fly(cardEl, event);
+      const imgElement = cardEl.querySelector('img') as HTMLImageElement;
+      const cartIconElement = document.querySelector('[data-cart-icon]') as HTMLElement || document.getElementById('cartIcon');
+      
+      if (imgElement && cartIconElement) {
+        this._flyToCartService.fly(imgElement, cartIconElement).then(() => {
+          cartIconElement.classList.add('animate-cart-pulse');
+          setTimeout(() => cartIconElement.classList.remove('animate-cart-pulse'), 300);
+        });
+      } else {
+        this._flyToCartService.fly(cardEl, event);
+      }
     }
     this._cartService.addToCart(product, 1).subscribe();
   }

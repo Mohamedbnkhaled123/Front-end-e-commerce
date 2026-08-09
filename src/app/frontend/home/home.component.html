@@ -39,14 +39,14 @@
         <div class="flex-1 w-full h-full flex items-center justify-center lg:justify-end relative mt-8 lg:mt-0">
           <div class="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full transform scale-75"></div>
           
-          <div class="relative w-full h-[250px] sm:h-[300px] md:h-[380px] flex items-center justify-center lg:pe-10 xl:pe-14">
+          <a routerLink="/products" class="relative w-full h-[250px] sm:h-[300px] md:h-[380px] flex items-center justify-center lg:pe-10 xl:pe-14 cursor-pointer block">
             <img [src]="cmsData.heroImage" 
                  fetchpriority="high"
                  loading="eager"
                  decoding="sync"
                  alt="Hero Banner Image"
                  class="absolute max-h-[200px] sm:max-h-[250px] md:max-h-[380px] w-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-700 ease-out hover:scale-105 z-10">
-          </div>
+          </a>
         </div>
 
         <!-- Mobile Button -->
@@ -109,7 +109,7 @@
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             @for (product of newArrivals; track product._id) {
               <div 
-                class="product-card group bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-lg flex flex-col justify-between h-full overflow-hidden min-w-0 transition-all duration-300 hover:-translate-y-1">
+                class="product-card group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between h-full min-w-0 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out">
                 <div>
                   <a [routerLink]="['/products', product.slug || product._id]" class="block overflow-hidden rounded-lg mb-4 aspect-square relative bg-slate-50 dark:bg-slate-800/80 p-4 flex items-center justify-center">
                     <img 
@@ -162,7 +162,7 @@
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             @for (product of mostPopular; track product._id) {
               <div 
-                class="product-card group bg-white dark:bg-slate-900 p-4 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-lg flex flex-col justify-between h-full overflow-hidden min-w-0 transition-all duration-300 hover:-translate-y-1">
+                class="product-card group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between h-full min-w-0 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out">
                 <div>
                   <a [routerLink]="['/products', product.slug || product._id]" class="block overflow-hidden rounded-lg mb-4 aspect-square relative bg-slate-50 dark:bg-slate-800/80 p-4 flex items-center justify-center">
                     <img 
