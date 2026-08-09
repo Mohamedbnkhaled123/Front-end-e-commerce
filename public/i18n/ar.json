@@ -52,6 +52,8 @@
   "product.out_of_stock": "نفذت الكمية",
   "product.in_stock": "متوفر بالمخزون",
   "product.description": "وصف المنتج",
+  "product.reviews": "تقييمات العملاء",
+  "product.verified_reviews": "تقييمات موثقة",
   "product.related": "منتجات ذات صلة",
   "product.add_to_cart": "إضافة إلى السلة",
   "cart.title": "عربة التسوق",

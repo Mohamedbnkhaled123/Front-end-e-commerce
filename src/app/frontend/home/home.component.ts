@@ -29,6 +29,7 @@ export class Home implements OnInit, OnDestroy {
 
   cmsData: HomePageData = DEFAULT_HOME;
   isCmsLoading: boolean = true;
+  isProductsLoading: boolean = false;
 
   currentLang: any;
 
@@ -61,9 +62,16 @@ export class Home implements OnInit, OnDestroy {
     if (preFetchedProducts && preFetchedProducts.length > 0) {
       this.handleProductsData(preFetchedProducts);
     } else {
+      this.isProductsLoading = true;
       const prodSub = this._productCacheService.getProducts().subscribe({
         next: (activeProducts: IProduct[]) => {
           this.handleProductsData(activeProducts);
+          this.isProductsLoading = false;
+          this._cdr.markForCheck();
+        },
+        error: () => {
+          this.isProductsLoading = false;
+          this._cdr.markForCheck();
         }
       });
       this.subscriptions.add(prodSub);

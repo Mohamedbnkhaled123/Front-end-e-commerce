@@ -52,6 +52,8 @@
   "product.out_of_stock": "Out of Stock",
   "product.in_stock": "In Stock",
   "product.description": "Product Description",
+  "product.reviews": "Customer Reviews",
+  "product.verified_reviews": "Verified Reviews",
   "product.related": "Related Products",
   "product.add_to_cart": "Add to Cart",
   "cart.title": "Shopping Cart",
