@@ -83,6 +83,12 @@ export class Home implements OnInit, OnDestroy {
       next: (res) => {
         const raw = res.data?.content ?? '';
         this.cmsData = parseCmsContent<HomePageData>(raw, DEFAULT_HOME);
+        
+        // Fix insecure localhost URL returned from DB in production
+        if (this.cmsData.heroImage && this.cmsData.heroImage.includes('http://localhost:3000/uploads/')) {
+          this.cmsData.heroImage = this.cmsData.heroImage.replace('http://localhost:3000/uploads/', this.staticURL);
+        }
+
         this.isCmsLoading = false;
         this._cdr.markForCheck();
       },
