@@ -1,0 +1,8 @@
+# shoPRO E-Commerce AI Guidelines
+
+Welcome to the shoPRO platform. This site is a modern e-commerce application.
+The purpose of this file is to provide basic context for AI agents crawling this site.
+
+## Important Links
+- [Home Page](https://e-commerce-app-theta-nine.vercel.app/)
+- [Products](https://e-commerce-app-theta-nine.vercel.app/products)
