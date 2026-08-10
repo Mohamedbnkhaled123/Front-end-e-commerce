@@ -3,7 +3,7 @@
     
     <!-- Hero Banner -->
     @if (isCmsLoading) {
-      <div class="relative w-full rounded-3xl overflow-hidden bg-slate-900 shadow-2xl min-h-[500px] lg:h-[500px] animate-pulse">
+      <div class="relative w-full rounded-3xl overflow-hidden bg-slate-900 shadow-2xl min-h-[500px] animate-pulse">
         <div class="absolute inset-0 bg-gradient-to-r from-slate-800 to-slate-900"></div>
         <div class="relative z-20 h-full flex flex-col lg:flex-row items-center justify-between p-6 py-10 md:p-12 lg:p-16 gap-6 md:gap-8">
           <div class="flex-1 space-y-6 w-full lg:max-w-xl flex flex-col items-center lg:items-start lg:ps-10 xl:ps-14">
@@ -22,7 +22,7 @@
       </div>
     } @else {
       <!-- Static Hero Banner -->
-      <div class="relative w-full rounded-3xl overflow-hidden bg-slate-900 shadow-2xl min-h-[500px] lg:h-[500px]">
+      <div class="relative w-full rounded-3xl overflow-hidden bg-slate-900 shadow-2xl min-h-[500px]">
         
         <!-- Background Gradient (Navy/Blue) -->
         <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950"></div>
@@ -31,14 +31,14 @@
         <div class="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 mix-blend-overlay"></div>
         
         <!-- Content Container -->
-        <div class="relative z-20 h-full flex flex-col lg:flex-row items-center justify-between p-6 py-10 md:p-12 lg:p-16 gap-6 md:gap-8 text-center lg:text-start lg:text-left rtl:lg:text-right">
+        <div class="relative z-20 flex flex-col lg:flex-row items-center justify-between p-6 py-10 md:p-12 lg:p-16 gap-6 md:gap-8 text-center lg:text-start lg:text-left rtl:lg:text-right min-h-[500px]">
           
           <!-- Text Content -->
           <div class="flex-1 space-y-4 md:space-y-6 max-w-lg lg:max-w-xl text-white flex flex-col items-center lg:items-start lg:ps-10 xl:ps-14">
             <div class="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest text-blue-100">
               New Collection
             </div>
-            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight drop-shadow-lg text-white">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight leading-tight drop-shadow-lg text-white">
               {{ localized(cmsData.heroTitle) }}
             </h1>
             <p class="text-blue-100/80 text-sm md:text-lg leading-relaxed line-clamp-3">
@@ -56,16 +56,16 @@
           </div>
 
           <!-- CMS Product Image -->
-          <div class="flex-1 w-full h-full flex items-center justify-center lg:justify-end relative mt-8 lg:mt-0">
+          <div class="flex-1 w-full flex items-center justify-center lg:justify-end relative mt-8 lg:mt-0 min-h-[250px]">
             <div class="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full transform scale-75"></div>
             
-            <a routerLink="/products" class="relative w-full h-[250px] sm:h-[300px] md:h-[380px] flex items-center justify-center lg:pe-10 xl:pe-14 cursor-pointer block">
+            <a routerLink="/products" class="relative w-full h-[250px] sm:h-[300px] md:h-[380px] flex items-center justify-center lg:pe-10 xl:pe-14 cursor-pointer">
               <img [src]="cmsData.heroImage" 
                    fetchpriority="high"
                    loading="eager"
                    decoding="sync"
                    alt="Hero Banner Image"
-                   class="absolute max-h-[200px] sm:max-h-[250px] md:max-h-[380px] w-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-700 ease-out hover:scale-105 z-10">
+                   class="max-h-[200px] sm:max-h-[250px] md:max-h-[380px] w-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-700 ease-out hover:scale-105 z-10">
             </a>
           </div>
 
