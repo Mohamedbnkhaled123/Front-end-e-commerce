@@ -73,7 +73,9 @@ export const crosshairPlugin: Plugin = {
 };
 
 // Factory functions to build Chart Configurations
-export function buildRevenueTrendConfig(trendData: IRevenueTrendPoint[], langService: LanguageService): ChartConfiguration<'line'> {
+export function buildRevenueTrendConfig(trendData: IRevenueTrendPoint[], langService: LanguageService, delayBetweenPoints: number = 30): ChartConfiguration<'line'> {
+  const previousY = (ctx: any) => ctx.index === 0 ? ctx.chart.scales.y.getPixelForValue(0) : ctx.chart.getDatasetMeta(ctx.datasetIndex).data[ctx.index - 1].getProps(['y'], true).y;
+
   return {
     type: 'line',
     data: {
@@ -116,7 +118,30 @@ export function buildRevenueTrendConfig(trendData: IRevenueTrendPoint[], langSer
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: false,
+      animation: {
+        x: {
+          type: 'number',
+          easing: 'linear',
+          duration: delayBetweenPoints,
+          from: NaN,
+          delay(ctx: any) {
+            if (ctx.type !== 'data' || ctx.xStarted) return 0;
+            ctx.xStarted = true;
+            return ctx.index * delayBetweenPoints;
+          }
+        },
+        y: {
+          type: 'number',
+          easing: 'linear',
+          duration: delayBetweenPoints,
+          from: previousY,
+          delay(ctx: any) {
+            if (ctx.type !== 'data' || ctx.yStarted) return 0;
+            ctx.yStarted = true;
+            return ctx.index * delayBetweenPoints;
+          }
+        }
+      },
       interaction: {
         mode: 'index',
         intersect: false,
