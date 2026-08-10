@@ -356,20 +356,20 @@ export class AdminCms implements OnInit {
     this.heroUploadProgress = 30;
     this._cdr.detectChanges();
 
-    this.currentUploadSub = this._cmsService.uploadHeroImage(this.sanitizedBlob, originalName).subscribe({
-      next: (res) => {
-        this.heroUploadProgress = 100;
-        this.homeData.heroImage = res.url;
-        this.heroUploadState = 'success';
-        this.heroUploadError = '';
-        this._cdr.detectChanges();
-      },
-      error: (err) => {
-        this.heroUploadState = 'error';
-        this.heroUploadError = err?.error?.message || 'Server upload failed. Please try again.';
-        this._cdr.detectChanges();
-      }
-    });
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.heroUploadProgress = 100;
+      this.homeData.heroImage = reader.result as string; // Embed as Base64 string directly
+      this.heroUploadState = 'success';
+      this.heroUploadError = '';
+      this._cdr.detectChanges();
+    };
+    reader.onerror = () => {
+      this.heroUploadState = 'error';
+      this.heroUploadError = 'Failed to process image locally. Please try again.';
+      this._cdr.detectChanges();
+    };
+    reader.readAsDataURL(this.sanitizedBlob);
   }
 
   cancelUpload(): void {
