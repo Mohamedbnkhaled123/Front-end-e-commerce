@@ -61,6 +61,9 @@
             
             <a routerLink="/products" class="relative w-full h-[250px] sm:h-[300px] md:h-[380px] flex items-center justify-center lg:pe-10 xl:pe-14 cursor-pointer">
               <img [src]="cmsData.heroImage" 
+                   [attr.srcset]="heroImageSrcset || null"
+                   sizes="(max-width: 640px) 400px, (max-width: 768px) 800px, 1200px"
+                   width="800" height="800"
                    fetchpriority="high"
                    loading="eager"
                    decoding="sync"

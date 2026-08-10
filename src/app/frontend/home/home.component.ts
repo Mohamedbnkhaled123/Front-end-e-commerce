@@ -30,6 +30,7 @@ export class Home implements OnInit, OnDestroy {
   cmsData: HomePageData = DEFAULT_HOME;
   isCmsLoading: boolean = true;
   isProductsLoading: boolean = false;
+  heroImageSrcset: string = '';
 
   currentLang: any;
 
@@ -87,6 +88,17 @@ export class Home implements OnInit, OnDestroy {
         // Fix insecure localhost URL returned from DB in production
         if (this.cmsData.heroImage && this.cmsData.heroImage.includes('http://localhost:3000/uploads/')) {
           this.cmsData.heroImage = this.cmsData.heroImage.replace('http://localhost:3000/uploads/', this.staticURL);
+        }
+
+        // Apply Cloudinary optimizations if it's a Cloudinary URL
+        if (this.cmsData.heroImage && this.cmsData.heroImage.includes('res.cloudinary.com') && !this.cmsData.heroImage.includes('f_auto')) {
+          const baseUrl = this.cmsData.heroImage;
+          this.cmsData.heroImage = baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/');
+          this.heroImageSrcset = `
+            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_400,c_limit/')} 400w,
+            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/')} 800w,
+            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_1200,c_limit/')} 1200w
+          `.trim();
         }
 
         this.isCmsLoading = false;
