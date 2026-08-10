@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /dashboard/
 
-Sitemap: http://localhost:8080/sitemap.xml
+Sitemap: https://customer-demo-e-commerce.vercel.app/sitemap.xml

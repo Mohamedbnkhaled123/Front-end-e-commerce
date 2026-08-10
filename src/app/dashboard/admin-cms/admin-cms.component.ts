@@ -17,6 +17,8 @@ import {
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { sanitizeImageFile, validateImageUrl } from '../../core/utils/image-upload-sanitizer';
 
+import { CloudinaryService } from '../../core/services/cloudinary.service';
+
 @Component({
   selector: 'app-admin-cms',
   standalone: true,
@@ -25,7 +27,11 @@ import { sanitizeImageFile, validateImageUrl } from '../../core/utils/image-uplo
 })
 export class AdminCms implements OnInit {
 
-  constructor(private _cmsService: CmsService, private _cdr: ChangeDetectorRef) {}
+  constructor(
+    private _cmsService: CmsService, 
+    private _cloudinaryService: CloudinaryService,
+    private _cdr: ChangeDetectorRef
+  ) {}
 
   readonly pages: CmsPageName[] = ['Home', 'About', 'Policy', 'FAQ', 'Contact'];
   activeTab: CmsPageName = 'Home';
@@ -353,23 +359,23 @@ export class AdminCms implements OnInit {
     if (!this.sanitizedBlob) return;
 
     this.heroUploadState = 'uploading';
-    this.heroUploadProgress = 30;
+    this.heroUploadProgress = 30; // Starts upload
     this._cdr.detectChanges();
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.heroUploadProgress = 100;
-      this.homeData.heroImage = reader.result as string; // Embed as Base64 string directly
-      this.heroUploadState = 'success';
-      this.heroUploadError = '';
-      this._cdr.detectChanges();
-    };
-    reader.onerror = () => {
-      this.heroUploadState = 'error';
-      this.heroUploadError = 'Failed to process image locally. Please try again.';
-      this._cdr.detectChanges();
-    };
-    reader.readAsDataURL(this.sanitizedBlob);
+    this.currentUploadSub = this._cloudinaryService.uploadImage(this.sanitizedBlob, originalName).subscribe({
+      next: (res) => {
+        this.heroUploadProgress = 100;
+        this.homeData.heroImage = res.secure_url;
+        this.heroUploadState = 'success';
+        this.heroUploadError = '';
+        this._cdr.detectChanges();
+      },
+      error: (err) => {
+        this.heroUploadState = 'error';
+        this.heroUploadError = 'Failed to upload image to Cloudinary. Please check configuration or try again.';
+        this._cdr.detectChanges();
+      }
+    });
   }
 
   cancelUpload(): void {
