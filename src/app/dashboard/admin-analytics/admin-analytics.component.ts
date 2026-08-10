@@ -347,9 +347,8 @@ export class AdminAnalytics implements OnInit, OnDestroy {
     this.setupResizeObserver();
 
     await this.initChartModule();
-    const delayBetweenPoints = 1200 / (trendData.length || 1);
 
-    const config = buildRevenueTrendConfig(trendData, this._langService, delayBetweenPoints);
+    const config = buildRevenueTrendConfig(trendData, this._langService);
 
     this.revenueChartInstance = new this.ChartConstructor(this.revenueCanvas.nativeElement, config);
   }
