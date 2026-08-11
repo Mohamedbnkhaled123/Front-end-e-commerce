@@ -46,8 +46,8 @@ export class ProductService {
   }
 
   // Creates new store product
-  addProduct(formData: FormData) {
-    return this._http.post<IProductRes>(this.apiURL, formData);
+  addProduct(payload: any) {
+    return this._http.post<IProductRes>(this.apiURL, payload);
   }
 
   // Updates existing product details

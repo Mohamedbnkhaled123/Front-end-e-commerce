@@ -4,6 +4,8 @@ import { RouterLink, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService, ICategory } from '../../../core/services/category.service';
+import { CloudinaryService } from '../../../core/services/cloudinary.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-add-product',
@@ -32,13 +34,20 @@ export class AddProduct implements OnInit {
   isAddingCategory = false;
   categoryModalError = '';
 
+  private subscriptions = new Subscription();
+
   constructor(
     private _fb: FormBuilder,
     private _productService: ProductService,
     private _categoryService: CategoryService,
+    private _cloudinaryService: CloudinaryService,
     private _router: Router,
     private _cdr: ChangeDetectorRef
   ) {}
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
 
   ngOnInit(): void {
     this.productForm = this._fb.group({
@@ -123,29 +132,45 @@ export class AddProduct implements OnInit {
     this.isAddingCategory = true;
     this._cdr.detectChanges();
 
-    const fd = new FormData();
-    fd.append('name', this.newCategoryName.trim());
-    if (this.newCategoryFile) fd.append('img', this.newCategoryFile);
-
-    this._categoryService.addCategory(fd).subscribe({
-      next: (res) => {
-        this.isAddingCategory = false;
-        this.showCategoryModal = false;
-        const cat = res.data;
-        if (cat?._id) {
-          this.categories = [...this.categories, cat];
-          this.selectedCategoryId = cat._id;
-        } else {
-          this.loadCategories();
+    const addCat = (imgURL?: string) => {
+      const payload = { name: this.newCategoryName.trim(), imgURL };
+      const sub = this._categoryService.addCategory(payload).subscribe({
+        next: (res) => {
+          this.isAddingCategory = false;
+          this.showCategoryModal = false;
+          const cat = res.data;
+          if (cat?._id) {
+            this.categories = [...this.categories, cat];
+            this.selectedCategoryId = cat._id;
+          } else {
+            this.loadCategories();
+          }
+          this._cdr.detectChanges();
+        },
+        error: (err: any) => {
+          this.isAddingCategory = false;
+          this.categoryModalError = err?.error?.message || 'Failed to add category.';
+          this._cdr.detectChanges();
         }
-        this._cdr.detectChanges();
-      },
-      error: (err: any) => {
-        this.isAddingCategory = false;
-        this.categoryModalError = err?.error?.message || 'Failed to add category.';
-        this._cdr.detectChanges();
-      }
-    });
+      });
+      this.subscriptions.add(sub);
+    };
+
+    if (this.newCategoryFile) {
+      const uploadSub = this._cloudinaryService.uploadImage(this.newCategoryFile, this.newCategoryFile.name).subscribe({
+        next: (res) => {
+          addCat(res.secure_url);
+        },
+        error: () => {
+          this.isAddingCategory = false;
+          this.categoryModalError = 'Failed to upload category image to Cloudinary.';
+          this._cdr.detectChanges();
+        }
+      });
+      this.subscriptions.add(uploadSub);
+    } else {
+      addCat();
+    }
   }
 
   // === Submit Product ===
@@ -169,36 +194,59 @@ export class AddProduct implements OnInit {
     this.isLoading = true;
     this._cdr.detectChanges();
 
-    const fd = new FormData();
-    const vals = this.productForm.value;
-    fd.append('name', vals.name);
-    fd.append('slug', vals.slug || '');
-    fd.append('desc', vals.desc);
-    fd.append('price', vals.price);
-    fd.append('discount', vals.discount || 0);
-    fd.append('stock', vals.stock);
-    fd.append('newArrived', vals.newArrived ? 'true' : 'false');
-    fd.append('mostPopular', vals.mostPopular ? 'true' : 'false');
-    fd.append('category', this.selectedCategoryId);
-    fd.append('img', this.selectedFile);
+    const submitProductData = (imgURL: string) => {
+      const vals = this.productForm.value;
+      const payload = {
+        name: vals.name,
+        slug: vals.slug || '',
+        desc: vals.desc,
+        price: vals.price,
+        discount: vals.discount || 0,
+        stock: vals.stock,
+        newArrived: vals.newArrived ? true : false,
+        mostPopular: vals.mostPopular ? true : false,
+        category: this.selectedCategoryId,
+        imgURL: imgURL
+      };
 
-    this._productService.addProduct(fd).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.successMessage = 'تمت إضافة المنتج بنجاح!';
-        this.productForm.reset({ discount: 0, newArrived: false, mostPopular: false });
-        this.selectedFile = null;
-        this._cdr.detectChanges();
-        
-        setTimeout(() => {
-          this._router.navigate(['/admin/products']);
-        }, 1500);
-      },
-      error: (err: any) => {
-        this.isLoading = false;
-        this.errorMessage = err?.error?.message || 'حدث خطأ أثناء إضافة المنتج.';
-        this._cdr.detectChanges();
-      }
-    });
+      const sub = this._productService.addProduct(payload).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.successMessage = 'تمت إضافة المنتج بنجاح!';
+          this.productForm.reset({ discount: 0, newArrived: false, mostPopular: false });
+          this.selectedFile = null;
+          this._cdr.detectChanges();
+          
+          setTimeout(() => {
+            this._router.navigate(['/admin/products']);
+          }, 1500);
+        },
+        error: (err: any) => {
+          this.isLoading = false;
+          this.errorMessage = err?.error?.message || 'حدث خطأ أثناء إضافة المنتج.';
+          this._cdr.detectChanges();
+        }
+      });
+      this.subscriptions.add(sub);
+    };
+
+    if (this.selectedFile) {
+      const uploadSub = this._cloudinaryService.uploadImage(this.selectedFile, this.selectedFile.name).subscribe({
+        next: (res) => {
+          submitProductData(res.secure_url);
+        },
+        error: () => {
+          this.isLoading = false;
+          this.errorMessage = 'حدث خطأ أثناء رفع الصورة إلى Cloudinary.';
+          this._cdr.detectChanges();
+        }
+      });
+      this.subscriptions.add(uploadSub);
+    } else {
+      // Should not be reached because of the validation above
+      this.isLoading = false;
+      this.errorMessage = 'يرجى اختيار صورة للمنتج.';
+      this._cdr.detectChanges();
+    }
   }
 }

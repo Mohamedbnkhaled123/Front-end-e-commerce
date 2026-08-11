@@ -18,10 +18,10 @@ export class CategoryService {
     return this._http.get<{ status: string; data: ICategory[] }>(this.apiURL);
   }
 
-  addCategory(formData: FormData) {
+  addCategory(payload: any) {
     return this._http.post<{ status: string; message: string; data: ICategory }>(
       this.apiURL, 
-      formData
+      payload
     );
   }
 }

@@ -4,6 +4,7 @@ import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../../core/services/product.service';
 import { ModalService } from '../../../core/services/modal.service';
+import { CloudinaryService } from '../../../core/services/cloudinary.service';
 import { env } from '../../../../env/env';
 import { Subscription } from 'rxjs';
 
@@ -35,6 +36,7 @@ export class EditProduct implements OnInit, OnDestroy {
     private _router: Router,
     private _productService: ProductService,
     private _modalService: ModalService,
+    private _cloudinaryService: CloudinaryService,
     private _cdr: ChangeDetectorRef
   ) {}
 
@@ -130,47 +132,66 @@ export class EditProduct implements OnInit, OnDestroy {
     this.isSaving = true;
     this._cdr.detectChanges();
 
-    const formData = new FormData();
-    formData.append('name', this.editForm.get('name')?.value || '');
-    formData.append('desc', this.editForm.get('desc')?.value || '');
-    formData.append('price', String(this.editForm.get('price')?.value || 0));
-    formData.append('discount', String(this.editForm.get('discount')?.value || 0));
-    formData.append('stock', String(this.editForm.get('stock')?.value || 0));
-    formData.append('slug', this.editForm.get('slug')?.value || '');
-    formData.append('isActive', String(this.editForm.get('isActive')?.value));
-    formData.append('newArrived', String(this.editForm.get('newArrived')?.value));
-    formData.append('mostPopular', String(this.editForm.get('mostPopular')?.value));
+    const updateProductData = (imgURL?: string) => {
+      const payload: any = {
+        name: this.editForm.get('name')?.value || '',
+        desc: this.editForm.get('desc')?.value || '',
+        price: this.editForm.get('price')?.value || 0,
+        discount: this.editForm.get('discount')?.value || 0,
+        stock: this.editForm.get('stock')?.value || 0,
+        slug: this.editForm.get('slug')?.value || '',
+        isActive: this.editForm.get('isActive')?.value,
+        newArrived: this.editForm.get('newArrived')?.value,
+        mostPopular: this.editForm.get('mostPopular')?.value
+      };
 
-    if (this.existingCategory) {
-      const catId = typeof this.existingCategory === 'object' ? this.existingCategory._id : String(this.existingCategory);
-      if (catId) formData.append('category', catId);
-    }
+      if (this.existingCategory) {
+        const catId = typeof this.existingCategory === 'object' ? this.existingCategory._id : String(this.existingCategory);
+        if (catId) payload.category = catId;
+      }
 
-    if (this.existingSubCategory) {
-      const subCatId = typeof this.existingSubCategory === 'object' ? this.existingSubCategory._id : String(this.existingSubCategory);
-      if (subCatId) formData.append('subCategory', subCatId);
-    }
+      if (this.existingSubCategory) {
+        const subCatId = typeof this.existingSubCategory === 'object' ? this.existingSubCategory._id : String(this.existingSubCategory);
+        if (subCatId) payload.subCategory = subCatId;
+      }
+
+      if (imgURL) {
+        payload.imgURL = imgURL;
+      }
+
+      const sub = this._productService.updateProduct(this.productId, payload).subscribe({
+        next: () => {
+          this.isSaving = false;
+          this.successMessage = 'Product updated successfully!';
+          this._cdr.detectChanges();
+          setTimeout(() => {
+            this._router.navigate(['/admin/products']);
+          }, 1200);
+        },
+        error: (err) => {
+          this.isSaving = false;
+          this.errorMessage = err?.error?.message || 'Failed to update product.';
+          this._cdr.detectChanges();
+        }
+      });
+      this.subscriptions.add(sub);
+    };
 
     if (this.selectedFile) {
-      formData.append('img', this.selectedFile);
+      const uploadSub = this._cloudinaryService.uploadImage(this.selectedFile, this.selectedFile.name).subscribe({
+        next: (res) => {
+          updateProductData(res.secure_url);
+        },
+        error: () => {
+          this.isSaving = false;
+          this.errorMessage = 'Failed to upload image to Cloudinary.';
+          this._cdr.detectChanges();
+        }
+      });
+      this.subscriptions.add(uploadSub);
+    } else {
+      updateProductData();
     }
-
-    const sub = this._productService.updateProduct(this.productId, formData).subscribe({
-      next: () => {
-        this.isSaving = false;
-        this.successMessage = 'Product updated successfully!';
-        this._cdr.detectChanges();
-        setTimeout(() => {
-          this._router.navigate(['/admin/products']);
-        }, 1200);
-      },
-      error: (err) => {
-        this.isSaving = false;
-        this.errorMessage = err?.error?.message || 'Failed to update product.';
-        this._cdr.detectChanges();
-      }
-    });
-    this.subscriptions.add(sub);
   }
 
   // Soft deletes product by ID
