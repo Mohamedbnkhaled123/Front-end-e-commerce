@@ -155,7 +155,7 @@
                   <a [routerLink]="['/products', product.slug || product._id]" class="block overflow-hidden rounded-lg mb-4 aspect-square relative bg-slate-50 dark:bg-slate-800/80 p-4 flex items-center justify-center">
                     <img 
                       [src]="product.fullImgUrl" 
-                      [style.view-transition-name]="'product-img-pop-' + product._id"
+                      [style.view-transition-name]="'product-img-' + product._id"
                       loading="lazy" 
                       decoding="async" 
                       width="300" height="300"
@@ -234,7 +234,7 @@
                   <a [routerLink]="['/products', product.slug || product._id]" class="block overflow-hidden rounded-lg mb-4 aspect-square relative bg-slate-50 dark:bg-slate-800/80 p-4 flex items-center justify-center">
                     <img 
                       [src]="product.fullImgUrl" 
-                      [style.view-transition-name]="'product-img-pop-' + product._id"
+                      [style.view-transition-name]="'product-img-' + product._id"
                       loading="lazy" 
                       decoding="async" 
                       width="300" height="300"

@@ -87,7 +87,12 @@
         <div class="group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out">
           <div>
             <a [routerLink]="['/products', product.slug || product._id]" class="block overflow-hidden relative rounded-lg bg-slate-50 dark:bg-slate-800/80 mb-3 p-4 flex items-center justify-center">
-              <img [src]="product.imgURL.startsWith('http') ? product.imgURL : staticURL + product.imgURL" class="w-full h-48 object-contain rounded-lg transform group-hover:scale-105 transition-transform duration-500 ease-out" [alt]="product | localizeField:'name'">
+              <img 
+                [src]="product.imgURL.startsWith('http') ? product.imgURL : staticURL + product.imgURL" 
+                [style.view-transition-name]="'product-img-' + product._id"
+                class="w-full h-48 object-contain rounded-lg transform group-hover:scale-105 transition-transform duration-500 ease-out" 
+                [alt]="product | localizeField:'name'"
+              >
             </a>
             <a [routerLink]="['/products', product.slug || product._id]">
               <h3 class="text-sm font-semibold text-slate-900 dark:text-white line-clamp-2 min-h-[2.8em] px-1">{{ product | localizeField:'name' }}</h3>

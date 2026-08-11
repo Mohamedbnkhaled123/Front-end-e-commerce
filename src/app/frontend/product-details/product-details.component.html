@@ -18,6 +18,7 @@
             <div class="w-full max-w-[450px] aspect-square rounded-2xl flex items-center justify-center shadow-sm overflow-hidden bg-slate-50 dark:bg-slate-800/80 border border-gray-100 dark:border-slate-800 relative">
               <img 
                 [src]="product.imgURL.startsWith('http') ? product.imgURL : staticURL + product.imgURL" 
+                [style.view-transition-name]="'product-img-' + product._id"
                 [alt]="product.name"
                 class="w-full h-full object-cover rounded-lg"
               >
