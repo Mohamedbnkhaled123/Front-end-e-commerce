@@ -186,13 +186,18 @@
             <h2 class="text-lg font-extrabold text-slate-900 dark:text-white mb-6 uppercase tracking-wider">Related Products</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               @for (rel of relatedProducts; track rel._id) {
-                <div class="border border-gray-200 dark:border-slate-800 p-4 rounded-xl flex flex-col justify-between bg-slate-50/50 dark:bg-slate-800/50">
-                  <a [routerLink]="['/products', rel.slug || rel._id]">
-                    <img [src]="rel.imgURL.startsWith('http') ? rel.imgURL : staticURL + rel.imgURL" class="w-full h-36 object-cover rounded mb-3" [alt]="rel.name">
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ rel.name }}</h3>
-                    <p class="text-xs text-slate-500 font-bold mt-1">{{ rel.price }} EGP</p>
-                  </a>
-                  <a [routerLink]="['/products', rel.slug || rel._id]" class="mt-3 flex items-center justify-center gap-1 w-full bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-medium py-1.5 rounded-lg transition-all cursor-pointer">
+                  <div class="border border-gray-200 dark:border-slate-800 p-4 rounded-xl flex flex-col justify-between bg-slate-50/50 dark:bg-slate-800/50">
+                    <a [routerLink]="['/products', rel.slug || rel._id]" (click)="clickedRelId.set(rel._id)">
+                      <img 
+                        [src]="rel.imgURL.startsWith('http') ? rel.imgURL : staticURL + rel.imgURL" 
+                        [style.view-transition-name]="clickedRelId() === rel._id ? 'product-img-' + rel._id : null"
+                        class="w-full h-36 object-cover rounded mb-3" 
+                        [alt]="rel.name"
+                      >
+                      <h3 class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ rel.name }}</h3>
+                      <p class="text-xs text-slate-500 font-bold mt-1">{{ rel.price }} EGP</p>
+                    </a>
+                    <a [routerLink]="['/products', rel.slug || rel._id]" (click)="clickedRelId.set(rel._id)" class="mt-3 flex items-center justify-center gap-1 w-full bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-medium py-1.5 rounded-lg transition-all cursor-pointer">
                     <span>Details</span>
                     <svg class="w-3 h-3 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                   </a>

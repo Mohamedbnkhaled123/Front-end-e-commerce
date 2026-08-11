@@ -1,5 +1,5 @@
 import { LocalizeFieldPipe } from '../../core/pipes/localize-field.pipe';
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -20,6 +20,7 @@ import { FlyToCartService } from '../../core/services/fly-to-cart.service';
   templateUrl: './product-details.component.html'
 })
 export class ProductDetails implements OnInit, OnDestroy {
+  clickedRelId = signal<string | null>(null);
   product: IProduct | null = null;
   relatedProducts: IProduct[] = [];
   staticURL = env.staticURL;

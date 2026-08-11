@@ -152,17 +152,17 @@
               <div 
                 class="group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-3 sm:p-4 flex flex-col justify-between h-full min-w-0 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out overflow-hidden">
                 <div>
-                  <a [routerLink]="['/products', product.slug || product._id]" class="block overflow-hidden rounded-lg mb-4 aspect-square relative bg-slate-50 dark:bg-slate-800/80 p-4 flex items-center justify-center">
+                  <a [routerLink]="['/products', product.slug || product._id]" (click)="clickedProductId.set(product._id)" class="block overflow-hidden rounded-lg mb-4 aspect-square relative bg-slate-50 dark:bg-slate-800/80 p-4 flex items-center justify-center">
                     <img 
                       [src]="product.fullImgUrl" 
-                      [style.view-transition-name]="'product-img-' + product._id"
+                      [style.view-transition-name]="clickedProductId() === product._id ? 'product-img-' + product._id : null"
                       loading="lazy" 
                       decoding="async" 
                       width="300" height="300"
                       class="w-full h-full object-contain rounded-lg transform group-hover:scale-105 transition-transform duration-500" 
                       [alt]="product | localizeField:'name'">
                   </a>
-                  <a [routerLink]="['/products', product.slug || product._id]" class="block">
+                  <a [routerLink]="['/products', product.slug || product._id]" (click)="clickedProductId.set(product._id)" class="block">
                     <h3 class="text-sm md:text-base font-semibold text-slate-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ product | localizeField:'name' }}</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1.5 leading-relaxed">{{ product | localizeField:'desc' }}</p>
                   </a>
@@ -231,17 +231,17 @@
               <div 
                 class="group bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between h-full min-w-0 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out">
                 <div>
-                  <a [routerLink]="['/products', product.slug || product._id]" class="block overflow-hidden rounded-lg mb-4 aspect-square relative bg-slate-50 dark:bg-slate-800/80 p-4 flex items-center justify-center">
+                  <a [routerLink]="['/products', product.slug || product._id]" (click)="clickedProductId.set(product._id)" class="block overflow-hidden rounded-lg mb-4 aspect-square relative bg-slate-50 dark:bg-slate-800/80 p-4 flex items-center justify-center">
                     <img 
                       [src]="product.fullImgUrl" 
-                      [style.view-transition-name]="'product-img-' + product._id"
+                      [style.view-transition-name]="clickedProductId() === product._id ? 'product-img-' + product._id : null"
                       loading="lazy" 
                       decoding="async" 
                       width="300" height="300"
                       class="w-full h-full object-contain rounded-lg transform group-hover:scale-105 transition-transform duration-500" 
                       [alt]="product | localizeField:'name'">
                   </a>
-                  <a [routerLink]="['/products', product.slug || product._id]" class="block">
+                  <a [routerLink]="['/products', product.slug || product._id]" (click)="clickedProductId.set(product._id)" class="block">
                     <h3 class="text-sm md:text-base font-semibold text-slate-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ product | localizeField:'name' }}</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1.5 leading-relaxed">{{ product | localizeField:'desc' }}</p>
                   </a>

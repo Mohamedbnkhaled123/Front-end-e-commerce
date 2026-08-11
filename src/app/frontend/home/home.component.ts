@@ -1,5 +1,5 @@
 import { LocalizeFieldPipe } from '../../core/pipes/localize-field.pipe';
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, NgZone, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
@@ -23,6 +23,7 @@ import { HomePageData, DEFAULT_HOME, parseCmsContent } from '../../core/models/c
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Home implements OnInit, OnDestroy {
+  clickedProductId = signal<string | null>(null);
   newArrivals: IProduct[] = [];
   mostPopular: IProduct[] = [];
   staticURL = env.staticURL;
