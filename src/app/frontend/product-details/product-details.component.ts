@@ -59,6 +59,7 @@ export class ProductDetails implements OnInit, OnDestroy {
         const res = data['productData'];
         if (res && res.data) {
           this.product = res.data;
+          this.clickedRelId.set(null);
           this.activeImageURL = this.product?.imgURL || null;
           if (this.product && this.product._id) {
             this.loadProductReviews(this.product._id);
