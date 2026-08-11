@@ -150,9 +150,55 @@ export class AddProduct implements OnInit {
 
   // === Submit Product ===
   onSubmit() {
-    this.errorMessage = 'لا يمكن للأدمن إضافة المنتجات';
+    this.errorMessage = '';
     this.successMessage = '';
-    this.isLoading = false;
+
+    if (this.productForm.invalid) {
+      this.errorMessage = 'يرجى ملء جميع الحقول المطلوبة.';
+      return;
+    }
+    if (!this.selectedCategoryId) {
+      this.errorMessage = 'يرجى تحديد قسم للمنتج.';
+      return;
+    }
+    if (!this.selectedFile) {
+      this.errorMessage = 'يرجى اختيار صورة للمنتج.';
+      return;
+    }
+
+    this.isLoading = true;
     this._cdr.detectChanges();
+
+    const fd = new FormData();
+    const vals = this.productForm.value;
+    fd.append('name', vals.name);
+    fd.append('slug', vals.slug || '');
+    fd.append('desc', vals.desc);
+    fd.append('price', vals.price);
+    fd.append('discount', vals.discount || 0);
+    fd.append('stock', vals.stock);
+    fd.append('newArrived', vals.newArrived ? 'true' : 'false');
+    fd.append('mostPopular', vals.mostPopular ? 'true' : 'false');
+    fd.append('category', this.selectedCategoryId);
+    fd.append('img', this.selectedFile);
+
+    this._productService.addProduct(fd).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.successMessage = 'تمت إضافة المنتج بنجاح!';
+        this.productForm.reset({ discount: 0, newArrived: false, mostPopular: false });
+        this.selectedFile = null;
+        this._cdr.detectChanges();
+        
+        setTimeout(() => {
+          this._router.navigate(['/admin/products']);
+        }, 1500);
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        this.errorMessage = err?.error?.message || 'حدث خطأ أثناء إضافة المنتج.';
+        this._cdr.detectChanges();
+      }
+    });
   }
 }
