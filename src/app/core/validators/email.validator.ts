@@ -70,12 +70,6 @@ export function validateEmail(raw: string): EmailValidationResult {
     return fail(sanitized, 'Email domain must contain at least one period.');
   }
 
-  // ── Google / Gmail Domain Check ──────────────────────────────────────────
-  const allowedGoogleDomains = ['gmail.com', 'googlemail.com'];
-  if (!allowedGoogleDomains.includes(domain)) {
-    return fail(sanitized, 'Only Google email addresses (@gmail.com) are supported.');
-  }
-
   const labels = domain.split('.');
 
   for (const label of labels) {

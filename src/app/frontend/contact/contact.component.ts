@@ -7,6 +7,7 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { ContactPageData, DEFAULT_CONTACT, parseCmsContent } from '../../core/models/cms.model';
 import { ContactService } from '../../core/services/contact.service';
 import { AuthService } from '../../core/services/auth-service';
+import { validateEmail } from '../../core/validators/email.validator';
 
 @Component({
   selector: 'app-contact',
@@ -27,10 +28,6 @@ export class Contact implements OnInit {
   submitSuccess: string = '';
   submitError: string = '';
 
-  validateEmail(email: string): boolean {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
-  }
 
   onSubmit(): void {
     this.submitSuccess = '';
@@ -41,10 +38,14 @@ export class Contact implements OnInit {
       return;
     }
 
-    if (!this.validateEmail(this.formEmail)) {
-      this.submitError = this.langService.currentLang() === 'ar' ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address.';
+    const emailCheck = validateEmail(this.formEmail);
+    if (!emailCheck.valid) {
+      this.submitError = this.langService.currentLang() === 'ar' 
+        ? 'يرجى إدخال بريد إلكتروني صحيح' 
+        : emailCheck.error || 'Please enter a valid email address.';
       return;
     }
+    this.formEmail = emailCheck.sanitized;
 
     const userRole = this._authService.isUser();
     if (userRole === 'admin' || userRole === 'superadmin') {

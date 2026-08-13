@@ -109,6 +109,14 @@ export class Signup implements ICanComponentDeactivate {
       return;
     }
 
+    if (this.phone) {
+      const phoneRegex = /^\+?[0-9]{10,15}$/;
+      if (!phoneRegex.test(this.phone.trim())) {
+        this.errorMsg = 'Please enter a valid phone number (10-15 digits, optional +).';
+        return;
+      }
+    }
+
     this.isLoading = true;
     this._cdr.detectChanges();
 
@@ -121,13 +129,21 @@ export class Signup implements ICanComponentDeactivate {
 
     this._authService.register(payload).subscribe({
       next: () => {
-        this.isLoading = false;
-        this.successMsg = 'Registration successful! Redirecting to login...';
+        this.successMsg = 'Registration successful! Redirecting to store...';
         this.isFormDirty = false;
-        this._cdr.detectChanges();
-        setTimeout(() => {
-          this._router.navigate(['/login']);
-        }, 1500);
+        
+        // Auto-login after successful registration
+        this._authService.login({ email: this.email.trim(), password: this.password }).subscribe({
+          next: () => {
+             this.isLoading = false;
+             this._cdr.detectChanges();
+          },
+          error: () => {
+             this.isLoading = false;
+             this._cdr.detectChanges();
+             this._router.navigate(['/login']);
+          }
+        });
       },
       error: (err) => {
         this.isLoading = false;
