@@ -24,18 +24,15 @@ export function validateEmail(raw: string): EmailValidationResult {
     return fail('', 'Email address is required.');
   }
 
-  // ── RFC 5321 total length ──────────────────────────────────────────────────
   if (sanitized.length > 254) {
     return fail(sanitized, 'Email address must not exceed 254 characters.');
   }
 
-  // ── Split at @ ────────────────────────────────────────────────────────────
   const atIdx = sanitized.indexOf('@');
   if (atIdx === -1) {
     return fail(sanitized, 'Email address must contain "@".');
   }
 
-  // Reject multiple @ signs
   if (sanitized.indexOf('@', atIdx + 1) !== -1) {
     return fail(sanitized, 'Email address must contain exactly one "@".');
   }
@@ -43,51 +40,42 @@ export function validateEmail(raw: string): EmailValidationResult {
   const local = sanitized.slice(0, atIdx);
   const domain = sanitized.slice(atIdx + 1);
 
-  // ── Local part ────────────────────────────────────────────────────────────
-  if (local.length === 0 || local.length > 64) {
-    return fail(sanitized, 'The part before "@" must be between 1 and 64 characters.');
+  // ── Google / Gmail Domain Check ──────────────────────────────────────────
+  const allowedGoogleDomains = ['gmail.com', 'googlemail.com'];
+  if (!allowedGoogleDomains.includes(domain)) {
+    return fail(sanitized, 'Only Google email addresses (@gmail.com) are supported.');
   }
 
-  if (local.startsWith('.') || local.endsWith('.')) {
-    return fail(sanitized, 'The part before "@" cannot start or end with a period.');
+  // ── Local part (Google Rules) ────────────────────────────────────────────
+  if (local.length === 0) {
+    return fail(sanitized, 'The email username cannot be empty.');
   }
 
-  if (local.includes('..')) {
-    return fail(sanitized, 'The part before "@" cannot contain consecutive periods.');
+  // Handle Gmail aliases (e.g., username+alias@gmail.com)
+  const baseUsername = local.split('+')[0];
+
+  if (baseUsername.length < 6 || baseUsername.length > 30) {
+    return fail(sanitized, 'The Google username (before +) must be between 6 and 30 characters long.');
   }
 
-  // Whitelist: alphanumeric + . _ % + -
-  if (!/^[a-z0-9._%+\-]+$/.test(local)) {
-    return fail(sanitized, 'The part before "@" contains invalid characters.');
+  if (!/^[a-z0-9.]+$/.test(baseUsername)) {
+    return fail(sanitized, 'The Google username can only contain letters (a-z), numbers (0-9), and periods (.).');
   }
 
-  // ── Domain ────────────────────────────────────────────────────────────────
-  if (!domain || domain.length < 3) {
-    return fail(sanitized, 'Email domain is missing or too short.');
+  if (baseUsername.startsWith('.') || baseUsername.endsWith('.')) {
+    return fail(sanitized, 'The Google username cannot start or end with a period.');
   }
 
-  if (!domain.includes('.')) {
-    return fail(sanitized, 'Email domain must contain at least one period.');
+  if (baseUsername.includes('..')) {
+    return fail(sanitized, 'The Google username cannot contain consecutive periods.');
   }
 
-  const labels = domain.split('.');
-
-  for (const label of labels) {
-    if (label.length === 0) {
-      return fail(sanitized, 'Email domain contains consecutive periods.');
+  // Check the alias part (if any)
+  if (local.includes('+')) {
+    const aliasPart = local.slice(baseUsername.length); // includes the '+'
+    if (!/^[a-z0-9._%+\-]+$/.test(aliasPart)) {
+      return fail(sanitized, 'The alias part of the email contains invalid characters.');
     }
-    if (label.startsWith('-') || label.endsWith('-')) {
-      return fail(sanitized, 'Email domain labels cannot start or end with a hyphen.');
-    }
-    if (!/^[a-z0-9\-]+$/.test(label)) {
-      return fail(sanitized, 'Email domain contains invalid characters.');
-    }
-  }
-
-  // ── TLD ───────────────────────────────────────────────────────────────────
-  const tld = labels[labels.length - 1];
-  if (tld.length < 2) {
-    return fail(sanitized, 'Email top-level domain must be at least 2 characters.');
   }
 
   return { valid: true, sanitized, error: null };
