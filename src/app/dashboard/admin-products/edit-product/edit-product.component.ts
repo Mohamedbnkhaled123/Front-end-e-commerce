@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../../core/services/product.service';
+import { CategoryService, ICategory } from '../../../core/services/category.service';
+import { SubCategoryService, ISubCategory } from '../../../core/services/subcategory.service';
 import { ModalService } from '../../../core/services/modal.service';
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
 import { env } from '../../../../env/env';
@@ -20,9 +22,14 @@ export class EditProduct implements OnInit, OnDestroy {
   staticURL = env.staticURL;
 
   currentImgURL = '';
-  existingCategory: any = null;
-  existingSubCategory: any = null;
   selectedFile: File | null = null;
+
+  categories: ICategory[] = [];
+  subCategories: ISubCategory[] = [];
+  selectedCategoryId = '';
+  selectedSubCategoryId = '';
+  isLoadingCategories = false;
+  isLoadingSubCategories = false;
 
   isLoading = false;
   isSaving = false;
@@ -35,6 +42,8 @@ export class EditProduct implements OnInit, OnDestroy {
     private _route: ActivatedRoute,
     private _router: Router,
     private _productService: ProductService,
+    private _categoryService: CategoryService,
+    private _subCategoryService: SubCategoryService,
     private _modalService: ModalService,
     private _cloudinaryService: CloudinaryService,
     private _cdr: ChangeDetectorRef
@@ -57,7 +66,59 @@ export class EditProduct implements OnInit, OnDestroy {
 
     if (this.productId) {
       this.loadProductDetails();
+      this.loadCategories();
     }
+  }
+
+  loadCategories() {
+    this.isLoadingCategories = true;
+    this._categoryService.getCategories().subscribe({
+      next: (res) => {
+        this.categories = res.data || [];
+        this.isLoadingCategories = false;
+        this._cdr.detectChanges();
+      },
+      error: () => {
+        this.categories = [];
+        this.isLoadingCategories = false;
+        this._cdr.detectChanges();
+      }
+    });
+  }
+
+  loadSubCategories(categoryId: string) {
+    if (!categoryId) {
+      this.subCategories = [];
+      this.selectedSubCategoryId = '';
+      return;
+    }
+    this.isLoadingSubCategories = true;
+    this._subCategoryService.getSubCategoriesByMain(categoryId).subscribe({
+      next: (res) => {
+        this.subCategories = res.data || [];
+        this.isLoadingSubCategories = false;
+        this._cdr.detectChanges();
+      },
+      error: () => {
+        this.subCategories = [];
+        this.isLoadingSubCategories = false;
+        this._cdr.detectChanges();
+      }
+    });
+  }
+
+  selectCategory(id: string) {
+    if (this.selectedCategoryId !== id) {
+      this.selectedCategoryId = id;
+      this.selectedSubCategoryId = '';
+      this.loadSubCategories(id);
+      this._cdr.detectChanges();
+    }
+  }
+
+  selectSubCategory(id: string) {
+    this.selectedSubCategoryId = id;
+    this._cdr.detectChanges();
   }
 
   // Loads existing product details
@@ -70,8 +131,12 @@ export class EditProduct implements OnInit, OnDestroy {
         const found = res.data;
         if (found) {
           this.currentImgURL = found.imgURL || '';
-          this.existingCategory = found.category || null;
-          this.existingSubCategory = found.subCategory || null;
+          this.selectedCategoryId = (typeof found.category === 'object' ? found.category?._id : found.category) || '';
+          this.selectedSubCategoryId = (typeof found.subCategory === 'object' ? found.subCategory?._id : found.subCategory) || '';
+          
+          if (this.selectedCategoryId) {
+            this.loadSubCategories(this.selectedCategoryId);
+          }
 
           this.editForm.patchValue({
             name: found.name,
@@ -145,14 +210,12 @@ export class EditProduct implements OnInit, OnDestroy {
         mostPopular: this.editForm.get('mostPopular')?.value
       };
 
-      if (this.existingCategory) {
-        const catId = typeof this.existingCategory === 'object' ? this.existingCategory._id : String(this.existingCategory);
-        if (catId) payload.category = catId;
+      if (this.selectedCategoryId) {
+        payload.category = this.selectedCategoryId;
       }
 
-      if (this.existingSubCategory) {
-        const subCatId = typeof this.existingSubCategory === 'object' ? this.existingSubCategory._id : String(this.existingSubCategory);
-        if (subCatId) payload.subCategory = subCatId;
+      if (this.selectedSubCategoryId) {
+        payload.subCategory = this.selectedSubCategoryId;
       }
 
       if (imgURL) {

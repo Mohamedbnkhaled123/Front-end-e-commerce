@@ -19,6 +19,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       { path: 'home', loadComponent: () => import('./frontend/home/home.component').then(m => m.Home) },
       { path: 'products', loadComponent: () => import('./frontend/products/products.component').then(m => m.Products) },
+      { path: 'products/filters', loadComponent: () => import('./frontend/products/product-filters/product-filters.component').then(m => m.ProductFilters) },
       { path: 'products/:slug', loadComponent: () => import('./frontend/product-details/product-details.component').then(m => m.ProductDetails), resolve: { productData: productResolver } },
       { path: 'login', loadComponent: () => import('./frontend/login/login.component').then(m => m.Login) },
       { path: 'dashboard-login', loadComponent: () => import('./dashboard/dashboard-login/dashboard-login.component').then(m => m.DashboardLogin), canActivate: [dashboardLoginGuard] },

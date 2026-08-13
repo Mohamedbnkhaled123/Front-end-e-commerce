@@ -5,7 +5,6 @@ import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../core/services/product.service';
 import { CartService } from '../../core/services/cart.service';
-import { CategoryService, ICategory } from '../../core/services/category.service';
 import { IProduct } from '../../core/models/product.model';
 import { env } from '../../../env/env';
 import { Subscription } from 'rxjs';
@@ -23,20 +22,17 @@ import { TranslatePipe } from '../../core/pipes/translate.pipe';
 })
 export class Products implements OnInit, OnDestroy {
   productsList: IProduct[] = [];
-  categoriesList: ICategory[] = [];
   paginatedProducts: IProduct[] = [];
   staticURL = env.staticURL;
   isLoading = true;
 
   // Filter input form state
   searchQuery: string = '';
-  selectedCategoryId: string = '';
-  minPrice: number | null = null;
-  maxPrice: number | null = null;
 
   // Applied filter state
   appliedSearchQuery: string = '';
   appliedCategoryId: string = '';
+  appliedSubCategoryId: string = '';
   appliedMinPrice: number | null = null;
   appliedMaxPrice: number | null = null;
 
@@ -53,7 +49,6 @@ export class Products implements OnInit, OnDestroy {
     private _productService: ProductService, 
     private _cartService: CartService,
     private _flyToCartService: FlyToCartService,
-    private _categoryService: CategoryService,
     private _cdr: ChangeDetectorRef,
     private _router: Router,
     private _route: ActivatedRoute
@@ -64,27 +59,17 @@ export class Products implements OnInit, OnDestroy {
       this.currentPage = Number(params['page']) || 1;
       this.appliedSearchQuery = params['search'] || '';
       this.appliedCategoryId = params['category'] || '';
+      this.appliedSubCategoryId = params['subCategory'] || '';
       this.appliedMinPrice = params['minPrice'] ? Number(params['minPrice']) : null;
       this.appliedMaxPrice = params['maxPrice'] ? Number(params['maxPrice']) : null;
 
       // Sync draft state with applied state
       this.searchQuery = this.appliedSearchQuery;
-      this.selectedCategoryId = this.appliedCategoryId;
-      this.minPrice = this.appliedMinPrice;
-      this.maxPrice = this.appliedMaxPrice;
       
       this.fetchProducts();
     });
 
-    const categoriesSub = this._categoryService.getCategories().subscribe({
-      next: (res) => {
-        this.categoriesList = res.data || [];
-        this._cdr.detectChanges();
-      }
-    });
-
     this.subscriptions.add(routeSub);
-    this.subscriptions.add(categoriesSub);
   }
 
   fetchProducts(): void {
@@ -96,6 +81,7 @@ export class Products implements OnInit, OnDestroy {
       limit: this.pageSize,
       search: this.appliedSearchQuery,
       category: this.appliedCategoryId,
+      subCategory: this.appliedSubCategoryId,
       minPrice: this.appliedMinPrice,
       maxPrice: this.appliedMaxPrice
     };
@@ -124,15 +110,13 @@ export class Products implements OnInit, OnDestroy {
 
   applyFilters(): void {
     this.appliedSearchQuery = this.searchQuery;
-    this.appliedCategoryId = this.selectedCategoryId;
-    this.appliedMinPrice = this.minPrice;
-    this.appliedMaxPrice = this.maxPrice;
 
     // Reset to page 1 on new filter and update URL
     const queryParams = { 
       page: 1,
       search: this.appliedSearchQuery || null,
       category: this.appliedCategoryId || null,
+      subCategory: this.appliedSubCategoryId || null,
       minPrice: this.appliedMinPrice !== null ? this.appliedMinPrice : null,
       maxPrice: this.appliedMaxPrice !== null ? this.appliedMaxPrice : null
     };
@@ -145,6 +129,7 @@ export class Products implements OnInit, OnDestroy {
       this._router.navigate([], { relativeTo: this._route, queryParams });
     }
   }
+
 
   updatePagination(): void {
     this.pageNumbers = [];
@@ -180,29 +165,15 @@ export class Products implements OnInit, OnDestroy {
     return !!(
       (this.appliedSearchQuery && this.appliedSearchQuery.trim()) ||
       this.appliedCategoryId ||
+      this.appliedSubCategoryId ||
       (this.appliedMinPrice !== null && this.appliedMinPrice !== undefined && String(this.appliedMinPrice) !== '') ||
       (this.appliedMaxPrice !== null && this.appliedMaxPrice !== undefined && String(this.appliedMaxPrice) !== '')
     );
   }
 
-  resetFilters(): void {
+  resetSearch(): void {
     this.searchQuery = '';
-    this.selectedCategoryId = '';
-    this.minPrice = null;
-    this.maxPrice = null;
-    
-    this.appliedSearchQuery = '';
-    this.appliedCategoryId = '';
-    this.appliedMinPrice = null;
-    this.appliedMaxPrice = null;
-
-    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
-      (document as any).startViewTransition(() => {
-        this._router.navigate([], { relativeTo: this._route, queryParams: { page: 1 } });
-      });
-    } else {
-      this._router.navigate([], { relativeTo: this._route, queryParams: { page: 1 } });
-    }
+    this.applyFilters();
   }
 
   setPage(page: number): void {

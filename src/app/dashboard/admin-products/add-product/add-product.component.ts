@@ -4,8 +4,10 @@ import { RouterLink, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService, ICategory } from '../../../core/services/category.service';
+import { SubCategoryService, ISubCategory } from '../../../core/services/subcategory.service';
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
-import { Subscription } from 'rxjs';
+import { Subscription, of } from 'rxjs';
+import { switchMap, tap, catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-add-product',
@@ -27,9 +29,15 @@ export class AddProduct implements OnInit {
   categories: ICategory[] = [];
   isLoadingCategories = true;
 
+  // === SubCategories State ===
+  subCategories: ISubCategory[] = [];
+  selectedSubCategoryId = '';
+  isLoadingSubCategories = false;
+
   // === Add Category Modal ===
   showCategoryModal = false;
   newCategoryName = '';
+  newSubCategoryName = ''; // Optional initial subcategory
   newCategoryFile: File | null = null;
   isAddingCategory = false;
   categoryModalError = '';
@@ -40,6 +48,7 @@ export class AddProduct implements OnInit {
     private _fb: FormBuilder,
     private _productService: ProductService,
     private _categoryService: CategoryService,
+    private _subCategoryService: SubCategoryService,
     private _cloudinaryService: CloudinaryService,
     private _router: Router,
     private _cdr: ChangeDetectorRef
@@ -82,6 +91,7 @@ export class AddProduct implements OnInit {
           this.selectedCategoryId = this.categories[0]._id;
         }
         this.isLoadingCategories = false;
+        this.loadSubCategories(this.selectedCategoryId);
         this._cdr.detectChanges();
       },
       error: () => {
@@ -92,8 +102,39 @@ export class AddProduct implements OnInit {
     });
   }
 
+  loadSubCategories(categoryId: string) {
+    if (!categoryId) {
+      this.subCategories = [];
+      this.selectedSubCategoryId = '';
+      return;
+    }
+    this.isLoadingSubCategories = true;
+    this._subCategoryService.getSubCategoriesByMain(categoryId).subscribe({
+      next: (res) => {
+        this.subCategories = res.data || [];
+        this.selectedSubCategoryId = this.subCategories.length > 0 ? this.subCategories[0]._id : '';
+        this.isLoadingSubCategories = false;
+        this._cdr.detectChanges();
+      },
+      error: () => {
+        this.subCategories = [];
+        this.selectedSubCategoryId = '';
+        this.isLoadingSubCategories = false;
+        this._cdr.detectChanges();
+      }
+    });
+  }
+
   selectCategory(id: string) {
-    this.selectedCategoryId = id;
+    if (this.selectedCategoryId !== id) {
+      this.selectedCategoryId = id;
+      this.loadSubCategories(id);
+      this._cdr.detectChanges();
+    }
+  }
+
+  selectSubCategory(id: string) {
+    this.selectedSubCategoryId = id;
     this._cdr.detectChanges();
   }
 
@@ -109,6 +150,7 @@ export class AddProduct implements OnInit {
   openCategoryModal() {
     this.showCategoryModal = true;
     this.newCategoryName = '';
+    this.newSubCategoryName = '';
     this.newCategoryFile = null;
     this.categoryModalError = '';
     this._cdr.detectChanges();
@@ -134,14 +176,36 @@ export class AddProduct implements OnInit {
 
     const addCat = (imgURL?: string) => {
       const payload = { name: this.newCategoryName.trim(), imgURL };
-      const sub = this._categoryService.addCategory(payload).subscribe({
-        next: (res) => {
+      const sub = this._categoryService.addCategory(payload).pipe(
+        switchMap(res => {
+          const cat = res.data;
+          if (cat?._id && this.newSubCategoryName.trim()) {
+            const subPayload = {
+              name: this.newSubCategoryName.trim(),
+              slug: this.newSubCategoryName.trim().toLowerCase().replace(/[\s_]+/g, '-'),
+              categoryId: cat._id
+            };
+            return this._subCategoryService.addSubCategory(subPayload).pipe(
+              tap(() => {
+                return res; // Forward category response
+              }),
+              catchError(err => {
+                console.error('Failed to add initial subcategory', err);
+                return of(res); // Still return category success even if subcat fails
+              })
+            );
+          }
+          return of(res);
+        })
+      ).subscribe({
+        next: (res: any) => {
           this.isAddingCategory = false;
           this.showCategoryModal = false;
-          const cat = res.data;
+          const cat = res?.data;
           if (cat?._id) {
             this.categories = [...this.categories, cat];
             this.selectedCategoryId = cat._id;
+            this.loadSubCategories(cat._id);
           } else {
             this.loadCategories();
           }
@@ -206,6 +270,7 @@ export class AddProduct implements OnInit {
         newArrived: vals.newArrived ? true : false,
         mostPopular: vals.mostPopular ? true : false,
         category: this.selectedCategoryId,
+        subCategory: this.selectedSubCategoryId || undefined,
         imgURL: imgURL
       };
 

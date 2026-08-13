@@ -19,6 +19,7 @@ export class ProductService {
       if (params.limit) queryParams = queryParams.set('limit', params.limit);
       if (params.search) queryParams = queryParams.set('search', params.search);
       if (params.category) queryParams = queryParams.set('category', params.category);
+      if (params.subCategory) queryParams = queryParams.set('subCategory', params.subCategory);
       if (params.minPrice !== undefined && params.minPrice !== null && params.minPrice !== '') {
         queryParams = queryParams.set('minPrice', params.minPrice);
       }
