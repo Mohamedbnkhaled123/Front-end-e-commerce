@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -8,6 +8,7 @@ import { SubCategoryService, ISubCategory } from '../../../core/services/subcate
 import { TaxonomyService, IMainTaxonomyGroup } from '../../../core/services/taxonomy.service';
 import { ModalService } from '../../../core/services/modal.service';
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
+import { LanguageService } from '../../../core/services/language.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { env } from '../../../../env/env';
 import { Subscription } from 'rxjs';
@@ -55,6 +56,7 @@ export class EditProduct implements OnInit, OnDestroy {
   isAddingSubCategory = false;
   subCategoryModalError = '';
 
+  public langService = inject(LanguageService);
   private subscriptions = new Subscription();
 
   constructor(
@@ -118,17 +120,21 @@ export class EditProduct implements OnInit, OnDestroy {
   }
 
   get currentGroupCategories(): ICategory[] {
+    if (!this.selectedMainGroupId) return [];
     const group = this.taxonomyGroups.find(g => g.id === this.selectedMainGroupId);
-    return group ? group.categories : this.categories;
+    return group ? group.categories : [];
   }
 
   onMainGroupChange(groupId: string) {
     this.selectedMainGroupId = groupId;
     const group = this.taxonomyGroups.find(g => g.id === groupId);
     if (group && group.categories.length > 0) {
-      this.selectedCategoryId = group.categories[0]._id;
+      const firstCat = group.categories[0];
+      this.selectCategory(firstCat._id);
+    } else {
+      this.selectedCategoryId = '';
       this.selectedSubCategoryId = '';
-      this.loadSubCategories(this.selectedCategoryId);
+      this.subCategories = [];
     }
     this._cdr.detectChanges();
   }
@@ -139,10 +145,17 @@ export class EditProduct implements OnInit, OnDestroy {
       this.selectedSubCategoryId = '';
       return;
     }
+
     this.isLoadingSubCategories = true;
     this._subCategoryService.getSubCategoriesByMain(categoryId).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.subCategories = res.data || [];
+        if (this.selectedSubCategoryId) {
+          const exists = this.subCategories.some(s => s._id === this.selectedSubCategoryId);
+          if (!exists) {
+            this.selectedSubCategoryId = this.subCategories.length > 0 ? this.subCategories[0]._id : '';
+          }
+        }
         this.isLoadingSubCategories = false;
         this._cdr.detectChanges();
       },
@@ -193,9 +206,13 @@ export class EditProduct implements OnInit, OnDestroy {
             this.loadSubCategories(this.selectedCategoryId);
           }
 
+          const isAr = this.langService.currentLang() === 'ar';
+          const activeName = isAr ? (found.name_ar || found.name) : (found.name_en || found.name);
+          const activeDesc = isAr ? (found.desc_ar || found.desc || '') : (found.desc_en || found.desc || '');
+
           this.editForm.patchValue({
-            name: found.name,
-            desc: found.desc || '',
+            name: activeName,
+            desc: activeDesc,
             price: found.price,
             discount: found.discount || 0,
             stock: found.stock,
@@ -205,14 +222,14 @@ export class EditProduct implements OnInit, OnDestroy {
             mostPopular: found.mostPopular || false
           });
         } else {
-          this.errorMessage = 'Product not found.';
+          this.errorMessage = this.langService.currentLang() === 'ar' ? 'المنتج غير موجود.' : 'Product not found.';
         }
         this.isLoading = false;
         this._cdr.detectChanges();
       },
       error: () => {
         this.isLoading = false;
-        this.errorMessage = 'Failed to load product details.';
+        this.errorMessage = this.langService.currentLang() === 'ar' ? 'فشل تحميل بيانات المنتج.' : 'Failed to load product details.';
         this._cdr.detectChanges();
       }
     });
@@ -241,7 +258,7 @@ export class EditProduct implements OnInit, OnDestroy {
   submitNewCategory() {
     this.categoryModalError = '';
     if (!this.newCategoryName.trim()) {
-      this.categoryModalError = 'Please enter a category name.';
+      this.categoryModalError = this.langService.currentLang() === 'ar' ? 'يرجى إدخال اسم التصنيف.' : 'Please enter a category name.';
       return;
     }
     this.isAddingCategory = true;
@@ -265,7 +282,7 @@ export class EditProduct implements OnInit, OnDestroy {
         },
         error: (err: any) => {
           this.isAddingCategory = false;
-          this.categoryModalError = err?.error?.message || 'Failed to add category.';
+          this.categoryModalError = err?.error?.message || (this.langService.currentLang() === 'ar' ? 'فشل إضافة التصنيف.' : 'Failed to add category.');
           this._cdr.detectChanges();
         }
       });
@@ -274,12 +291,12 @@ export class EditProduct implements OnInit, OnDestroy {
 
     if (this.newCategoryFile) {
       const uploadSub = this._cloudinaryService.uploadImage(this.newCategoryFile, this.newCategoryFile.name).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           addCat(res.secure_url);
         },
         error: () => {
           this.isAddingCategory = false;
-          this.categoryModalError = 'Failed to upload category image.';
+          this.categoryModalError = this.langService.currentLang() === 'ar' ? 'فشل رفع صورة التصنيف.' : 'Failed to upload category image.';
           this._cdr.detectChanges();
         }
       });
@@ -306,11 +323,11 @@ export class EditProduct implements OnInit, OnDestroy {
   submitNewSubCategory() {
     this.subCategoryModalError = '';
     if (!this.newSubCatName.trim()) {
-      this.subCategoryModalError = 'Please enter a subcategory name.';
+      this.subCategoryModalError = this.langService.currentLang() === 'ar' ? 'يرجى إدخال اسم التصنيف الفرعي.' : 'Please enter a subcategory name.';
       return;
     }
     if (!this.targetCategoryIdForSub) {
-      this.subCategoryModalError = 'Please select a parent category for this subcategory.';
+      this.subCategoryModalError = this.langService.currentLang() === 'ar' ? 'يرجى اختيار التصنيف الرئيسي.' : 'Please select a parent category.';
       return;
     }
 
@@ -319,9 +336,7 @@ export class EditProduct implements OnInit, OnDestroy {
 
     const payload = {
       name: this.newSubCatName.trim(),
-      slug: this.newSubCatName.trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-'),
-      categoryId: this.targetCategoryIdForSub,
-      category: this.targetCategoryIdForSub
+      categoryId: this.targetCategoryIdForSub
     };
 
     const sub = this._subCategoryService.addSubCategory(payload).subscribe({
@@ -330,21 +345,16 @@ export class EditProduct implements OnInit, OnDestroy {
         this.showSubCategoryModal = false;
         const newSub = res?.data;
 
-        this.selectedCategoryId = this.targetCategoryIdForSub;
-        this.isLoadingSubCategories = true;
+        if (this.selectedCategoryId !== this.targetCategoryIdForSub) {
+          this.selectedCategoryId = this.targetCategoryIdForSub;
+        }
+
         this._subCategoryService.getSubCategoriesByMain(this.targetCategoryIdForSub).subscribe({
-          next: (subRes) => {
+          next: (subRes: any) => {
             this.subCategories = subRes.data || [];
             if (newSub?._id) {
               this.selectedSubCategoryId = newSub._id;
-            } else if (this.subCategories.length > 0) {
-              this.selectedSubCategoryId = this.subCategories[this.subCategories.length - 1]._id;
             }
-            this.isLoadingSubCategories = false;
-            this._cdr.detectChanges();
-          },
-          error: () => {
-            this.isLoadingSubCategories = false;
             this._cdr.detectChanges();
           }
         });
@@ -352,7 +362,7 @@ export class EditProduct implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         this.isAddingSubCategory = false;
-        this.subCategoryModalError = err?.error?.message || 'Failed to create subcategory.';
+        this.subCategoryModalError = err?.error?.message || (this.langService.currentLang() === 'ar' ? 'فشل إنشاء التصنيف الفرعي.' : 'Failed to create subcategory.');
         this._cdr.detectChanges();
       }
     });
@@ -363,7 +373,6 @@ export class EditProduct implements OnInit, OnDestroy {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      const fileNameLower = (file.name || '').toLowerCase();
       this.selectedFile = file;
     }
   }
@@ -372,18 +381,19 @@ export class EditProduct implements OnInit, OnDestroy {
   async onSubmit() {
     this.errorMessage = '';
     this.successMessage = '';
+    const isAr = this.langService.currentLang() === 'ar';
 
     if (this.editForm.invalid) {
       this.editForm.markAllAsTouched();
-      this.errorMessage = 'Please fill in all required fields (Name, Description, Price, Stock).';
+      this.errorMessage = isAr ? 'يرجى ملء جميع الحقول المطلوبة (الاسم، الوصف، السعر، المخزون).' : 'Please fill in all required fields (Name, Description, Price, Stock).';
       return;
     }
 
     const confirmed = await this._modalService.confirm({
-      title: 'Confirm Save Changes',
-      message: 'Are you sure you want to save the changes made to this product?',
-      confirmText: 'Yes, Save Changes',
-      cancelText: 'Cancel',
+      title: isAr ? 'تأكيد حفظ التعديلات' : 'Confirm Save Changes',
+      message: isAr ? 'هل أنت متأكد من حفظ التعديلات على هذا المنتج؟' : 'Are you sure you want to save the changes made to this product?',
+      confirmText: isAr ? 'نعم، حفظ التعديلات' : 'Yes, Save Changes',
+      cancelText: isAr ? 'إلغاء' : 'Cancel',
       type: 'info'
     });
 
@@ -393,17 +403,28 @@ export class EditProduct implements OnInit, OnDestroy {
     this._cdr.detectChanges();
 
     const updateProductData = (imgURL?: string) => {
+      const formName = (this.editForm.get('name')?.value || '').trim();
+      const formDesc = (this.editForm.get('desc')?.value || '').trim();
+      const formSlug = (this.editForm.get('slug')?.value || '').trim();
+
       const payload: any = {
-        name: this.editForm.get('name')?.value || '',
-        desc: this.editForm.get('desc')?.value || '',
-        price: this.editForm.get('price')?.value || 0,
-        discount: this.editForm.get('discount')?.value || 0,
-        stock: this.editForm.get('stock')?.value || 0,
-        slug: this.editForm.get('slug')?.value || '',
-        isActive: this.editForm.get('isActive')?.value,
-        newArrived: this.editForm.get('newArrived')?.value,
-        mostPopular: this.editForm.get('mostPopular')?.value
+        name: formName,
+        desc: formDesc,
+        name_ar: formName,
+        name_en: formName,
+        desc_ar: formDesc,
+        desc_en: formDesc,
+        price: Number(this.editForm.get('price')?.value) || 0,
+        discount: Number(this.editForm.get('discount')?.value) || 0,
+        stock: Number(this.editForm.get('stock')?.value) || 0,
+        isActive: this.editForm.get('isActive')?.value !== false,
+        newArrived: !!this.editForm.get('newArrived')?.value,
+        mostPopular: !!this.editForm.get('mostPopular')?.value
       };
+
+      if (formSlug) {
+        payload.slug = formSlug;
+      }
 
       if (this.selectedCategoryId) {
         payload.category = this.selectedCategoryId;
@@ -413,14 +434,12 @@ export class EditProduct implements OnInit, OnDestroy {
         payload.subCategory = this.selectedSubCategoryId;
       }
 
-      if (imgURL) {
-        payload.imgURL = imgURL;
-      }
+      payload.imgURL = imgURL || this.currentImgURL;
 
       const sub = this._productService.updateProduct(this.productId, payload).subscribe({
         next: () => {
           this.isSaving = false;
-          this.successMessage = 'Product updated successfully!';
+          this.successMessage = isAr ? 'تم تحديث بيانات المنتج بنجاح!' : 'Product updated successfully!';
           this._cdr.detectChanges();
           setTimeout(() => {
             this._router.navigate(['/admin/products']);
@@ -428,7 +447,7 @@ export class EditProduct implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.isSaving = false;
-          this.errorMessage = err?.error?.message || 'Failed to update product.';
+          this.errorMessage = err?.error?.message || (isAr ? 'فشل تحديث المنتج.' : 'Failed to update product.');
           this._cdr.detectChanges();
         }
       });
@@ -437,12 +456,12 @@ export class EditProduct implements OnInit, OnDestroy {
 
     if (this.selectedFile) {
       const uploadSub = this._cloudinaryService.uploadImage(this.selectedFile, this.selectedFile.name).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           updateProductData(res.secure_url);
         },
         error: () => {
           this.isSaving = false;
-          this.errorMessage = 'Failed to upload image to Cloudinary.';
+          this.errorMessage = isAr ? 'فشل رفع الصورة إلى Cloudinary.' : 'Failed to upload image to Cloudinary.';
           this._cdr.detectChanges();
         }
       });
@@ -454,11 +473,12 @@ export class EditProduct implements OnInit, OnDestroy {
 
   // Soft deletes product by ID
   async onSoftDelete() {
+    const isAr = this.langService.currentLang() === 'ar';
     const confirmDelete = await this._modalService.confirm({
-      title: 'Soft Delete Product',
-      message: 'Are you sure you want to soft delete / disable this product?',
-      confirmText: 'Yes, Delete',
-      cancelText: 'No, Keep it',
+      title: isAr ? 'حذف المنتج' : 'Soft Delete Product',
+      message: isAr ? 'هل أنت متأكد من حذف هذا المنتج ونقله للأرشيف؟' : 'Are you sure you want to soft delete / disable this product?',
+      confirmText: isAr ? 'نعم، حذف' : 'Yes, Delete',
+      cancelText: isAr ? 'إلغاء' : 'Cancel',
       type: 'danger'
     });
 
@@ -468,14 +488,14 @@ export class EditProduct implements OnInit, OnDestroy {
     this._cdr.detectChanges();
     const sub = this._productService.deleteProduct(this.productId).subscribe({
       next: () => {
-        this.successMessage = 'Product soft-deleted / archived successfully!';
+        this.successMessage = isAr ? 'تم حذف المنتج بنجاح!' : 'Product soft-deleted / archived successfully!';
         this._cdr.detectChanges();
         setTimeout(() => {
           this._router.navigate(['/admin/products']);
         }, 1200);
       },
       error: (err) => {
-        this.errorMessage = err?.error?.message || 'Failed to delete product.';
+        this.errorMessage = err?.error?.message || (isAr ? 'فشل حذف المنتج.' : 'Failed to delete product.');
         this._cdr.detectChanges();
       }
     });

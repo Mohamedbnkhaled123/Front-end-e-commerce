@@ -374,25 +374,40 @@ export class AddProduct implements OnInit {
 
     const submitProductData = (imgURL: string) => {
       const vals = this.productForm.value;
-      const payload = {
-        name: vals.name,
-        slug: vals.slug || '',
-        desc: vals.desc,
-        price: vals.price,
-        discount: vals.discount || 0,
-        stock: vals.stock,
-        newArrived: vals.newArrived ? true : false,
-        mostPopular: vals.mostPopular ? true : false,
+      const formName = (vals.name || '').trim();
+      const formDesc = (vals.desc || '').trim();
+      const formSlug = (vals.slug || '').trim();
+
+      const payload: any = {
+        name: formName,
+        desc: formDesc,
+        name_ar: formName,
+        name_en: formName,
+        desc_ar: formDesc,
+        desc_en: formDesc,
+        price: Number(vals.price) || 0,
+        discount: Number(vals.discount) || 0,
+        stock: Number(vals.stock) || 0,
+        newArrived: !!vals.newArrived,
+        mostPopular: !!vals.mostPopular,
+        isActive: vals.isActive !== false,
         category: this.selectedCategoryId,
-        subCategory: this.selectedSubCategoryId || undefined,
         imgURL: imgURL
       };
+
+      if (formSlug) {
+        payload.slug = formSlug;
+      }
+
+      if (this.selectedSubCategoryId) {
+        payload.subCategory = this.selectedSubCategoryId;
+      }
 
       const sub = this._productService.addProduct(payload).subscribe({
         next: () => {
           this.isLoading = false;
           this.successMessage = 'تمت إضافة المنتج بنجاح!';
-          this.productForm.reset({ discount: 0, newArrived: false, mostPopular: false });
+          this.productForm.reset({ discount: 0, newArrived: false, mostPopular: false, isActive: true });
           this.selectedFile = null;
           this._cdr.detectChanges();
           
@@ -422,7 +437,6 @@ export class AddProduct implements OnInit {
       });
       this.subscriptions.add(uploadSub);
     } else {
-      // Should not be reached because of the validation above
       this.isLoading = false;
       this.errorMessage = 'يرجى اختيار صورة للمنتج.';
       this._cdr.detectChanges();
