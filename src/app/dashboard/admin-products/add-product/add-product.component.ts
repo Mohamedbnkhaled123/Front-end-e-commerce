@@ -5,6 +5,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService, ICategory } from '../../../core/services/category.service';
 import { SubCategoryService, ISubCategory } from '../../../core/services/subcategory.service';
+import { TaxonomyService, IMainTaxonomyGroup } from '../../../core/services/taxonomy.service';
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
 import { Subscription, of } from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
@@ -25,8 +26,10 @@ export class AddProduct implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  // === Categories State ===
+  // === Categories & Taxonomy State ===
   categories: ICategory[] = [];
+  taxonomyGroups: IMainTaxonomyGroup[] = [];
+  selectedMainGroupId = '';
   isLoadingCategories = true;
 
   // === SubCategories State ===
@@ -56,6 +59,7 @@ export class AddProduct implements OnInit {
     private _productService: ProductService,
     private _categoryService: CategoryService,
     private _subCategoryService: SubCategoryService,
+    public taxonomyService: TaxonomyService,
     private _cloudinaryService: CloudinaryService,
     private _router: Router,
     private _cdr: ChangeDetectorRef
@@ -94,19 +98,44 @@ export class AddProduct implements OnInit {
     this._categoryService.getCategories().subscribe({
       next: (res) => {
         this.categories = res.data || [];
-        if (this.categories.length > 0 && !this.selectedCategoryId) {
-          this.selectedCategoryId = this.categories[0]._id;
+        this.taxonomyGroups = this.taxonomyService.groupCategories(this.categories);
+
+        if (this.selectedCategoryId) {
+          const foundGroup = this.taxonomyService.findGroupByCategoryId(this.selectedCategoryId, this.taxonomyGroups);
+          this.selectedMainGroupId = foundGroup ? foundGroup.id : (this.taxonomyGroups[0]?.id || '');
+        } else if (this.taxonomyGroups.length > 0) {
+          this.selectedMainGroupId = this.taxonomyGroups[0].id;
+          this.selectedCategoryId = this.taxonomyGroups[0].categories[0]?._id || '';
         }
+
         this.isLoadingCategories = false;
-        this.loadSubCategories(this.selectedCategoryId);
+        if (this.selectedCategoryId) {
+          this.loadSubCategories(this.selectedCategoryId);
+        }
         this._cdr.detectChanges();
       },
       error: () => {
         this.categories = [];
+        this.taxonomyGroups = [];
         this.isLoadingCategories = false;
         this._cdr.detectChanges();
       }
     });
+  }
+
+  get currentGroupCategories(): ICategory[] {
+    const group = this.taxonomyGroups.find(g => g.id === this.selectedMainGroupId);
+    return group ? group.categories : this.categories;
+  }
+
+  onMainGroupChange(groupId: string) {
+    this.selectedMainGroupId = groupId;
+    const group = this.taxonomyGroups.find(g => g.id === groupId);
+    if (group && group.categories.length > 0) {
+      this.selectedCategoryId = group.categories[0]._id;
+      this.loadSubCategories(this.selectedCategoryId);
+    }
+    this._cdr.detectChanges();
   }
 
   loadSubCategories(categoryId: string) {
@@ -135,6 +164,10 @@ export class AddProduct implements OnInit {
   selectCategory(id: string) {
     if (this.selectedCategoryId !== id) {
       this.selectedCategoryId = id;
+      const foundGroup = this.taxonomyService.findGroupByCategoryId(id, this.taxonomyGroups);
+      if (foundGroup && foundGroup.id !== this.selectedMainGroupId) {
+        this.selectedMainGroupId = foundGroup.id;
+      }
       this.loadSubCategories(id);
       this._cdr.detectChanges();
     }

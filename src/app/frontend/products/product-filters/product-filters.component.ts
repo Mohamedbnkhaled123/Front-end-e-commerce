@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService, ICategory } from '../../../core/services/category.service';
 import { SubCategoryService, ISubCategory } from '../../../core/services/subcategory.service';
+import { TaxonomyService, IMainTaxonomyGroup } from '../../../core/services/taxonomy.service';
 import { Subscription } from 'rxjs';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
@@ -16,6 +17,7 @@ import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 })
 export class ProductFilters implements OnInit, OnDestroy {
   categoriesList: ICategory[] = [];
+  taxonomyGroups: IMainTaxonomyGroup[] = [];
   subCategoriesList: ISubCategory[] = [];
   
   selectedCategoryId: string = '';
@@ -34,6 +36,7 @@ export class ProductFilters implements OnInit, OnDestroy {
     private _productService: ProductService,
     private _categoryService: CategoryService,
     private _subCategoryService: SubCategoryService,
+    public taxonomyService: TaxonomyService,
     private _cdr: ChangeDetectorRef,
     private _router: Router,
     private _route: ActivatedRoute,
@@ -58,6 +61,7 @@ export class ProductFilters implements OnInit, OnDestroy {
     const categoriesSub = this._categoryService.getCategories().subscribe({
       next: (res) => {
         this.categoriesList = res.data || [];
+        this.taxonomyGroups = this.taxonomyService.groupCategories(this.categoriesList);
         this._cdr.detectChanges();
       }
     });

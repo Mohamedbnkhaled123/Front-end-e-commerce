@@ -54,11 +54,11 @@
             </div>
           } @else {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- Main Category Selection -->
+              <!-- Main Category Selection (الأقسام الرئيسية) -->
               <div>
                 <div class="flex items-center justify-between mb-1.5">
                   <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                    Category <span class="text-red-500">*</span>
+                    Main Category (القسم الرئيسي) <span class="text-red-500">*</span>
                   </label>
                   <button type="button" (click)="openCategoryModal()"
                           class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 hover:underline transition cursor-pointer">
@@ -69,24 +69,24 @@
                   </button>
                 </div>
                 <select
-                  [value]="selectedCategoryId"
-                  (change)="selectCategory($any($event.target).value)"
+                  [value]="selectedMainGroupId"
+                  (change)="onMainGroupChange($any($event.target).value)"
                   class="w-full bg-white dark:bg-slate-800 border rounded-lg px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white border-gray-300 dark:border-slate-700 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer">
-                  <option value="" disabled>Select a category...</option>
-                  @for (cat of categories; track cat._id) {
-                    <option [value]="cat._id">{{ cat.name }}</option>
+                  <option value="" disabled>Select main category...</option>
+                  @for (group of taxonomyGroups; track group.id) {
+                    <option [value]="group.id">{{ taxonomyService.getGroupName(group) }}</option>
                   }
                 </select>
-                @if (!selectedCategoryId) {
-                  <p class="text-red-500 text-xs mt-1.5 font-semibold">Please select a category</p>
+                @if (!selectedMainGroupId) {
+                  <p class="text-red-500 text-xs mt-1.5 font-semibold">Please select a main category</p>
                 }
               </div>
 
-              <!-- Subcategory Selection -->
+              <!-- Subcategory Selection (القسم الفرعي) -->
               <div>
                 <div class="flex items-center justify-between mb-1.5">
                   <label class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                    Subcategory <span class="text-slate-400 font-normal normal-case">(Optional)</span>
+                    Subcategory (القسم الفرعي) <span class="text-red-500">*</span>
                   </label>
                   <button type="button" (click)="openSubCategoryModal()"
                           class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 hover:underline transition cursor-pointer">
@@ -97,17 +97,17 @@
                   </button>
                 </div>
                 <select
-                  [value]="selectedSubCategoryId"
-                  (change)="selectSubCategory($any($event.target).value)"
-                  [disabled]="!selectedCategoryId || isLoadingSubCategories"
+                  [value]="selectedCategoryId"
+                  (change)="selectCategory($any($event.target).value)"
+                  [disabled]="!selectedMainGroupId || currentGroupCategories.length === 0"
                   class="w-full bg-white dark:bg-slate-800 border rounded-lg px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white border-gray-300 dark:border-slate-700 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
-                  <option value="">No Subcategory (Optional)</option>
-                  @for (sub of subCategories; track sub._id) {
-                    <option [value]="sub._id">{{ sub.name }}</option>
+                  <option value="" disabled>Select subcategory...</option>
+                  @for (cat of currentGroupCategories; track cat._id) {
+                    <option [value]="cat._id">{{ cat.name }}</option>
                   }
                 </select>
-                @if (isLoadingSubCategories) {
-                  <p class="text-blue-500 text-xs mt-1.5 font-semibold">Loading subcategories...</p>
+                @if (!selectedCategoryId) {
+                  <p class="text-red-500 text-xs mt-1.5 font-semibold">Please select a subcategory</p>
                 }
               </div>
             </div>
