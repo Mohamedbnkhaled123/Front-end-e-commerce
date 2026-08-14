@@ -1,5 +1,5 @@
 import { LocalizeFieldPipe } from '../../core/pipes/localize-field.pipe';
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrderService, IOrder } from '../../core/services/order.service';
@@ -17,11 +17,20 @@ import { LanguageService } from '../../core/services/language.service';
   templateUrl: './admin-orders.component.html'
 })
 export class AdminOrders implements OnInit, OnDestroy {
-  orders: IOrder[] = [];
-  filteredOrders: IOrder[] = [];
-  statusFilter = '';
-  isLoading = false;
-  message = '';
+  orders = signal<IOrder[]>([]);
+  statusFilter = signal<string>('');
+  
+  filteredOrders = computed(() => {
+    const filter = this.statusFilter();
+    const all = this.orders();
+    if (filter) {
+      return all.filter(o => o.orderStatus === filter);
+    }
+    return all;
+  });
+
+  isLoading = signal<boolean>(false);
+  message = signal<string>('');
   staticURL = env.staticURL;
   private subscriptions = new Subscription();
 
@@ -47,7 +56,6 @@ export class AdminOrders implements OnInit, OnDestroy {
   constructor(
     private _orderService: OrderService,
     private _modalService: ModalService,
-    private _cdr: ChangeDetectorRef,
     public _langService: LanguageService
   ) {}
 
@@ -57,32 +65,18 @@ export class AdminOrders implements OnInit, OnDestroy {
 
   // Fetches all store orders
   loadOrders() {
-    this.isLoading = true;
-    this._cdr.detectChanges();
+    this.isLoading.set(true);
 
     const sub = this._orderService.getAllOrders().subscribe({
       next: (res) => {
-        this.orders = res.data || [];
-        this.applyFilter();
-        this.isLoading = false;
-        this._cdr.detectChanges();
+        this.orders.set(res.data || []);
+        this.isLoading.set(false);
       },
       error: () => {
-        this.isLoading = false;
-        this._cdr.detectChanges();
+        this.isLoading.set(false);
       }
     });
     this.subscriptions.add(sub);
-  }
-
-  // Filters orders by status
-  applyFilter() {
-    if (this.statusFilter) {
-      this.filteredOrders = this.orders.filter(o => o.orderStatus === this.statusFilter);
-    } else {
-      this.filteredOrders = [...this.orders];
-    }
-    this._cdr.detectChanges();
   }
 
   // Formats status strings to clean human readable title case
@@ -138,7 +132,6 @@ export class AdminOrders implements OnInit, OnDestroy {
 
     if (!confirmed) {
       selectEl.value = currentStatus;
-      this._cdr.detectChanges();
       return;
     }
 
@@ -153,12 +146,10 @@ export class AdminOrders implements OnInit, OnDestroy {
 
     const sub = this._orderService.updateOrderStatus(order._id, newStatus, fixedItems).subscribe({
       next: (res) => {
-        this.message = res.message || `Order status updated to '${newStatus}'`;
+        this.message.set(res.message || `Order status updated to '${newStatus}'`);
         this.loadOrders();
-        this._cdr.detectChanges();
         setTimeout(() => {
-          this.message = '';
-          this._cdr.detectChanges();
+          this.message.set('');
         }, 3000);
       },
       error: (err) => {
@@ -168,7 +159,6 @@ export class AdminOrders implements OnInit, OnDestroy {
           message: err?.error?.message || 'Failed to update order status.',
           type: 'danger'
         });
-        this._cdr.detectChanges();
       }
     });
     this.subscriptions.add(sub);

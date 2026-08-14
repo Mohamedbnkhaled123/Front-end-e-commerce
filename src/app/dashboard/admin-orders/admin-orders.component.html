@@ -9,21 +9,21 @@
     </div>
 
     <!-- Alert -->
-    @if (message) {
+    @if (message()) {
       <div class="mb-4 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-semibold p-3.5 rounded-lg shadow-xs">
-        {{ message }}
+        {{ message() }}
       </div>
     }
 
     <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden transition-colors duration-200">
       <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 flex items-center justify-between flex-wrap gap-4">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-white">{{ 'admin.all_client_orders' | translate }} ({{ filteredOrders.length }})</h2>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-white">{{ 'admin.all_client_orders' | translate }} ({{ filteredOrders().length }})</h2>
         <div class="flex items-center gap-3">
           <label for="status-filter" class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">{{ 'admin.filter_status' | translate }}</label>
           <select 
             id="status-filter" 
-            [(ngModel)]="statusFilter"  
-            (ngModelChange)="applyFilter()"
+            [ngModel]="statusFilter()"  
+            (ngModelChange)="statusFilter.set($event)"
             class="text-xs bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-900 dark:text-white font-medium outline-none min-h-[36px]">
             <option value="">{{ 'admin.all_statuses' | translate }}</option>
             @for (s of availableStatuses; track s) {
@@ -33,16 +33,16 @@
         </div>
       </div>
 
-      @if (isLoading) {
+      @if (isLoading()) {
         <div class="p-8 text-center text-slate-500 dark:text-slate-400 text-sm font-medium">
           {{ 'admin.loading_orders' | translate }}
         </div>
       }
 
-      @if (!isLoading) {
+      @if (!isLoading()) {
         <!-- Card-Based Adaptive Responsive Orders List (No Horizontal Table Scroll!) -->
         <div class="divide-y divide-gray-100 dark:divide-slate-800 p-4 sm:p-6 space-y-4">
-          @for (order of filteredOrders; track order._id; let i = $index) {
+          @for (order of filteredOrders(); track order._id; let i = $index) {
             <div class="bg-slate-50/50 dark:bg-slate-800/40 border border-gray-200/80 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-xs transition-all space-y-4">
               
               <!-- Top Header Row: Order Number, Customer Info, Date, Total Amount -->
