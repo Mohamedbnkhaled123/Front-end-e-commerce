@@ -260,7 +260,7 @@
                       <div class="font-bold text-slate-900 dark:text-white">{{ ord.shippingAddress?.title || ord.user?.name || 'N/A' }}</div>
                       <div class="text-[11px] text-slate-400">{{ ord.shippingAddress?.phoneNumber || '' }}</div>
                     </td>
-                    <td class="px-6 py-4 text-slate-500">{{ ord.createdAt | date:'short':'':_langService.currentLang() }}</td>
+                    <td class="px-6 py-4 text-slate-500">{{ ord.createdAt ? (ord.createdAt | date:'short':'':_langService.currentLang()) : '' }}</td>
                     <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">EGP {{ ord.totalPrice }}</td>
                     <td class="px-6 py-4">
                       <span class="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase border"

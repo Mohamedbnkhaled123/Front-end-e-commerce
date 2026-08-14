@@ -1,5 +1,5 @@
 import { LocalizeFieldPipe } from '../../core/pipes/localize-field.pipe';
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReviewService, IReview } from '../../core/services/review.service';
 import { ModalService } from '../../core/services/modal.service';
@@ -18,16 +18,15 @@ import { LanguageService } from '../../core/services/language.service';
   templateUrl: './admin-reviews.component.html'
 })
 export class AdminReviews implements OnInit, OnDestroy {
-  reviews: IReview[] = [];
-  isLoading = false;
-  message = '';
+  reviews = signal<IReview[]>([]);
+  isLoading = signal<boolean>(false);
+  message = signal<string>('');
   staticURL = env.staticURL;
   private subscriptions = new Subscription();
 
   constructor(
     private _reviewService: ReviewService,
     private _modalService: ModalService,
-    private _cdr: ChangeDetectorRef,
     public _langService: LanguageService
   ) { }
 
@@ -36,18 +35,15 @@ export class AdminReviews implements OnInit, OnDestroy {
   }
 
   loadReviews() {
-    this.isLoading = true;
-    this._cdr.detectChanges();
+    this.isLoading.set(true);
 
     const sub = this._reviewService.getAllReviews().subscribe({
       next: (res) => {
-        this.reviews = res.data || [];
-        this.isLoading = false;
-        this._cdr.detectChanges();
+        this.reviews.set(res.data || []);
+        this.isLoading.set(false);
       },
       error: () => {
-        this.isLoading = false;
-        this._cdr.detectChanges();
+        this.isLoading.set(false);
       }
     });
     this.subscriptions.add(sub);
@@ -56,12 +52,10 @@ export class AdminReviews implements OnInit, OnDestroy {
   changeStatus(id: string, status: 'Pending' | 'Approved' | 'Cancelled') {
     const sub = this._reviewService.updateReviewStatus(id, status).subscribe({
       next: () => {
-        this.message = `Review status changed to '${status}' successfully!`;
+        this.message.set(`Review status changed to '${status}' successfully!`);
         this.loadReviews();
-        this._cdr.detectChanges();
         setTimeout(() => {
-          this.message = '';
-          this._cdr.detectChanges();
+          this.message.set('');
         }, 3000);
       },
       error: (err) => {
@@ -70,7 +64,6 @@ export class AdminReviews implements OnInit, OnDestroy {
           message: err?.error?.message || 'Error updating review status.',
           type: 'danger'
         });
-        this._cdr.detectChanges();
       }
     });
     this.subscriptions.add(sub);
@@ -93,12 +86,10 @@ export class AdminReviews implements OnInit, OnDestroy {
 
     const sub = this._reviewService.deleteReview(id).subscribe({
       next: () => {
-        this.message = 'Review permanently deleted successfully!';
+        this.message.set('Review permanently deleted successfully!');
         this.loadReviews();
-        this._cdr.detectChanges();
         setTimeout(() => {
-          this.message = '';
-          this._cdr.detectChanges();
+          this.message.set('');
         }, 3000);
       },
       error: (err) => {
@@ -107,7 +98,6 @@ export class AdminReviews implements OnInit, OnDestroy {
           message: err?.error?.message || 'Error deleting review.',
           type: 'danger'
         });
-        this._cdr.detectChanges();
       }
     });
     this.subscriptions.add(sub);

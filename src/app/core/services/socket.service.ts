@@ -20,6 +20,13 @@ export class SocketService {
         const { io } = await import('socket.io-client');
         this.socket = io(this.serverUrl, {
           reconnectionDelayMax: 10000,
+          reconnectionAttempts: 2,
+          timeout: 4000,
+          autoConnect: true
+        });
+        this.socket.on('connect_error', () => {
+          // If serverless backend returns 404 on socket.io, stop continuous polling to save bandwidth
+          this.socket?.disconnect();
         });
       } else {
         this.socket = { on: () => {}, off: () => {} };

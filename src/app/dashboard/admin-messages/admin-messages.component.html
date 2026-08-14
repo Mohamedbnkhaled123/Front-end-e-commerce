@@ -13,14 +13,14 @@
       
       <!-- Mobile View -->
       <div class="md:hidden">
-        @if (isLoading) {
+        @if (isLoading()) {
           <div class="p-8 text-center">
             <svg class="animate-spin h-8 w-8 text-blue-500 mx-auto" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
             </svg>
           </div>
-        } @else if (messages.length === 0) {
+        } @else if (messages().length === 0) {
           <div class="p-12 text-center border-b border-gray-100 dark:border-slate-800/80">
             <div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
               <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -29,7 +29,7 @@
           </div>
         } @else {
           <div class="grid grid-cols-1 gap-4 p-4 border-b border-gray-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
-            @for (msg of messages; track msg._id) {
+            @for (msg of messages(); track msg._id) {
               <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 shadow-sm relative transition-colors" [ngClass]="{'bg-blue-50/40 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/50': !msg.isRead}">
                 @if (!msg.isRead) {
                   <div class="absolute top-5 right-4 rtl:right-auto rtl:left-4 w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
@@ -46,7 +46,7 @@
                 </div>
                 
                 <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-slate-700/50 mt-2">
-                  <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{{ msg.createdAt | date:'short':'':_langService.currentLang() }}</span>
+                  <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{{ msg.createdAt ? (msg.createdAt | date:'short':'':_langService.currentLang()) : '' }}</span>
                   
                   <div class="flex items-center gap-2">
                     @if (!msg.isRead) {
@@ -80,7 +80,7 @@
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-slate-800/80">
 
-            @if (isLoading) {
+            @if (isLoading()) {
               <tr>
                 <td colspan="5" class="px-5 py-16 text-center">
                   <svg class="animate-spin h-8 w-8 text-blue-500 mx-auto" fill="none" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@
                   </svg>
                 </td>
               </tr>
-            } @else if (messages.length === 0) {
+            } @else if (messages().length === 0) {
               <tr>
                 <td colspan="5" class="px-5 py-12 text-center">
                   <div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
@@ -99,7 +99,7 @@
                 </td>
               </tr>
             } @else {
-              @for (msg of messages; track msg._id) {
+              @for (msg of messages(); track msg._id) {
                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors" [ngClass]="{'bg-blue-50/30 dark:bg-blue-900/10': !msg.isRead}">
                   <td class="px-5 py-4">
                     <div class="flex items-start gap-3">
@@ -119,7 +119,7 @@
                     <p class="line-clamp-2">{{ msg.message }}</p>
                   </td>
                   <td class="px-5 py-4 text-[11px] font-semibold text-slate-400 dark:text-slate-500 text-center whitespace-nowrap">
-                    {{ msg.createdAt | date:'short':'':_langService.currentLang() }}
+                    {{ msg.createdAt ? (msg.createdAt | date:'short':'':_langService.currentLang()) : '' }}
                   </td>
                   <td class="px-5 py-4 text-right">
                     <div class="flex items-center justify-end gap-2">
@@ -141,22 +141,22 @@
       </div>
 
       <!-- Pagination -->
-      @if (totalPages > 1) {
+      @if (totalPages() > 1) {
         <div class="px-5 py-4 border-t border-gray-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-4">
           <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">
-            {{ 'admin.showing' | translate }} {{ (currentPage - 1) * pageSize + 1 }} {{ 'admin.to' | translate }} {{ min(currentPage * pageSize, totalResults) }} {{ 'admin.of' | translate }} {{ totalResults }} {{ 'admin.entries' | translate }}
+            {{ 'admin.showing' | translate }} {{ (currentPage() - 1) * pageSize + 1 }} {{ 'admin.to' | translate }} {{ min(currentPage() * pageSize, totalResults()) }} {{ 'admin.of' | translate }} {{ totalResults() }} {{ 'admin.entries' | translate }}
           </p>
           <div class="flex items-center gap-1.5">
-            <button (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1"
+            <button (click)="setPage(currentPage() - 1)" [disabled]="currentPage() === 1"
               class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">{{ 'admin.prev' | translate }}</button>
-            @for (p of pageNumbers; track p) {
+            @for (p of pageNumbers(); track p) {
               <button (click)="setPage(p)"
-                [class]="p === currentPage ? 'bg-blue-600 text-white font-bold' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-gray-50 dark:hover:bg-slate-700'"
+                [class]="p === currentPage() ? 'bg-blue-600 text-white font-bold' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-gray-50 dark:hover:bg-slate-700'"
                 class="w-8 h-8 rounded-lg border border-gray-200 dark:border-slate-700 flex items-center justify-center text-xs transition-colors">
                 {{ p }}
               </button>
             }
-            <button (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages"
+            <button (click)="setPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
               class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">{{ 'admin.next' | translate }}</button>
           </div>
         </div>

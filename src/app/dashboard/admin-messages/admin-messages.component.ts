@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContactService, IContactMessage } from '../../core/services/contact.service';
@@ -15,19 +15,27 @@ import { LanguageService } from '../../core/services/language.service';
   templateUrl: './admin-messages.component.html'
 })
 export class AdminMessages implements OnInit, OnDestroy {
-  messages: IContactMessage[] = [];
-  isLoading = true;
-  currentPage = 1;
+  messages = signal<IContactMessage[]>([]);
+  isLoading = signal<boolean>(true);
+  currentPage = signal<number>(1);
   pageSize = 10;
-  totalResults = 0;
-  totalPages = 1;
+  totalResults = signal<number>(0);
+  totalPages = signal<number>(1);
+
+  pageNumbers = computed(() => {
+    const pages: number[] = [];
+    const total = this.totalPages();
+    for (let i = 1; i <= total; i++) {
+      pages.push(i);
+    }
+    return pages;
+  });
 
   private socketSub!: Subscription;
 
   constructor(
     private _contactService: ContactService,
     private _socketService: SocketService,
-    private _cdr: ChangeDetectorRef,
     public _langService: LanguageService
   ) {}
 
@@ -38,16 +46,14 @@ export class AdminMessages implements OnInit, OnDestroy {
     this.socketSub = this._socketService.onEvent<IContactMessage>('new_contact_message').subscribe({
       next: (newMessage: IContactMessage) => {
         // Prepend the new message to the list
-        this.messages.unshift(newMessage);
-        this.totalResults++;
-        
-        // Remove the oldest if it exceeds page size
-        if (this.messages.length > this.pageSize) {
-          this.messages.pop();
+        const updated = [newMessage, ...this.messages()];
+        if (updated.length > this.pageSize) {
+          updated.pop();
         }
-        
-        this.totalPages = Math.ceil(this.totalResults / this.pageSize) || 1;
-        this._cdr.detectChanges();
+        this.messages.set(updated);
+        const newTotal = this.totalResults() + 1;
+        this.totalResults.set(newTotal);
+        this.totalPages.set(Math.ceil(newTotal / this.pageSize) || 1);
       }
     });
   }
@@ -59,19 +65,17 @@ export class AdminMessages implements OnInit, OnDestroy {
   }
 
   fetchMessages(): void {
-    this.isLoading = true;
-    this._contactService.getMessages(this.currentPage, this.pageSize).subscribe({
+    this.isLoading.set(true);
+    this._contactService.getMessages(this.currentPage(), this.pageSize).subscribe({
       next: (res: any) => {
-        this.messages = res.data || [];
-        this.totalResults = res.totalResults || 0;
-        this.totalPages = res.totalPages || 1;
-        this.isLoading = false;
-        this._cdr.detectChanges();
+        this.messages.set(res.data || []);
+        this.totalResults.set(res.totalResults || 0);
+        this.totalPages.set(res.totalPages || 1);
+        this.isLoading.set(false);
       },
       error: () => {
-        this.messages = [];
-        this.isLoading = false;
-        this._cdr.detectChanges();
+        this.messages.set([]);
+        this.isLoading.set(false);
       }
     });
   }
@@ -81,8 +85,7 @@ export class AdminMessages implements OnInit, OnDestroy {
 
     this._contactService.markAsRead(msg._id).subscribe({
       next: () => {
-        msg.isRead = true;
-        this._cdr.detectChanges();
+        this.messages.update(list => list.map(m => m._id === msg._id ? { ...m, isRead: true } : m));
       }
     });
   }
@@ -98,18 +101,10 @@ export class AdminMessages implements OnInit, OnDestroy {
   }
 
   setPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
       this.fetchMessages();
     }
-  }
-
-  get pageNumbers(): number[] {
-    const pages: number[] = [];
-    for (let i = 1; i <= this.totalPages; i++) {
-      pages.push(i);
-    }
-    return pages;
   }
 
   min(a: number, b: number): number {

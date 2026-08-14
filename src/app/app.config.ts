@@ -1,9 +1,13 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withViewTransitions, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { registerLocaleData } from '@angular/common';
+import localeAr from '@angular/common/locales/ar';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 import { errorHandlerInterceptor } from './core/interceptors/error-handler-interceptor';
+
+registerLocaleData(localeAr, 'ar');
 
 export const appConfig: ApplicationConfig = {
   providers: [
