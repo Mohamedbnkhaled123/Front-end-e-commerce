@@ -42,6 +42,13 @@ export class AddProduct implements OnInit {
   isAddingCategory = false;
   categoryModalError = '';
 
+  // === Add SubCategory Modal ===
+  showSubCategoryModal = false;
+  newSubCatName = '';
+  targetCategoryIdForSub = '';
+  isAddingSubCategory = false;
+  subCategoryModalError = '';
+
   private subscriptions = new Subscription();
 
   constructor(
@@ -235,6 +242,79 @@ export class AddProduct implements OnInit {
     } else {
       addCat();
     }
+  }
+
+  // === SubCategory Modal ===
+  openSubCategoryModal() {
+    this.showSubCategoryModal = true;
+    this.targetCategoryIdForSub = this.selectedCategoryId || (this.categories.length > 0 ? this.categories[0]._id : '');
+    this.newSubCatName = '';
+    this.subCategoryModalError = '';
+    this._cdr.detectChanges();
+  }
+
+  closeSubCategoryModal() {
+    this.showSubCategoryModal = false;
+    this._cdr.detectChanges();
+  }
+
+  submitNewSubCategory() {
+    this.subCategoryModalError = '';
+    if (!this.newSubCatName.trim()) {
+      this.subCategoryModalError = 'Please enter a subcategory name.';
+      return;
+    }
+    if (!this.targetCategoryIdForSub) {
+      this.subCategoryModalError = 'Please select a parent category for this subcategory.';
+      return;
+    }
+
+    this.isAddingSubCategory = true;
+    this._cdr.detectChanges();
+
+    const payload = {
+      name: this.newSubCatName.trim(),
+      slug: this.newSubCatName.trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-'),
+      categoryId: this.targetCategoryIdForSub,
+      category: this.targetCategoryIdForSub
+    };
+
+    const sub = this._subCategoryService.addSubCategory(payload).subscribe({
+      next: (res: any) => {
+        this.isAddingSubCategory = false;
+        this.showSubCategoryModal = false;
+        const newSub = res?.data;
+
+        // Switch to the target category if not already active
+        this.selectedCategoryId = this.targetCategoryIdForSub;
+        
+        // Reload subcategories for this category and select the newly added one
+        this.isLoadingSubCategories = true;
+        this._subCategoryService.getSubCategoriesByMain(this.targetCategoryIdForSub).subscribe({
+          next: (subRes) => {
+            this.subCategories = subRes.data || [];
+            if (newSub?._id) {
+              this.selectedSubCategoryId = newSub._id;
+            } else if (this.subCategories.length > 0) {
+              this.selectedSubCategoryId = this.subCategories[this.subCategories.length - 1]._id;
+            }
+            this.isLoadingSubCategories = false;
+            this._cdr.detectChanges();
+          },
+          error: () => {
+            this.isLoadingSubCategories = false;
+            this._cdr.detectChanges();
+          }
+        });
+        this._cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.isAddingSubCategory = false;
+        this.subCategoryModalError = err?.error?.message || 'Failed to create subcategory.';
+        this._cdr.detectChanges();
+      }
+    });
+    this.subscriptions.add(sub);
   }
 
   // === Submit Product ===

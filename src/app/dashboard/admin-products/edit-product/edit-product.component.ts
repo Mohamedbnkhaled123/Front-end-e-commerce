@@ -35,6 +35,22 @@ export class EditProduct implements OnInit, OnDestroy {
   isSaving = false;
   errorMessage = '';
   successMessage = '';
+
+  // === Add Category Modal ===
+  showCategoryModal = false;
+  newCategoryName = '';
+  newSubCategoryName = '';
+  newCategoryFile: File | null = null;
+  isAddingCategory = false;
+  categoryModalError = '';
+
+  // === Add SubCategory Modal ===
+  showSubCategoryModal = false;
+  newSubCatName = '';
+  targetCategoryIdForSub = '';
+  isAddingSubCategory = false;
+  subCategoryModalError = '';
+
   private subscriptions = new Subscription();
 
   constructor(
@@ -158,6 +174,146 @@ export class EditProduct implements OnInit, OnDestroy {
       error: () => {
         this.isLoading = false;
         this.errorMessage = 'Failed to load product details.';
+        this._cdr.detectChanges();
+      }
+    });
+    this.subscriptions.add(sub);
+  }
+
+  // === Category Modal ===
+  openCategoryModal() {
+    this.showCategoryModal = true;
+    this.newCategoryName = '';
+    this.newSubCategoryName = '';
+    this.newCategoryFile = null;
+    this.categoryModalError = '';
+    this._cdr.detectChanges();
+  }
+
+  closeCategoryModal() {
+    this.showCategoryModal = false;
+    this._cdr.detectChanges();
+  }
+
+  onCategoryFileSelected(event: any) {
+    this.newCategoryFile = event.target.files[0] || null;
+  }
+
+  submitNewCategory() {
+    this.categoryModalError = '';
+    if (!this.newCategoryName.trim()) {
+      this.categoryModalError = 'Please enter a category name.';
+      return;
+    }
+    this.isAddingCategory = true;
+    this._cdr.detectChanges();
+
+    const addCat = (imgURL?: string) => {
+      const payload = { name: this.newCategoryName.trim(), imgURL };
+      const sub = this._categoryService.addCategory(payload).subscribe({
+        next: (res: any) => {
+          this.isAddingCategory = false;
+          this.showCategoryModal = false;
+          const cat = res?.data;
+          if (cat?._id) {
+            this.categories = [...this.categories, cat];
+            this.selectedCategoryId = cat._id;
+            this.loadSubCategories(cat._id);
+          } else {
+            this.loadCategories();
+          }
+          this._cdr.detectChanges();
+        },
+        error: (err: any) => {
+          this.isAddingCategory = false;
+          this.categoryModalError = err?.error?.message || 'Failed to add category.';
+          this._cdr.detectChanges();
+        }
+      });
+      this.subscriptions.add(sub);
+    };
+
+    if (this.newCategoryFile) {
+      const uploadSub = this._cloudinaryService.uploadImage(this.newCategoryFile, this.newCategoryFile.name).subscribe({
+        next: (res) => {
+          addCat(res.secure_url);
+        },
+        error: () => {
+          this.isAddingCategory = false;
+          this.categoryModalError = 'Failed to upload category image.';
+          this._cdr.detectChanges();
+        }
+      });
+      this.subscriptions.add(uploadSub);
+    } else {
+      addCat();
+    }
+  }
+
+  // === SubCategory Modal ===
+  openSubCategoryModal() {
+    this.showSubCategoryModal = true;
+    this.targetCategoryIdForSub = this.selectedCategoryId || (this.categories.length > 0 ? this.categories[0]._id : '');
+    this.newSubCatName = '';
+    this.subCategoryModalError = '';
+    this._cdr.detectChanges();
+  }
+
+  closeSubCategoryModal() {
+    this.showSubCategoryModal = false;
+    this._cdr.detectChanges();
+  }
+
+  submitNewSubCategory() {
+    this.subCategoryModalError = '';
+    if (!this.newSubCatName.trim()) {
+      this.subCategoryModalError = 'Please enter a subcategory name.';
+      return;
+    }
+    if (!this.targetCategoryIdForSub) {
+      this.subCategoryModalError = 'Please select a parent category for this subcategory.';
+      return;
+    }
+
+    this.isAddingSubCategory = true;
+    this._cdr.detectChanges();
+
+    const payload = {
+      name: this.newSubCatName.trim(),
+      slug: this.newSubCatName.trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-'),
+      categoryId: this.targetCategoryIdForSub,
+      category: this.targetCategoryIdForSub
+    };
+
+    const sub = this._subCategoryService.addSubCategory(payload).subscribe({
+      next: (res: any) => {
+        this.isAddingSubCategory = false;
+        this.showSubCategoryModal = false;
+        const newSub = res?.data;
+
+        this.selectedCategoryId = this.targetCategoryIdForSub;
+        this.isLoadingSubCategories = true;
+        this._subCategoryService.getSubCategoriesByMain(this.targetCategoryIdForSub).subscribe({
+          next: (subRes) => {
+            this.subCategories = subRes.data || [];
+            if (newSub?._id) {
+              this.selectedSubCategoryId = newSub._id;
+            } else if (this.subCategories.length > 0) {
+              this.selectedSubCategoryId = this.subCategories[this.subCategories.length - 1]._id;
+            }
+            this.isLoadingSubCategories = false;
+            this._cdr.detectChanges();
+          },
+          error: () => {
+            this.isLoadingSubCategories = false;
+            this._cdr.detectChanges();
+          }
+        });
+        this._cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.isAddingSubCategory = false;
+        this.subCategoryModalError = err?.error?.message || 'Failed to create subcategory.';
         this._cdr.detectChanges();
       }
     });

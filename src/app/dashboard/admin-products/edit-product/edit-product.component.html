@@ -52,9 +52,18 @@
           <!-- Category & SubCategory -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Category <span class="text-red-500">*</span>
-              </label>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Category <span class="text-red-500">*</span>
+                </label>
+                <button type="button" (click)="openCategoryModal()"
+                        class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 hover:underline transition cursor-pointer">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  Add Category
+                </button>
+              </div>
               @if (isLoadingCategories) {
                 <p class="text-blue-500 text-xs mt-1.5 font-semibold">Loading categories...</p>
               } @else {
@@ -71,9 +80,18 @@
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Subcategory (Optional)
-              </label>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Subcategory <span class="text-slate-400 font-normal normal-case">(Optional)</span>
+                </label>
+                <button type="button" (click)="openSubCategoryModal()"
+                        class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 hover:underline transition cursor-pointer">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  Add Subcategory
+                </button>
+              </div>
               <select
                 [value]="selectedSubCategoryId"
                 (change)="selectSubCategory($any($event.target).value)"
@@ -255,5 +273,166 @@
       }
     </div>
   </div>
+
+  <!-- ================= CATEGORY MODAL ================= -->
+  @if (showCategoryModal) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-200"
+         (click)="closeCategoryModal()">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200/80 dark:border-slate-800"
+           (click)="$event.stopPropagation()">
+
+        <div class="flex justify-between items-center mb-5">
+          <div>
+            <h3 class="text-base font-semibold text-slate-900 dark:text-white">Add New Category</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Categories help customers find products faster.</p>
+          </div>
+          <button (click)="closeCategoryModal()"
+                  class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition text-lg font-medium cursor-pointer">
+            &times;
+          </button>
+        </div>
+
+        @if (categoryModalError) {
+          <div class="mb-4 bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-bold p-3 rounded-lg flex items-center gap-2">
+            <svg class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>{{ categoryModalError }}</span>
+          </div>
+        }
+
+        <div class="space-y-4">
+          <div>
+            <label for="edit-cat-name" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              Category Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="edit-cat-name"
+              type="text"
+              [value]="newCategoryName"
+              (input)="newCategoryName = $any($event.target).value"
+              placeholder="e.g. Leather Bags, Accessories..."
+              class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-xs"
+            >
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              Category Image <span class="text-slate-400 dark:text-slate-500 font-normal normal-case">(optional)</span>
+            </label>
+            <input
+              type="file"
+              (change)="onCategoryFileSelected($event)"
+              accept="image/*"
+              class="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-100 dark:file:bg-blue-900/40 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-200 dark:hover:file:bg-blue-800 cursor-pointer transition-colors"
+            >
+          </div>
+
+          <div class="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-slate-800">
+            <button type="button" (click)="closeCategoryModal()"
+                    class="px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition cursor-pointer">
+              Cancel
+            </button>
+            <button type="button" (click)="submitNewCategory()"
+                    [disabled]="isAddingCategory"
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-slate-800 disabled:text-gray-500 text-white font-semibold rounded-lg text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer">
+              @if (isAddingCategory) {
+                <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                Adding...
+              } @else {
+                Save & Select Category
+              }
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ================= SUB CATEGORY MODAL ================= -->
+  @if (showSubCategoryModal) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-200">
+      <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+        
+        <div class="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            Add New Subcategory
+          </h3>
+          <button type="button" (click)="closeSubCategoryModal()"
+                  class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold p-1 leading-none cursor-pointer">
+            &times;
+          </button>
+        </div>
+
+        @if (subCategoryModalError) {
+          <div class="bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-bold p-3 rounded-lg flex items-center gap-2">
+            <svg class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>{{ subCategoryModalError }}</span>
+          </div>
+        }
+
+        <div class="space-y-4">
+          <!-- Parent Category Choice -->
+          <div>
+            <label for="edit-subcat-parent" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              Belongs Under Main Category <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="edit-subcat-parent"
+              [value]="targetCategoryIdForSub"
+              (change)="targetCategoryIdForSub = $any($event.target).value"
+              class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-xs cursor-pointer">
+              <option value="" disabled>Select parent category...</option>
+              @for (cat of categories; track cat._id) {
+                <option [value]="cat._id">{{ cat.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Subcategory Name -->
+          <div>
+            <label for="edit-subcat-name-input" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+              Subcategory Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="edit-subcat-name-input"
+              type="text"
+              [value]="newSubCatName"
+              (input)="newSubCatName = $any($event.target).value"
+              placeholder="e.g. Smart Watches, Leather Boots, Summer Dresses..."
+              class="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-xs"
+            >
+          </div>
+
+          <div class="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-slate-800">
+            <button type="button" (click)="closeSubCategoryModal()"
+                    class="px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition cursor-pointer">
+              Cancel
+            </button>
+            <button type="button" (click)="submitNewSubCategory()"
+                    [disabled]="isAddingSubCategory"
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-slate-800 disabled:text-gray-500 text-white font-semibold rounded-lg text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer">
+              @if (isAddingSubCategory) {
+                <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                </svg>
+                Creating...
+              } @else {
+                Save & Select Subcategory
+              }
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
+
 </div>
 
