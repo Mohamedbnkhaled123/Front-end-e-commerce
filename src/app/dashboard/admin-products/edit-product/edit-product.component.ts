@@ -8,13 +8,14 @@ import { SubCategoryService, ISubCategory } from '../../../core/services/subcate
 import { TaxonomyService, IMainTaxonomyGroup } from '../../../core/services/taxonomy.service';
 import { ModalService } from '../../../core/services/modal.service';
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { env } from '../../../../env/env';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-edit-product',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, TranslatePipe],
   templateUrl: './edit-product.component.html'
 })
 export class EditProduct implements OnInit, OnDestroy {

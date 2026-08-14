@@ -9,11 +9,12 @@ import { TaxonomyService, IMainTaxonomyGroup } from '../../../core/services/taxo
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
 import { Subscription, of } from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
+import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-add-product',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, TranslatePipe],
   templateUrl: './add-product.component.html'
 })
 export class AddProduct implements OnInit {
@@ -262,7 +263,7 @@ export class AddProduct implements OnInit {
 
     if (this.newCategoryFile) {
       const uploadSub = this._cloudinaryService.uploadImage(this.newCategoryFile, this.newCategoryFile.name).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           addCat(res.secure_url);
         },
         error: () => {
@@ -410,7 +411,7 @@ export class AddProduct implements OnInit {
 
     if (this.selectedFile) {
       const uploadSub = this._cloudinaryService.uploadImage(this.selectedFile, this.selectedFile.name).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           submitProductData(res.secure_url);
         },
         error: () => {
