@@ -74,8 +74,14 @@
           </div>
 
           <div class="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="text-sm font-black text-slate-950 dark:text-white flex-1">{{ product.price }} EGP</span>
+            <div class="flex items-center gap-2 mb-3 flex-wrap">
+              @if (product.discount && product.discount > 0) {
+                <span class="text-sm font-black text-slate-950 dark:text-white">{{ (product.price * (1 - product.discount / 100)) | number:'1.0-2' }} EGP</span>
+                <span class="line-through text-xs text-slate-400 font-semibold">{{ product.price | number:'1.0-2' }} EGP</span>
+                <span class="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800 shrink-0">-{{ product.discount }}%</span>
+              } @else {
+                <span class="text-sm font-black text-slate-950 dark:text-white flex-1">{{ product.price | number:'1.0-2' }} EGP</span>
+              }
             </div>
             <div class="flex items-center gap-2">
               <button (click)="addToCart(product, $event)" [disabled]="product.stock === 0"

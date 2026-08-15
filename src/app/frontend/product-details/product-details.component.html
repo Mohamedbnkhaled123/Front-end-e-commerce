@@ -48,8 +48,14 @@
 
             <hr class="border-gray-200 dark:border-slate-800">
 
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-black text-slate-900 dark:text-white">{{ product.price }} EGP</span>
+            <div class="flex items-baseline gap-3 flex-wrap">
+              @if (product.discount && product.discount > 0) {
+                <span class="text-3xl font-black text-slate-900 dark:text-white">{{ (product.price * (1 - product.discount / 100)) | number:'1.0-2' }} EGP</span>
+                <span class="line-through text-lg text-slate-400 font-bold">{{ product.price | number:'1.0-2' }} EGP</span>
+                <span class="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">-{{ product.discount }}% OFF</span>
+              } @else {
+                <span class="text-3xl font-black text-slate-900 dark:text-white">{{ product.price | number:'1.0-2' }} EGP</span>
+              }
             </div>
 
             <div class="space-y-1">
@@ -196,7 +202,15 @@
                         [alt]="rel | localizeField:'name'"
                       >
                       <h3 class="text-sm font-bold text-slate-900 dark:text-white truncate">{{ rel | localizeField:'name' }}</h3>
-                      <p class="text-xs text-slate-500 font-bold mt-1">{{ rel.price }} EGP</p>
+                      @if (rel.discount && rel.discount > 0) {
+                        <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+                          <span class="text-xs font-bold text-slate-900 dark:text-white">{{ (rel.price * (1 - rel.discount / 100)) | number:'1.0-2' }} EGP</span>
+                          <span class="line-through text-[10px] text-slate-400 font-semibold">{{ rel.price | number:'1.0-2' }}</span>
+                          <span class="text-[9px] font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1 rounded">-{{ rel.discount }}%</span>
+                        </div>
+                      } @else {
+                        <p class="text-xs text-slate-500 font-bold mt-1">{{ rel.price | number:'1.0-2' }} EGP</p>
+                      }
                     </a>
                     <a [routerLink]="['/products', rel.slug || rel._id]" (click)="clickedRelId.set(rel._id)" class="mt-3 flex items-center justify-center gap-1 w-full bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-medium py-1.5 rounded-lg transition-all cursor-pointer">
                     <span>{{ 'catalog.details' | translate }}</span>

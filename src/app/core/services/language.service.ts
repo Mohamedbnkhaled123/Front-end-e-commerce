@@ -92,7 +92,13 @@ export class LanguageService {
       'admin.modal_subcategory_name': 'Subcategory Name',
       'admin.modal_subcategory_name_placeholder': 'e.g. Smart Watches, Leather Boots...',
       'admin.modal_save_select_subcategory': 'Save & Select Subcategory',
-      'admin.modal_creating': 'Creating...'
+      'admin.modal_creating': 'Creating...',
+      'cart.total': 'Total Amount',
+      'cart.final_total': 'Total Amount',
+      'cart.subtotal': 'Subtotal Amount',
+      'cart.shipping': 'Shipping Fee',
+      'admin.discount': 'Coupon Discount',
+      'admin.coupon_discount': 'Coupon Discount'
     },
     ar: {
       'brand.name': 'شوبرو',
@@ -169,7 +175,13 @@ export class LanguageService {
       'admin.modal_subcategory_name': 'اسم التصنيف الفرعي',
       'admin.modal_subcategory_name_placeholder': 'مثال: ساعات ذكية، أحذية جلدية...',
       'admin.modal_save_select_subcategory': 'حفظ واختيار التصنيف الفرعي',
-      'admin.modal_creating': 'جاري الإنشاء...'
+      'admin.modal_creating': 'جاري الإنشاء...',
+      'cart.total': 'المبلغ الإجمالي',
+      'cart.final_total': 'المبلغ الإجمالي',
+      'cart.subtotal': 'إجمالي المنتجات',
+      'cart.shipping': 'رسوم الشحن',
+      'admin.discount': 'خصم الكوبون',
+      'admin.coupon_discount': 'خصم الكوبون'
     }
   };
 

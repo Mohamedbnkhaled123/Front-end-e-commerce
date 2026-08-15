@@ -114,15 +114,19 @@ export class CartService {
       const currentItems = [...this.cartItems$.value];
       const existingIndex = currentItems.findIndex(i => i.productId === product._id);
 
+      const effectivePrice = (product.discount && product.discount > 0)
+        ? Number((product.price * (1 - product.discount / 100)).toFixed(2))
+        : product.price;
+
       if (existingIndex > -1) {
         currentItems[existingIndex].quantity += quantity;
-        currentItems[existingIndex].priceAtAddition = product.price;
+        currentItems[existingIndex].priceAtAddition = effectivePrice;
         if (product.imgURL) currentItems[existingIndex].productImg = product.imgURL;
       } else {
         currentItems.push({
           productId: product._id,
           name: product.name,
-          priceAtAddition: product.price,
+          priceAtAddition: effectivePrice,
           quantity: quantity,
           productImg: product.imgURL,
           isPriceChanged: false
