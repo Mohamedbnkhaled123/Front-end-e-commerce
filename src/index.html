@@ -28,7 +28,8 @@
             if (rawContent) {
               var contentObj = JSON.parse(rawContent);
               var imgUrl = contentObj.heroImage;
-              if (imgUrl && imgUrl.indexOf('res.cloudinary.com') > -1 && imgUrl.indexOf('f_auto') === -1) {
+              var isHomePage = window.location.pathname === '/' || window.location.pathname === '/home';
+              if (isHomePage && imgUrl && imgUrl.indexOf('res.cloudinary.com') > -1 && imgUrl.indexOf('f_auto') === -1) {
                 var optimizedUrl = imgUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/');
                 var link = document.createElement('link');
                 link.rel = 'preload';

@@ -19,7 +19,7 @@ export class SubCategoryService {
   constructor(private http: HttpClient) {}
 
   getSubCategoriesByMain(categoryId: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/${categoryId}`);
+    return this.http.get(`${this.baseUrl}/main/${categoryId}`);
   }
 
   addSubCategory(payload: { name: string, slug?: string, categoryId?: string, category?: string }): Observable<any> {

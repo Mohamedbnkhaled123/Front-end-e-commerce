@@ -9,27 +9,33 @@ import { env } from '../../../env/env';
 export class SocketService {
   private socket: any = null;
   private serverUrl: string;
+  private isServerless: boolean;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     this.serverUrl = env.apiURL.replace('/api/v1/', '');
+    // Vercel serverless platform does not host persistent WebSocket / Socket.io servers
+    this.isServerless = this.serverUrl.includes('vercel.app');
   }
 
   private async getSocket(): Promise<any> {
     if (!this.socket) {
-      if (isPlatformBrowser(this.platformId)) {
-        const { io } = await import('socket.io-client');
-        this.socket = io(this.serverUrl, {
-          reconnectionDelayMax: 10000,
-          reconnectionAttempts: 2,
-          timeout: 4000,
-          autoConnect: true
-        });
-        this.socket.on('connect_error', () => {
-          // If serverless backend returns 404 on socket.io, stop continuous polling to save bandwidth
-          this.socket?.disconnect();
-        });
+      if (isPlatformBrowser(this.platformId) && !this.isServerless) {
+        try {
+          const { io } = await import('socket.io-client');
+          this.socket = io(this.serverUrl, {
+            reconnectionDelayMax: 10000,
+            reconnectionAttempts: 2,
+            timeout: 4000,
+            autoConnect: true
+          });
+          this.socket.on('connect_error', () => {
+            this.socket?.disconnect();
+          });
+        } catch {
+          this.socket = { on: () => {}, off: () => {}, disconnect: () => {} };
+        }
       } else {
-        this.socket = { on: () => {}, off: () => {} };
+        this.socket = { on: () => {}, off: () => {}, disconnect: () => {} };
       }
     }
     return this.socket;
@@ -41,15 +47,18 @@ export class SocketService {
         observer.next(data);
       };
       
-      // Delay connection slightly to allow initial critical render to finish
-      setTimeout(() => {
-        this.getSocket().then(socket => {
-          socket.on(event, listener);
-        });
-      }, 2500);
+      if (!this.isServerless) {
+        setTimeout(() => {
+          this.getSocket().then(socket => {
+            if (socket && typeof socket.on === 'function') {
+              socket.on(event, listener);
+            }
+          });
+        }, 2500);
+      }
 
       return () => {
-        if (this.socket) {
+        if (this.socket && typeof this.socket.off === 'function') {
           this.socket.off(event, listener);
         }
       };

@@ -77,7 +77,7 @@ export class EditProduct implements OnInit, OnDestroy {
 
     this.editForm = this._fb.group({
       name:        ['', Validators.required],
-      desc:        ['', Validators.required],
+      desc:        [''],
       price:       [null, [Validators.required, Validators.min(0)]],
       discount:    [0, [Validators.min(0), Validators.max(100)]],
       stock:       [null, [Validators.required, Validators.min(0)]],
@@ -207,8 +207,8 @@ export class EditProduct implements OnInit, OnDestroy {
           }
 
           const isAr = this.langService.currentLang() === 'ar';
-          const activeName = isAr ? (found.name_ar || found.name) : (found.name_en || found.name);
-          const activeDesc = isAr ? (found.desc_ar || found.desc || '') : (found.desc_en || found.desc || '');
+          const activeName = found.name || (isAr ? found.name_ar : found.name_en) || '';
+          const activeDesc = (found.desc !== undefined && found.desc !== null) ? found.desc : (isAr ? (found.desc_ar || '') : (found.desc_en || ''));
 
           this.editForm.patchValue({
             name: activeName,

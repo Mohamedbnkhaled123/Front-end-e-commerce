@@ -11,18 +11,22 @@ export class LocalizeFieldPipe implements PipeTransform {
 
   transform(item: any, fieldName: string): string {
     if (!item) return '';
+
+    // 1. Primary canonical database field (e.g. name or desc) updated by admin
+    const baseValue = item[fieldName];
+    if (baseValue !== undefined && baseValue !== null && typeof baseValue === 'string') {
+      return baseValue;
+    }
+
+    // 2. Fallback to localized key if base field is not present
     const currentLang = this._languageService.currentLang();
-    
-    // Check if the localized field exists (e.g. name_ar or name_en)
     const localizedKey = `${fieldName}_${currentLang}`;
     const localizedValue = item[localizedKey];
 
-    if (localizedValue && typeof localizedValue === 'string' && localizedValue.trim() !== '') {
-        return localizedValue;
+    if (localizedValue && typeof localizedValue === 'string') {
+      return localizedValue;
     }
 
-    // Fallback to the base field (e.g. name)
-    const baseValue = item[fieldName];
     return baseValue || '';
   }
 }

@@ -74,7 +74,7 @@ export class AddProduct implements OnInit {
     this.productForm = this._fb.group({
       name:        ['', Validators.required],
       slug:        ['', Validators.required],
-      desc:        ['', Validators.required],
+      desc:        [''],
       price:       [null, [Validators.required, Validators.min(0)]],
       discount:    [0, [Validators.min(0), Validators.max(100)]],
       stock:       [null, [Validators.required, Validators.min(0)]],
