@@ -131,8 +131,13 @@
             
             <!-- Coupon Discount Line -->
             @if (appliedCoupon) {
-              <div class="flex justify-between text-blue-700 dark:text-blue-400 font-bold bg-blue-50 dark:bg-slate-800 p-2 rounded-lg border border-blue-200 dark:border-slate-700">
-                <span>Coupon ({{ appliedCoupon.code }} -{{ appliedCoupon.discountPercent }}%):</span>
+              <div class="flex items-center justify-between text-blue-700 dark:text-blue-400 font-bold bg-blue-50 dark:bg-slate-800 p-2.5 rounded-lg border border-blue-200 dark:border-slate-700">
+                <div class="flex items-center gap-2">
+                  <span>{{ 'admin.coupon_discount' | translate }} ({{ appliedCoupon.code }} -{{ appliedCoupon.discountPercent }}%):</span>
+                  <button type="button" (click)="removeCoupon()" class="text-[10px] text-rose-500 hover:text-rose-700 font-bold underline cursor-pointer">
+                    {{ 'cart.remove_coupon' | translate }}
+                  </button>
+                </div>
                 <span>-{{ appliedCoupon.discountAmount.toFixed(2) }} EGP</span>
               </div>
             }
@@ -146,20 +151,21 @@
 
             <!-- Promo Code Coupon Input Box -->
             <div class="border-t border-gray-100 dark:border-slate-800 pt-3 space-y-2">
-              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Promo Coupon Code</label>
+              <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ 'admin.coupons' | translate }}</label>
               <div class="flex items-center gap-1.5">
                 <input 
                   type="text" 
                   [(ngModel)]="couponCode" 
+                  (ngModelChange)="couponError = ''"
                   name="couponCode" 
-                  placeholder="PROMO CODE" 
+                  placeholder="MEMO..." 
                   class="flex-1 bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold uppercase outline-none focus:ring-1 focus:ring-blue-600 text-slate-900 dark:text-white">
                 <button 
                   type="button" 
                   (click)="applyCoupon()" 
-                  [disabled]="isValidatingCoupon || !couponCode" 
-                  class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-all cursor-pointer">
-                  {{ isValidatingCoupon ? '...' : ('action.filter' | translate) }}
+                  [disabled]="!canApplyCoupon" 
+                  class="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">
+                  {{ isValidatingCoupon ? '...' : ('cart.apply_coupon' | translate) }}
                 </button>
               </div>
               @if (couponMessage) {

@@ -54,10 +54,23 @@ export class CartService {
         ? item.productId 
         : (prodObj?._id ? String(prodObj._id) : (item.productId ? String(item.productId) : ''));
 
+      // Calculate effective discounted price if product has a discount
+      const prodDiscount = (prodObj as any)?.discount ?? defaultProduct?.discount ?? item.discountPercent ?? 0;
+      const rawPrice = (prodObj as any)?.price ?? defaultProduct?.price ?? item.priceAtAddition;
+      
+      let effectivePrice = item.priceAtAddition;
+      if (prodDiscount > 0 && rawPrice) {
+        effectivePrice = Number((rawPrice * (1 - prodDiscount / 100)).toFixed(2));
+      } else if (rawPrice !== undefined && rawPrice !== null) {
+        effectivePrice = rawPrice;
+      }
+
       return {
         productId: prodIdStr,
         name: prodObj?.name || item.name || defaultProduct?.name || 'Product Item',
-        priceAtAddition: item.priceAtAddition,
+        priceAtAddition: effectivePrice,
+        originalPrice: (rawPrice && prodDiscount > 0) ? rawPrice : undefined,
+        discountPercent: prodDiscount > 0 ? prodDiscount : undefined,
         quantity: item.quantity,
         isPriceChanged: item.isPriceChanged,
         productImg: prodObj?.imgURL || defaultProduct?.imgURL

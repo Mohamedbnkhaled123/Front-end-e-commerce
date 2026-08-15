@@ -97,6 +97,8 @@ export class LanguageService {
       'cart.final_total': 'Total Amount',
       'cart.subtotal': 'Subtotal Amount',
       'cart.shipping': 'Shipping Fee',
+      'cart.apply_coupon': 'Apply',
+      'cart.remove_coupon': 'Remove',
       'admin.discount': 'Coupon Discount',
       'admin.coupon_discount': 'Coupon Discount'
     },
@@ -180,6 +182,8 @@ export class LanguageService {
       'cart.final_total': 'المبلغ الإجمالي',
       'cart.subtotal': 'إجمالي المنتجات',
       'cart.shipping': 'رسوم الشحن',
+      'cart.apply_coupon': 'تطبيق',
+      'cart.remove_coupon': 'إلغاء',
       'admin.discount': 'خصم الكوبون',
       'admin.coupon_discount': 'خصم الكوبون'
     }

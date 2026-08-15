@@ -73,6 +73,8 @@
   "cart.shipping": "Shipping Fee",
   "cart.free": "FREE",
   "cart.proceed_checkout": "Proceed to Checkout",
+  "cart.apply_coupon": "Apply",
+  "cart.remove_coupon": "Remove",
   "admin.discount": "Coupon Discount",
   "admin.coupon_discount": "Coupon Discount",
   "checkout.title": "Checkout & Shipping Address",

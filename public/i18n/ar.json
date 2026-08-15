@@ -73,6 +73,8 @@
   "cart.shipping": "رسوم الشحن",
   "cart.free": "مجاناً",
   "cart.proceed_checkout": "متابعة الشراء والدفع",
+  "cart.apply_coupon": "تطبيق",
+  "cart.remove_coupon": "إلغاء",
   "admin.discount": "خصم الكوبون",
   "admin.coupon_discount": "خصم الكوبون",
   "checkout.title": "إتمام الشراء وعنوان التوصيل",

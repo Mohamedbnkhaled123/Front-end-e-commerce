@@ -15,10 +15,16 @@ export class OrderService {
   constructor(private _http: HttpClient) {}
 
   // Creates new store order
-  createOrder(shippingAddress: IShippingAddress) {
+  createOrder(shippingAddress: IShippingAddress, couponCode?: string) {
+    const payload: any = { shippingAddress };
+    if (couponCode) {
+      payload.couponCode = couponCode;
+      payload.coupon = couponCode;
+      payload.code = couponCode;
+    }
     return this._http.post<{ status: string; message: string; data: IOrder }>(
       this.apiURL, 
-      { shippingAddress }
+      payload
     );
   }
 

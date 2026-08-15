@@ -34,6 +34,7 @@ export class Checkout implements OnInit {
 
   // Promo Coupon State
   couponCode = '';
+  lastAppliedCode = '';
   appliedCoupon: { code: string; discountPercent: number; discountAmount: number } | null = null;
   couponMessage = '';
   couponError = '';
@@ -76,19 +77,30 @@ export class Checkout implements OnInit {
     return Math.max(0, this.subtotal - (this.appliedCoupon?.discountAmount || 0));
   }
 
+  get canApplyCoupon(): boolean {
+    const code = (this.couponCode || '').trim().toUpperCase();
+    if (!code || this.isValidatingCoupon) return false;
+    if (this.appliedCoupon && code === this.lastAppliedCode) return false;
+    return true;
+  }
+
   applyCoupon() {
-    if (!this.couponCode.trim()) return;
+    const code = (this.couponCode || '').trim().toUpperCase();
+    if (!code) return;
+    if (this.appliedCoupon && code === this.lastAppliedCode) return;
+
     this.isValidatingCoupon = true;
     this.couponError = '';
     this.couponMessage = '';
 
-    this._couponService.validateCoupon(this.couponCode, this.subtotal).subscribe({
+    this._couponService.validateCoupon(code, this.subtotal).subscribe({
       next: (res) => {
         this.appliedCoupon = {
           code: res.data.code,
           discountPercent: res.data.discountPercent,
           discountAmount: res.data.discountAmount
         };
+        this.lastAppliedCode = code;
         this.couponMessage = `Coupon applied! You saved EGP ${res.data.discountAmount.toFixed(2)}.`;
         this.isValidatingCoupon = false;
         this._cdr.detectChanges();
@@ -96,10 +108,20 @@ export class Checkout implements OnInit {
       error: (err) => {
         this.couponError = err?.error?.message || 'Invalid coupon code.';
         this.appliedCoupon = null;
+        this.lastAppliedCode = '';
         this.isValidatingCoupon = false;
         this._cdr.detectChanges();
       }
     });
+  }
+
+  removeCoupon() {
+    this.appliedCoupon = null;
+    this.lastAppliedCode = '';
+    this.couponCode = '';
+    this.couponMessage = '';
+    this.couponError = '';
+    this._cdr.detectChanges();
   }
 
   ngOnInit(): void {
@@ -165,7 +187,7 @@ export class Checkout implements OnInit {
       phoneNumber: cleanPhone
     };
 
-    this._orderService.createOrder(shippingAddress).subscribe({
+    this._orderService.createOrder(shippingAddress, this.appliedCoupon?.code).subscribe({
       next: async () => {
         this.isLoading = false;
         this._cartService.clearCart();
