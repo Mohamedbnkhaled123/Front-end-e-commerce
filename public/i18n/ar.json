@@ -75,6 +75,7 @@
   "cart.proceed_checkout": "متابعة الشراء والدفع",
   "cart.apply_coupon": "تطبيق",
   "cart.remove_coupon": "إلغاء",
+  "cart.coupon_applied": "تم تطبيق الكوبون بنجاح",
   "admin.discount": "خصم الكوبون",
   "admin.coupon_discount": "خصم الكوبون",
   "checkout.title": "إتمام الشراء وعنوان التوصيل",

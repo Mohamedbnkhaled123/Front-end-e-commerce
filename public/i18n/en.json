@@ -75,6 +75,7 @@
   "cart.proceed_checkout": "Proceed to Checkout",
   "cart.apply_coupon": "Apply",
   "cart.remove_coupon": "Remove",
+  "cart.coupon_applied": "Coupon applied successfully",
   "admin.discount": "Coupon Discount",
   "admin.coupon_discount": "Coupon Discount",
   "checkout.title": "Checkout & Shipping Address",

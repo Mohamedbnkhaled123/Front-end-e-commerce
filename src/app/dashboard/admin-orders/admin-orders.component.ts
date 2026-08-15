@@ -79,6 +79,24 @@ export class AdminOrders implements OnInit, OnDestroy {
     this.subscriptions.add(sub);
   }
 
+  // Computes the actual items subtotal from ordered items
+  getItemsSubtotal(order: IOrder): number {
+    if (!order?.items || order.items.length === 0) return 0;
+    return order.items.reduce((sum, item) => {
+      const p = item.discountedPrice !== undefined ? item.discountedPrice : item.priceAtPurchase;
+      return sum + ((p || 0) * (item.quantity || 1));
+    }, 0);
+  }
+
+  // Computes actual coupon discount without mixing with product-level discounts
+  getCouponDiscount(order: IOrder): number {
+    if (order.couponDiscount && order.couponDiscount > 0) return order.couponDiscount;
+    const subtotal = this.getItemsSubtotal(order);
+    const shipping = order.shippingFee !== undefined ? order.shippingFee : 50;
+    const diff = subtotal + shipping - order.totalPrice;
+    return diff > 0.01 ? Number(diff.toFixed(2)) : 0;
+  }
+
   // Formats status strings to clean human readable title case
   formatStatus(status: string): string {
     if (!status) return '';

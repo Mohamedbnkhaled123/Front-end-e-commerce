@@ -99,6 +99,7 @@ export class LanguageService {
       'cart.shipping': 'Shipping Fee',
       'cart.apply_coupon': 'Apply',
       'cart.remove_coupon': 'Remove',
+      'cart.coupon_applied': 'Coupon applied successfully',
       'admin.discount': 'Coupon Discount',
       'admin.coupon_discount': 'Coupon Discount'
     },
@@ -184,6 +185,7 @@ export class LanguageService {
       'cart.shipping': 'رسوم الشحن',
       'cart.apply_coupon': 'تطبيق',
       'cart.remove_coupon': 'إلغاء',
+      'cart.coupon_applied': 'تم تطبيق الكوبون بنجاح',
       'admin.discount': 'خصم الكوبون',
       'admin.coupon_discount': 'خصم الكوبون'
     }

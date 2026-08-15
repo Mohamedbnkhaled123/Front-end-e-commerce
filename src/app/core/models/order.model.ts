@@ -35,6 +35,8 @@ export interface IOrder {
   grossTotal?: number;
   shippingFee?: number;
   totalDiscount?: number;
+  couponDiscount?: number;
+  couponCode?: string;
   netTotal?: number;
   totalPrice: number;
   orderStatus: string;
