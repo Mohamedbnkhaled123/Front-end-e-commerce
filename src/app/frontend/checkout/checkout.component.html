@@ -161,7 +161,7 @@
             <div class="flex justify-between text-slate-600 dark:text-slate-400 font-medium">
               <span>{{ 'cart.shipping' | translate }}:</span>
               <span class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                <span>{{ subtotal >= 1000 ? ('cart.free' | translate) : '50.00 EGP' }}</span>
+                <span>{{ shippingFee === 0 ? ('cart.free' | translate) : '50.00 EGP' }}</span>
               </span>
             </div>
 

@@ -73,8 +73,13 @@ export class Checkout implements OnInit {
     private _cdr: ChangeDetectorRef
   ) {}
 
+  get shippingFee(): number {
+    return this.subtotal >= 1000 ? 0 : 50;
+  }
+
   get grandTotal(): number {
-    return Math.max(0, this.subtotal - (this.appliedCoupon?.discountAmount || 0));
+    const discount = this.appliedCoupon?.discountAmount || 0;
+    return Math.max(0, Number((this.subtotal + this.shippingFee - discount).toFixed(2)));
   }
 
   get canApplyCoupon(): boolean {
