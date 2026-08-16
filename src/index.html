@@ -9,52 +9,12 @@
   <meta name="theme-color" content="#020617">
   
   <!-- Content Security Policy (CSP) Meta Fallback -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https:; object-src 'none'; base-uri 'self';">
   
   <!-- Local Fonts Preload (Inter is critical for LCP) -->
   <link rel="preload" href="/assets/fonts/inter-variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preconnect" href="https://e-commerce-backend-theta-nine.vercel.app" crossorigin>
   <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-
-  <!-- Dynamic CMS Prefetch (Breaks LCP Waterfall) -->
-  <script>
-    (function() {
-      var backendUrl = 'https://e-commerce-backend-theta-nine.vercel.app/api/v1/cms/Home';
-      window.__cmsHomePromise = fetch(backendUrl)
-        .then(function(res) {
-          if (!res.ok) throw new Error('CMS prefetch failed');
-          return res.json();
-        })
-        .then(function(json) {
-          try {
-            var rawContent = json.data && json.data.content;
-            if (rawContent) {
-              var contentObj = JSON.parse(rawContent);
-              var imgUrl = contentObj.heroImage;
-              var isHomePage = window.location.pathname === '/' || window.location.pathname === '/home';
-              if (isHomePage && imgUrl && imgUrl.indexOf('res.cloudinary.com') > -1 && imgUrl.indexOf('f_auto') === -1) {
-                var optimizedUrl = imgUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/');
-                var link = document.createElement('link');
-                link.rel = 'preload';
-                link.as = 'image';
-                link.href = optimizedUrl;
-                link.imageSrcset = imgUrl.replace('/upload/', '/upload/f_auto,q_auto,w_400,c_limit/') + ' 400w, ' +
-                                   optimizedUrl + ' 800w, ' +
-                                   imgUrl.replace('/upload/', '/upload/f_auto,q_auto,w_1200,c_limit/') + ' 1200w';
-                link.imageSizes = '(max-width: 640px) 400px, (max-width: 768px) 800px, 1200px';
-                link.setAttribute('fetchpriority', 'high');
-                document.head.appendChild(link);
-              }
-            }
-          } catch(e) {}
-          return json;
-        })
-        .catch(function(e) {
-          window.__cmsHomePromise = null;
-          return null;
-        });
-    })();
-  </script>
 
   <!-- Inline Critical CSS for instant above-the-fold layout -->
   <style>
