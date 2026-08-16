@@ -29,9 +29,14 @@ export class Home implements OnInit, OnDestroy {
   staticURL = env.staticURL;
 
   cmsData: HomePageData = DEFAULT_HOME;
-  isCmsLoading: boolean = true;
+  isCmsLoading: boolean = false;
   isProductsLoading: boolean = false;
-  heroImageSrcset: string = '';
+  heroImageSrcset: string = `
+    https://res.cloudinary.com/lntp2qny/image/upload/f_auto,q_auto,w_200,c_limit/v1786395122/rbeljlxnwbezppug3ae3.png 200w,
+    https://res.cloudinary.com/lntp2qny/image/upload/f_auto,q_auto,w_350,c_limit/v1786395122/rbeljlxnwbezppug3ae3.png 350w,
+    https://res.cloudinary.com/lntp2qny/image/upload/f_auto,q_auto,w_500,c_limit/v1786395122/rbeljlxnwbezppug3ae3.png 500w,
+    https://res.cloudinary.com/lntp2qny/image/upload/f_auto,q_auto,w_700,c_limit/v1786395122/rbeljlxnwbezppug3ae3.png 700w
+  `.trim();
 
   currentLang: any;
 
@@ -79,8 +84,7 @@ export class Home implements OnInit, OnDestroy {
       this.subscriptions.add(prodSub);
     }
 
-    // Fetch CMS Data
-    this.isCmsLoading = true;
+    // Fetch CMS Data (background update with zero layout delay)
     const cmsSub = this._cmsService.getPage('Home').subscribe({
       next: (res) => {
         const raw = res.data?.content ?? '';
@@ -92,21 +96,22 @@ export class Home implements OnInit, OnDestroy {
         }
 
         // Apply Cloudinary optimizations if it's a Cloudinary URL
-        if (this.cmsData.heroImage && this.cmsData.heroImage.includes('res.cloudinary.com') && !this.cmsData.heroImage.includes('f_auto')) {
-          const baseUrl = this.cmsData.heroImage;
-          this.cmsData.heroImage = baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_600,c_limit/');
+        if (this.cmsData.heroImage && this.cmsData.heroImage.includes('res.cloudinary.com')) {
+          const baseUrl = this.cmsData.heroImage.includes('/upload/f_auto') 
+            ? this.cmsData.heroImage.replace(/\/upload\/[^/]+\//, '/upload/') 
+            : this.cmsData.heroImage;
+          this.cmsData.heroImage = baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_400,c_limit/');
           this.heroImageSrcset = `
-            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_400,c_limit/')} 400w,
-            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_600,c_limit/')} 600w,
-            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/')} 800w
+            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_200,c_limit/')} 200w,
+            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_350,c_limit/')} 350w,
+            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_500,c_limit/')} 500w,
+            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_700,c_limit/')} 700w
           `.trim();
         }
 
-        this.isCmsLoading = false;
         this._cdr.markForCheck();
       },
       error: () => {
-        this.isCmsLoading = false;
         this._cdr.markForCheck();
       }
     });

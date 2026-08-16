@@ -59,15 +59,17 @@
           <div class="flex-1 w-full flex items-center justify-center lg:justify-end relative mt-8 lg:mt-0 min-h-[250px]">
             <div class="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full transform scale-75"></div>
             
-            <a routerLink="/products" class="relative w-full h-[250px] sm:h-[300px] md:h-[380px] flex items-center justify-center lg:pe-10 xl:pe-14 cursor-pointer">
+            <a routerLink="/products" 
+               aria-label="Shop Featured Products on shoPRO"
+               class="relative w-full h-[250px] sm:h-[300px] md:h-[380px] flex items-center justify-center lg:pe-10 xl:pe-14 cursor-pointer">
               <img [src]="cmsData.heroImage" 
                    [attr.srcset]="heroImageSrcset || null"
-                   sizes="(max-width: 640px) 360px, (max-width: 1024px) 600px, 800px"
-                   width="800" height="800"
+                   sizes="(max-width: 640px) 200px, (max-width: 1024px) 300px, 400px"
+                   width="400" height="400"
                    fetchpriority="high"
                    loading="eager"
-                   decoding="sync"
-                   alt="Hero Banner Image"
+                   decoding="async"
+                   alt="Hero Banner Featured Product"
                    class="max-h-[200px] sm:max-h-[250px] md:max-h-[380px] w-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-all duration-700 ease-out hover:scale-105 z-10">
             </a>
           </div>
@@ -75,6 +77,7 @@
           <!-- Mobile Button -->
           <div class="pt-4 pb-2 lg:hidden w-full flex justify-center z-20">
             <a routerLink="/products" 
+               aria-label="Shop now on mobile"
                class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-3.5 rounded-xl shadow-[0_8px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_10px_25px_rgba(37,99,235,0.4)] transition-all hover:-translate-y-0.5 flex items-center gap-2 text-base">
               <span>{{ 'home.shop_now' | translate }}</span>
               <svg class="w-4 h-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>

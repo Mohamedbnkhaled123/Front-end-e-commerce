@@ -111,7 +111,7 @@ export interface ContactPageData {
 export const DEFAULT_HOME: HomePageData = {
   heroTitle: { en: 'Modern High-Performance E-Commerce', ar: 'متجر إلكتروني حديث بأداء عالي' },
   heroSubtitle: { en: 'Explore my services in creating a secure e-commerce store with a great user interface and seamless experience.', ar: 'استكشف خدماتي في إنشاء متجر إلكتروني آمن مع واجهة مستخدم رائعة وتجربة مستخدم عالية.' },
-  heroImage: ''
+  heroImage: 'https://res.cloudinary.com/lntp2qny/image/upload/f_auto,q_auto,w_400,c_limit/v1786395122/rbeljlxnwbezppug3ae3.png'
 };
 
 export const DEFAULT_ABOUT: AboutPageData = {
