@@ -13,6 +13,8 @@ import { Subscription } from 'rxjs';
 
 import { FlyToCartService } from '../../core/services/fly-to-cart.service';
 
+import { SeoService } from '../../core/services/seo.service';
+
 @Component({
   selector: 'app-product-details',
   standalone: true,
@@ -50,6 +52,7 @@ export class ProductDetails implements OnInit, OnDestroy {
     private _cartService: CartService,
     private _reviewService: ReviewService,
     private _flyToCartService: FlyToCartService,
+    private _seoService: SeoService,
     private _cdr: ChangeDetectorRef
   ) {}
 
@@ -61,6 +64,7 @@ export class ProductDetails implements OnInit, OnDestroy {
           this.product = res.data;
           this.clickedRelId.set(null);
           this.activeImageURL = this.product?.imgURL || null;
+          this._seoService.setProductMeta(this.product);
           if (this.product && this.product._id) {
             this.loadProductReviews(this.product._id);
           }
@@ -69,6 +73,7 @@ export class ProductDetails implements OnInit, OnDestroy {
           }
         } else {
           this.product = null;
+          this._seoService.resetDefaultMeta();
         }
       }
     });
@@ -182,6 +187,7 @@ export class ProductDetails implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this._seoService.resetDefaultMeta();
     this.subscriptions.unsubscribe();
   }
 }
