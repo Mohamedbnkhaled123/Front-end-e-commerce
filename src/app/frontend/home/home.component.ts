@@ -94,11 +94,11 @@ export class Home implements OnInit, OnDestroy {
         // Apply Cloudinary optimizations if it's a Cloudinary URL
         if (this.cmsData.heroImage && this.cmsData.heroImage.includes('res.cloudinary.com') && !this.cmsData.heroImage.includes('f_auto')) {
           const baseUrl = this.cmsData.heroImage;
-          this.cmsData.heroImage = baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/');
+          this.cmsData.heroImage = baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_600,c_limit/');
           this.heroImageSrcset = `
             ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_400,c_limit/')} 400w,
-            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/')} 800w,
-            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_1200,c_limit/')} 1200w
+            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_600,c_limit/')} 600w,
+            ${baseUrl.replace('/upload/', '/upload/f_auto,q_auto,w_800,c_limit/')} 800w
           `.trim();
         }
 

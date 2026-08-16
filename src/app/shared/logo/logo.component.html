@@ -23,7 +23,8 @@
       <span class="font-bold transition-colors duration-500" 
             [style.color]="lightText ? '#ffffff' : ''"
             [ngClass]="!lightText ? 'text-slate-900 dark:text-white' : ''">sho</span>
-      <span class="font-extrabold uppercase text-blue-400 ms-0.5 transition-colors duration-500">PRO</span>
+      <span class="font-extrabold uppercase ms-0.5 transition-colors duration-500"
+            [ngClass]="lightText ? 'text-blue-400' : 'text-blue-600 dark:text-blue-400'">PRO</span>
     </div>
 
     <!-- Optional Admin Badge -->
