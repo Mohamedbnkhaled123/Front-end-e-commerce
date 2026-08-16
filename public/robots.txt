@@ -1,6 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /admin/
-Disallow: /dashboard/
 
-Sitemap: https://customer-demo-e-commerce.vercel.app/sitemap.xml
+Sitemap: https://shopro-store.vercel.app/sitemap.xml

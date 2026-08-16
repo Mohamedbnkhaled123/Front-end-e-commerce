@@ -30,8 +30,18 @@
     <div class="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-300 gap-4">
       <p class="text-slate-300 font-medium">{{ 'footer.copyright' | translate }}</p>
       <div class="flex space-x-6 rtl:space-x-reverse">
-        <a routerLink="/policy" class="text-slate-300 hover:text-white transition-colors font-medium">{{ 'footer.conditions' | translate }}</a>
-        <a routerLink="/policy" class="text-slate-300 hover:text-white transition-colors font-medium">{{ 'footer.privacy' | translate }}</a>
+        <a routerLink="/policy" 
+           aria-label="Terms of Service and Conditions" 
+           class="text-slate-300 hover:text-white transition-colors font-medium">
+          {{ 'footer.conditions' | translate }}
+        </a>
+        <a routerLink="/policy" 
+           aria-label="Privacy Policy and Data Protection Notice"
+           title="Privacy Policy"
+           rel="privacy-policy" 
+           class="text-slate-300 hover:text-white transition-colors font-medium">
+          {{ 'footer.privacy' | translate }}
+        </a>
       </div>
     </div>
   </div>
