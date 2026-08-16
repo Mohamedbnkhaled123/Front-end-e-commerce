@@ -17,9 +17,9 @@
 
     <div class="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-xl shadow-xs overflow-hidden transition-colors duration-200">
       <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 flex items-center justify-between flex-wrap gap-4">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-800 dark:text-white">{{ 'admin.all_client_orders' | translate }} ({{ filteredOrders().length }})</h2>
+        <h2 class="text-xs font-semibold text-slate-800 dark:text-white">{{ 'admin.all_client_orders' | translate }} ({{ filteredOrders().length }})</h2>
         <div class="flex items-center gap-3">
-          <label for="status-filter" class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">{{ 'admin.filter_status' | translate }}</label>
+          <label for="status-filter" class="text-xs text-slate-500 dark:text-slate-400 font-semibold">{{ 'admin.filter_status' | translate }}</label>
           <select 
             id="status-filter" 
             [ngModel]="statusFilter()"  
@@ -61,7 +61,7 @@
                   @if (order.createdAt) {
                     <span class="font-mono text-[11px]">{{ order.createdAt | date:'medium':'':_langService.currentLang() }}</span>
                   }
-                  <span class="text-base font-bold text-slate-900 dark:text-white shrink-0">{{ order.totalPrice | number:'1.0-2' }} EGP</span>
+                  <span class="text-base font-bold text-slate-900 dark:text-white shrink-0">{{ getEffectiveTotal(order) | number:'1.0-2' }} EGP</span>
                 </div>
               </div>
 
@@ -101,7 +101,7 @@
                 
                 <!-- Order Items -->
                 <div class="space-y-3">
-                  <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ 'admin.ordered_products' | translate }} ({{ order.items ? order.items.length : 0 }})</h4>
+                  <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ 'admin.ordered_products' | translate }} ({{ order.items ? order.items.length : 0 }})</h4>
                   <div class="space-y-2">
                     @for (item of order.items; track $index) {
                       <div class="flex items-center gap-3 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-2.5 rounded-lg shadow-sm">
@@ -126,7 +126,7 @@
 
                 <!-- Shipping Address & Info -->
                 <div class="space-y-3">
-                  <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ 'admin.shipping_details' | translate }}</h4>
+                  <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ 'admin.shipping_details' | translate }}</h4>
                   @if (order.shippingAddress) {
                     <div class="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-3.5 rounded-lg shadow-sm space-y-2 text-xs">
                       <div class="flex items-start gap-2">
@@ -165,13 +165,13 @@
                     </div>
                     @if (getCouponDiscount(order) > 0) {
                       <div class="flex justify-between text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50/60 dark:bg-emerald-950/40 px-2 py-1 rounded border border-emerald-200/60 dark:border-emerald-800/40">
-                        <span>{{ 'admin.coupon_discount' | translate }}:</span> 
+                        <span>{{ 'admin.coupon_discount' | translate }}@if (getOrderCoupon(order)?.code) { ({{ getOrderCoupon(order)?.code }}) }:</span> 
                         <span>-{{ getCouponDiscount(order) | number:'1.0-2' }} EGP</span>
                       </div>
                     }
                     <div class="flex justify-between text-slate-900 dark:text-white font-black text-sm pt-2 border-t border-blue-200/60 dark:border-blue-800/60 mt-1">
                       <span>{{ 'cart.total' | translate }}:</span> 
-                      <span class="text-blue-600 dark:text-blue-400">{{ order.totalPrice | number:'1.0-2' }} EGP</span>
+                      <span class="text-blue-600 dark:text-blue-400">{{ getEffectiveTotal(order) | number:'1.0-2' }} EGP</span>
                     </div>
                   </div>
                 </div>

@@ -11,6 +11,7 @@ import { LanguageService } from '../../core/services/language.service';
 import { env } from '../../../env/env';
 import { Subscription } from 'rxjs';
 
+import { CouponService } from '../../core/services/coupon.service';
 import { SkeletonComponent } from '../../shared/skeleton/skeleton.component';
 
 @Component({
@@ -39,11 +40,27 @@ export class MyOrders implements OnInit, OnDestroy {
   constructor(
     private _orderService: OrderService,
     private _reviewService: ReviewService,
+    private _couponService: CouponService,
     private _modalService: ModalService,
     private _langService: LanguageService,
     private _cdr: ChangeDetectorRef,
     private _router: Router
   ) {}
+
+  getOrderCoupon(order: IOrder): { code: string; discountPercent: number; discountAmount: number } | null {
+    if (order.couponCode && order.couponDiscount) {
+      return { code: order.couponCode, discountPercent: 0, discountAmount: order.couponDiscount };
+    }
+    return this._couponService.getOrderCoupon(order._id);
+  }
+
+  getEffectiveTotal(order: IOrder): number {
+    const coupon = this.getOrderCoupon(order);
+    if (coupon && coupon.discountAmount > 0) {
+      return Math.max(0, Number((order.totalPrice - coupon.discountAmount).toFixed(2)));
+    }
+    return order.totalPrice;
+  }
 
   ngOnInit(): void {
     this.loadMyOrders();

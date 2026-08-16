@@ -7,6 +7,7 @@ import { ModalService } from '../../core/services/modal.service';
 import { Subscription } from 'rxjs';
 import { env } from '../../../env/env';
 
+import { CouponService } from '../../core/services/coupon.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 import { LanguageService } from '../../core/services/language.service';
 
@@ -55,6 +56,7 @@ export class AdminOrders implements OnInit, OnDestroy {
 
   constructor(
     private _orderService: OrderService,
+    private _couponService: CouponService,
     private _modalService: ModalService,
     public _langService: LanguageService
   ) {}
@@ -91,10 +93,29 @@ export class AdminOrders implements OnInit, OnDestroy {
   // Computes actual coupon discount without mixing with product-level discounts
   getCouponDiscount(order: IOrder): number {
     if (order.couponDiscount && order.couponDiscount > 0) return order.couponDiscount;
+    const local = this._couponService.getOrderCoupon(order._id);
+    if (local && local.discountAmount > 0) return local.discountAmount;
     const subtotal = this.getItemsSubtotal(order);
     const shipping = order.shippingFee !== undefined ? order.shippingFee : 50;
     const diff = subtotal + shipping - order.totalPrice;
     return diff > 0.01 ? Number(diff.toFixed(2)) : 0;
+  }
+
+  getOrderCoupon(order: IOrder): { code: string; discountPercent: number; discountAmount: number } | null {
+    if (order.couponCode && order.couponDiscount) {
+      return { code: order.couponCode, discountPercent: 0, discountAmount: order.couponDiscount };
+    }
+    return this._couponService.getOrderCoupon(order._id);
+  }
+
+  getEffectiveTotal(order: IOrder): number {
+    const couponDiscount = this.getCouponDiscount(order);
+    if (couponDiscount > 0) {
+      const subtotal = this.getItemsSubtotal(order);
+      const shipping = order.shippingFee !== undefined ? order.shippingFee : 50;
+      return Math.max(0, Number((subtotal + shipping - couponDiscount).toFixed(2)));
+    }
+    return order.totalPrice;
   }
 
   // Formats status strings to clean human readable title case

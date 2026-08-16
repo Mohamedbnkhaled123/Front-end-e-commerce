@@ -31,4 +31,30 @@ export class CouponService {
   validateCoupon(code: string, orderSubtotal: number): Observable<ICouponValidateRes> {
     return this._http.post<ICouponValidateRes>(`${this.apiURL}/validate`, { code, orderSubtotal });
   }
+
+  private readonly ORDER_COUPONS_KEY = 'velora_order_coupons';
+
+  saveOrderCoupon(orderId: string, coupon: { code: string; discountPercent: number; discountAmount: number }) {
+    if (!orderId || !coupon) return;
+    try {
+      const existing = this.getAllOrderCoupons();
+      existing[orderId] = coupon;
+      localStorage.setItem(this.ORDER_COUPONS_KEY, JSON.stringify(existing));
+    } catch {}
+  }
+
+  getAllOrderCoupons(): Record<string, { code: string; discountPercent: number; discountAmount: number }> {
+    try {
+      const raw = localStorage.getItem(this.ORDER_COUPONS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  getOrderCoupon(orderId: string): { code: string; discountPercent: number; discountAmount: number } | null {
+    if (!orderId) return null;
+    const all = this.getAllOrderCoupons();
+    return all[orderId] || null;
+  }
 }

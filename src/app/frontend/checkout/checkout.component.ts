@@ -188,7 +188,10 @@ export class Checkout implements OnInit {
     };
 
     this._orderService.createOrder(shippingAddress, this.appliedCoupon?.code).subscribe({
-      next: async () => {
+      next: async (res) => {
+        if (res?.data?._id && this.appliedCoupon) {
+          this._couponService.saveOrderCoupon(res.data._id, this.appliedCoupon);
+        }
         this.isLoading = false;
         this._cartService.clearCart();
         this._cdr.detectChanges();
