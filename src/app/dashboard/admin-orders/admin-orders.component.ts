@@ -92,9 +92,9 @@ export class AdminOrders implements OnInit, OnDestroy {
 
   // Computes actual coupon discount without mixing with product-level discounts
   getCouponDiscount(order: IOrder): number {
+    const coupon = this.getOrderCoupon(order);
+    if (coupon && coupon.discountAmount > 0) return coupon.discountAmount;
     if (order.couponDiscount && order.couponDiscount > 0) return order.couponDiscount;
-    const local = this._couponService.getOrderCoupon(order._id);
-    if (local && local.discountAmount > 0) return local.discountAmount;
     const subtotal = this.getItemsSubtotal(order);
     const shipping = order.shippingFee !== undefined ? order.shippingFee : 50;
     const diff = subtotal + shipping - order.totalPrice;
@@ -102,10 +102,7 @@ export class AdminOrders implements OnInit, OnDestroy {
   }
 
   getOrderCoupon(order: IOrder): { code: string; discountPercent: number; discountAmount: number } | null {
-    if (order.couponCode && order.couponDiscount) {
-      return { code: order.couponCode, discountPercent: 0, discountAmount: order.couponDiscount };
-    }
-    return this._couponService.getOrderCoupon(order._id);
+    return this._couponService.extractOrderCoupon(order);
   }
 
   getEffectiveTotal(order: IOrder): number {

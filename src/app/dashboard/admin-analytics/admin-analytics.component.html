@@ -257,7 +257,7 @@
                   <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
                     <td class="px-6 py-4 font-mono font-bold text-blue-600 dark:text-blue-400">#{{ ord._id.substring(ord._id.length - 8) }}</td>
                     <td class="px-6 py-4">
-                      <div class="font-bold text-slate-900 dark:text-white">{{ ord.shippingAddress?.title || ord.user?.name || 'N/A' }}</div>
+                      <div class="font-bold text-slate-900 dark:text-white">{{ cleanAddressTitle(ord.shippingAddress?.title) || ord.user?.name || 'N/A' }}</div>
                       <div class="text-[11px] text-slate-400">{{ ord.shippingAddress?.phoneNumber || '' }}</div>
                     </td>
                     <td class="px-6 py-4 text-slate-500">{{ ord.createdAt ? (ord.createdAt | date:'short':'':_langService.currentLang()) : '' }}</td>

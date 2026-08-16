@@ -48,10 +48,7 @@ export class MyOrders implements OnInit, OnDestroy {
   ) {}
 
   getOrderCoupon(order: IOrder): { code: string; discountPercent: number; discountAmount: number } | null {
-    if (order.couponCode && order.couponDiscount) {
-      return { code: order.couponCode, discountPercent: 0, discountAmount: order.couponDiscount };
-    }
-    return this._couponService.getOrderCoupon(order._id);
+    return this._couponService.extractOrderCoupon(order);
   }
 
   getEffectiveTotal(order: IOrder): number {

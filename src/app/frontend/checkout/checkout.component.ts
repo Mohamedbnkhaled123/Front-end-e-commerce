@@ -178,8 +178,13 @@ export class Checkout implements OnInit {
     this.isLoading = true;
     this._cdr.detectChanges();
 
+    let addressTitle = (this.title || 'Home').trim();
+    if (this.appliedCoupon) {
+      addressTitle += ` [COUPON:${this.appliedCoupon.code}:${this.appliedCoupon.discountPercent}:${this.appliedCoupon.discountAmount}]`;
+    }
+
     const shippingAddress: IShippingAddress = {
-      title: (this.title || 'Home').trim(),
+      title: addressTitle,
       street: cleanStreet,
       city: cleanCity,
       buildingNumber: cleanBuilding || undefined,

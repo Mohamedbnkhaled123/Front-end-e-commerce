@@ -17,6 +17,7 @@ import {
   ICategoryBreakdown,
   IReviewAnalyticsRes
 } from '../../core/services/analytics.service';
+import { cleanAddressTitle } from '../../core/services/coupon.service';
 import { CHART_COLORS, centerTextPlugin, crosshairPlugin, buildRevenueTrendConfig, buildCategoryBreakdownConfig, buildStarBreakdownConfig } from './analytics-chart-style';
 export type AnalyticsTab = 'financial' | 'products' | 'transactions' | 'sentiment';
 
@@ -28,6 +29,7 @@ export type AnalyticsTab = 'financial' | 'products' | 'transactions' | 'sentimen
   styleUrl: './admin-analytics.component.css'
 })
 export class AdminAnalytics implements OnInit, OnDestroy {
+  cleanAddressTitle = cleanAddressTitle;
   @ViewChild('revenueCanvas') revenueCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('categoryCanvas') categoryCanvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('starCanvas') starCanvas?: ElementRef<HTMLCanvasElement>;
