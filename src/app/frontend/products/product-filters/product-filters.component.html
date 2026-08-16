@@ -3,9 +3,9 @@
   <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-100 dark:border-slate-800">
     <div class="flex items-center gap-4">
       <button (click)="goBack()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
-        <svg class="w-6 h-6 text-slate-700 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <svg class="w-6 h-6 text-slate-700 dark:text-slate-300 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
       </button>
-      <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">Advanced Filters</h1>
+      <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">{{ 'catalog.advanced_filters' | translate }}</h1>
     </div>
   </div>
 
@@ -29,10 +29,10 @@
 
     <!-- SubCategory -->
     <div [class.opacity-50]="!selectedCategoryId || subCategoriesList.length === 0">
-      <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Subcategory</label>
+      <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ 'catalog.subcategory' | translate }}</label>
       <select [(ngModel)]="selectedSubCategoryId" (change)="onFilterChange()" [disabled]="!selectedCategoryId || subCategoriesList.length === 0"
         class="w-full px-4 py-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:text-white transition-all cursor-pointer shadow-sm disabled:cursor-not-allowed">
-        <option value="">Any Subcategory</option>
+        <option value="">{{ 'catalog.any_subcategory' | translate }}</option>
         @for (sub of subCategoriesList; track sub._id) {
           <option [value]="sub._id">{{ sub.name }}</option>
         }
@@ -41,45 +41,47 @@
 
     <!-- Price Range -->
     <div>
-      <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Price Range</label>
-      <div class="flex items-center gap-4">
+      <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">{{ 'catalog.price_range' | translate }}</label>
+      <div class="flex items-center gap-3 sm:gap-4">
         <div class="relative flex-1">
-          <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">$</span>
-          <input type="number" [(ngModel)]="minPrice" (ngModelChange)="onFilterChange()" placeholder="Min" min="0"
-            class="w-full pl-8 pr-4 py-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:text-white transition-all shadow-sm">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-semibold text-xs sm:text-sm">EGP</span>
+          <input type="number" [(ngModel)]="minPrice" (ngModelChange)="onFilterChange()" [placeholder]="'catalog.min' | translate" min="0"
+            class="w-full pl-12 pr-3 py-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:text-white transition-all shadow-sm">
         </div>
         <span class="text-slate-400 font-bold">-</span>
         <div class="relative flex-1">
-          <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">$</span>
-          <input type="number" [(ngModel)]="maxPrice" (ngModelChange)="onFilterChange()" placeholder="Max" min="0"
-            class="w-full pl-8 pr-4 py-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:text-white transition-all shadow-sm">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-semibold text-xs sm:text-sm">EGP</span>
+          <input type="number" [(ngModel)]="maxPrice" (ngModelChange)="onFilterChange()" [placeholder]="'catalog.max' | translate" min="0"
+            class="w-full pl-12 pr-3 py-3 text-sm border border-gray-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-800 dark:text-white transition-all shadow-sm">
         </div>
       </div>
     </div>
   </div>
 
   <!-- Footer Actions -->
-  <div class="mt-8 pt-6 border-t border-gray-100 dark:border-slate-800 sticky bottom-0 bg-gray-50/80 dark:bg-slate-950/80 backdrop-blur-md pb-4 z-10">
-    <div class="flex flex-col gap-4">
-      <!-- Live Counter -->
-      <div class="flex items-center justify-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 py-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all">
+  <div class="mt-8 pt-6 border-t border-gray-100 dark:border-slate-800 sticky bottom-0 bg-gray-50/90 dark:bg-slate-950/90 backdrop-blur-md pb-4 z-10">
+    <div class="flex flex-col gap-3 sm:gap-4">
+      <!-- Live Counter (Robust Responsive Layout for 320px screens) -->
+      <div class="flex items-center justify-center gap-1.5 px-3 py-3 text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm text-center">
         @if (isCounting) {
-          <span class="animate-pulse flex h-3 w-3">
+          <span class="animate-pulse flex h-3 w-3 shrink-0">
             <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
           </span>
-          Calculating...
+          <span>{{ 'catalog.calculating' | translate }}</span>
         } @else {
-          Found <span class="text-blue-600 dark:text-blue-400 font-bold text-lg">{{ matchingCount }}</span> Products matching these criteria
+          <span class="truncate">{{ 'catalog.found_prefix' | translate }}</span>
+          <span class="text-blue-600 dark:text-blue-400 font-extrabold text-sm sm:text-base px-1 shrink-0">{{ matchingCount }}</span>
+          <span class="truncate">{{ 'catalog.found_suffix' | translate }}</span>
         }
       </div>
 
-      <div class="flex gap-4">
+      <div class="flex gap-3 sm:gap-4">
         <button (click)="resetFilters()"
-          class="flex-1 py-3.5 text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 border border-rose-200 dark:border-rose-800/50 rounded-xl transition-all cursor-pointer">
+          class="flex-1 py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 border border-rose-200 dark:border-rose-800/50 rounded-xl transition-all cursor-pointer">
           {{ 'catalog.clear' | translate }}
         </button>
         <button (click)="applyFilters()" [disabled]="isCounting"
-          class="flex-[2] py-3.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+          class="flex-[2] py-3 sm:py-3.5 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
           {{ 'catalog.apply_filters' | translate }}
         </button>
       </div>

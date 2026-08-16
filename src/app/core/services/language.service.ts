@@ -101,7 +101,18 @@ export class LanguageService {
       'cart.remove_coupon': 'Remove',
       'cart.coupon_applied': 'Coupon applied successfully',
       'admin.discount': 'Coupon Discount',
-      'admin.coupon_discount': 'Coupon Discount'
+      'admin.coupon_discount': 'Coupon Discount',
+      'action.search': 'Search',
+      'navbar.search': 'Search',
+      'catalog.advanced_filters': 'Advanced Filters',
+      'catalog.subcategory': 'Subcategory',
+      'catalog.any_subcategory': 'Any Subcategory',
+      'catalog.price_range': 'Price Range',
+      'catalog.min': 'Min',
+      'catalog.max': 'Max',
+      'catalog.calculating': 'Calculating...',
+      'catalog.found_prefix': 'Found',
+      'catalog.found_suffix': 'products matching these criteria'
     },
     ar: {
       'brand.name': 'شوبرو',
@@ -179,15 +190,26 @@ export class LanguageService {
       'admin.modal_subcategory_name_placeholder': 'مثال: ساعات ذكية، أحذية جلدية...',
       'admin.modal_save_select_subcategory': 'حفظ واختيار التصنيف الفرعي',
       'admin.modal_creating': 'جاري الإنشاء...',
-      'cart.total': 'المبلغ الإجمالي',
+      'cart.total': 'إجمالي الطلب',
       'cart.final_total': 'المبلغ الإجمالي',
-      'cart.subtotal': 'إجمالي المنتجات',
-      'cart.shipping': 'رسوم الشحن',
+      'cart.subtotal': 'المجموع الفرعي',
+      'cart.shipping': 'تكلفة الشحن',
       'cart.apply_coupon': 'تطبيق',
-      'cart.remove_coupon': 'إلغاء',
+      'cart.remove_coupon': 'إزالة',
       'cart.coupon_applied': 'تم تطبيق الكوبون بنجاح',
       'admin.discount': 'خصم الكوبون',
-      'admin.coupon_discount': 'خصم الكوبون'
+      'admin.coupon_discount': 'خصم الكوبون',
+      'action.search': 'بحث',
+      'navbar.search': 'بحث',
+      'catalog.advanced_filters': 'فلاتر متقدمة',
+      'catalog.subcategory': 'التصنيف الفرعي',
+      'catalog.any_subcategory': 'أي تصنيف فرعي',
+      'catalog.price_range': 'نطاق السعر',
+      'catalog.min': 'أدنى',
+      'catalog.max': 'أقصى',
+      'catalog.calculating': 'جاري الحساب...',
+      'catalog.found_prefix': 'تم العثور على',
+      'catalog.found_suffix': 'منتج مطابق لهذه المعايير'
     }
   };
 

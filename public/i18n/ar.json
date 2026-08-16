@@ -459,5 +459,15 @@
   "admin.modal_subcategory_name": "اسم التصنيف الفرعي",
   "admin.modal_subcategory_name_placeholder": "مثال: ساعات ذكية، أحذية جلدية...",
   "admin.modal_save_select_subcategory": "حفظ واختيار التصنيف الفرعي",
-  "admin.modal_creating": "جاري الإنشاء..."
+  "admin.modal_creating": "جاري الإنشاء...",
+  "navbar.search": "بحث",
+  "catalog.advanced_filters": "فلاتر متقدمة",
+  "catalog.subcategory": "التصنيف الفرعي",
+  "catalog.any_subcategory": "أي تصنيف فرعي",
+  "catalog.price_range": "نطاق السعر",
+  "catalog.min": "أدنى",
+  "catalog.max": "أقصى",
+  "catalog.calculating": "جاري الحساب...",
+  "catalog.found_prefix": "تم العثور على",
+  "catalog.found_suffix": "منتج مطابق لهذه المعايير"
 }

@@ -459,5 +459,15 @@
   "admin.modal_subcategory_name": "Subcategory Name",
   "admin.modal_subcategory_name_placeholder": "e.g. Smart Watches, Leather Boots...",
   "admin.modal_save_select_subcategory": "Save & Select Subcategory",
-  "admin.modal_creating": "Creating..."
+  "admin.modal_creating": "Creating...",
+  "navbar.search": "Search",
+  "catalog.advanced_filters": "Advanced Filters",
+  "catalog.subcategory": "Subcategory",
+  "catalog.any_subcategory": "Any Subcategory",
+  "catalog.price_range": "Price Range",
+  "catalog.min": "Min",
+  "catalog.max": "Max",
+  "catalog.calculating": "Calculating...",
+  "catalog.found_prefix": "Found",
+  "catalog.found_suffix": "products matching these criteria"
 }
