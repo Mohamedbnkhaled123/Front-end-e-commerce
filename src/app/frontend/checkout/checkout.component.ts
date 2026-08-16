@@ -79,7 +79,10 @@ export class Checkout implements OnInit {
 
   get grandTotal(): number {
     const discount = this.appliedCoupon?.discountAmount || 0;
-    return Math.max(0, Number((this.subtotal + this.shippingFee - discount).toFixed(2)));
+    // 1. الخصم يتم حسابه وتطبيقه فقط على سعر المنتجات الأساسي
+    const productsSubtotalAfterDiscount = Math.max(0, this.subtotal - discount);
+    // 2. بعد خصم سعر المنتجات، تُضاف رسوم الشحن بشكل منفصل
+    return Number((productsSubtotalAfterDiscount + this.shippingFee).toFixed(2));
   }
 
   get canApplyCoupon(): boolean {
