@@ -33,6 +33,17 @@
   ],
   "rewrites": [
     {
+      "source": "/products/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|WhatsApp|Twitterbot|Pinterest|Googlebot|LinkedInBot|TelegramBot|Discordbot|Slackbot|SkypeUriPreview|vkShare|W3C_Validator|bingbot|yahoo|duckduckbot|baiduspider).*"
+        }
+      ],
+      "destination": "/api/product-meta?slug=:slug"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
