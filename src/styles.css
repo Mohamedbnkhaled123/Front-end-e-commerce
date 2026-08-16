@@ -374,9 +374,14 @@ app-product-details a p {
   will-change: transform;
 }
 
-/* Hide 'Add' text in product cards for screens <= 435px */
-@media (max-width: 435px) {
+/* Show 'Add' text from 321px upwards, hide only on <= 320px ultra-small screens */
+@media (max-width: 320px) {
   .cart-text-mobile-hide {
     display: none !important;
+  }
+}
+@media (min-width: 321px) {
+  .cart-text-mobile-hide {
+    display: inline !important;
   }
 }
