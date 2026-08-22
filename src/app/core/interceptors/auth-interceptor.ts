@@ -16,7 +16,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   let modifiedReq = req;
 
   if (isApiRequest) {
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = {
+      'X-Requested-With': 'XMLHttpRequest'
+    };
     const token = _authService.getToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -61,7 +63,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           const retryReq = req.clone({
             context: req.context,
             setHeaders: {
-              'Authorization': `Bearer ${newToken}`
+              'Authorization': `Bearer ${newToken}`,
+              'X-Requested-With': 'XMLHttpRequest'
             },
             withCredentials: true
           });
