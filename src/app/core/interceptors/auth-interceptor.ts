@@ -11,14 +11,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const _authService = inject(AuthService);
   const _refreshCoordinator = inject(RefreshCoordinator);
 
-  // Only add credentials + CSRF header for requests to our own API
+  // Only add credentials and token for requests to our own API
   const isApiRequest = req.url.startsWith(env.apiURL);
   let modifiedReq = req;
 
   if (isApiRequest) {
-    const headers: Record<string, string> = {
-      'X-Requested-With': 'XMLHttpRequest'
-    };
+    const headers: Record<string, string> = {};
     const token = _authService.getToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -63,8 +61,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           const retryReq = req.clone({
             context: req.context,
             setHeaders: {
-              'Authorization': `Bearer ${newToken}`,
-              'X-Requested-With': 'XMLHttpRequest'
+              'Authorization': `Bearer ${newToken}`
             },
             withCredentials: true
           });
