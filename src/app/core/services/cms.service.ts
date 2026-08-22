@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ICmsPageRes, ICmsUpdateRes, CmsPageName } from '../models/cms.model';
 import { env } from '../../../env/env';
@@ -51,25 +51,17 @@ export class CmsService {
 
   // Updates CMS page content and invalidates cache
   updatePage(pageName: CmsPageName, content: string) {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    return this._http.post<ICmsUpdateRes>(`${API_BASE}/update`, { pageName, content }, { headers }).pipe(
+    return this._http.post<ICmsUpdateRes>(`${API_BASE}/update`, { pageName, content }).pipe(
       tap(() => this.invalidatePage(pageName))
     );
   }
 
   // Uploads CMS hero image and invalidates Home cache
   uploadHeroImage(blob: Blob, fileName: string) {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
     const formData = new FormData();
     formData.append('heroImage', blob, fileName);
 
-    return this._http.post<{ status: string; message: string; url: string }>(`${API_BASE}/upload-hero`, formData, { headers }).pipe(
+    return this._http.post<{ status: string; message: string; url: string }>(`${API_BASE}/upload-hero`, formData).pipe(
       tap(() => this.invalidatePage('Home'))
     );
   }

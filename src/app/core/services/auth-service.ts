@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, map, catchError, of } from 'rxjs';
 import { env } from '../../../env/env';
 import { IAuthLogin, IAuthLoginRes, IAuthRegister, IJWT } from '../models/auth.model';
+import { RefreshCoordinator } from './refresh-coordinator';
 
 
 @Injectable({
@@ -12,9 +13,21 @@ import { IAuthLogin, IAuthLoginRes, IAuthRegister, IJWT } from '../models/auth.m
 export class AuthService {
   private isAuthanticate = new BehaviorSubject<string | null>(null);
   apiURL = env.apiURL + 'auth/login';
-  private token_key = 'token';
 
-  constructor(private _http: HttpClient, private _router: Router) {}
+  /** In-memory access token — NEVER persisted to localStorage */
+  private accessToken: string | null = null;
+
+  /** Emits true once the initial auth check completes (logged in or guest) */
+  authReady$ = new ReplaySubject<boolean>(1);
+
+  /** Handle for the proactive exp-based refresh timer */
+  private expTimerHandle: ReturnType<typeof setTimeout> | null = null;
+
+  constructor(
+    private _http: HttpClient,
+    private _router: Router,
+    private _refreshCoordinator: RefreshCoordinator
+  ) {}
 
   // Checks current user role
   isUser(): string | null {
@@ -37,16 +50,32 @@ export class AuthService {
     return this.isAuthanticate.asObservable();
   }
 
-  // Initializes authentication state
+  // Initializes authentication state — called from App.ngOnInit()
+  // Non-blocking: fires background refresh, does NOT delay rendering
   onInitAuth() {
-    const token = this.getToken();
-    if (token) {
-      const decoded = this.jwtDecoding(token);
-      if (decoded) {
-        return this.isAuthanticate.next(decoded.name || decoded.id || 'Logged User');
-      }
+    // Clean up legacy localStorage token (forced re-login per plan §3.6)
+    const legacyToken = localStorage.getItem('token');
+    if (legacyToken) {
+      localStorage.removeItem('token');
     }
-    this.isAuthanticate.next(null);
+
+    // Attempt silent refresh via HttpOnly cookie (non-blocking)
+    this._refreshCoordinator.refresh().subscribe({
+      next: (token) => {
+        if (token) {
+          this.setAccessTokenInMemory(token);
+          const decoded = this.jwtDecoding(token);
+          if (decoded) {
+            this.isAuthanticate.next(decoded.name || decoded.id || 'Logged User');
+          }
+        }
+        this.authReady$.next(true);
+      },
+      error: () => {
+        this.accessToken = null;
+        this.authReady$.next(true); // Ready as guest
+      }
+    });
   }
 
   // Customer login handler
@@ -67,11 +96,11 @@ export class AuthService {
       localCart
     };
 
-    return this._http.post<IAuthLoginRes>(this.apiURL, payload).pipe(
+    return this._http.post<IAuthLoginRes>(this.apiURL, payload, { withCredentials: true }).pipe(
       map(res => {
-        const token = res.JWT;
+        const token = res.accessToken || res.JWT;
         if (token) {
-          this.storeToken(token);
+          this.setAccessTokenInMemory(token);
           if (localCart) {
             localStorage.removeItem('shopro_guest_cart');
             localStorage.removeItem('velora_guest_cart');
@@ -93,14 +122,14 @@ export class AuthService {
 
   // Admin dashboard login handler
   adminLogin(data: IAuthLogin) {
-    return this._http.post<IAuthLoginRes>(this.apiURL, data).pipe(
+    return this._http.post<IAuthLoginRes>(this.apiURL, data, { withCredentials: true }).pipe(
       map(res => {
-        const token = res.JWT;
+        const token = res.accessToken || res.JWT;
         const decodedToken = this.jwtDecoding(token);
         const role = (decodedToken?.role || '').toLowerCase();
 
         if (role === 'admin' || role === 'superadmin') {
-          this.storeToken(token);
+          this.setAccessTokenInMemory(token);
           this.setUserLogin(decodedToken?.name || decodedToken?.id || (role === 'superadmin' ? 'Super Admin' : 'Admin'));
           this._router.navigate(['/admin/home']);
         }
@@ -116,11 +145,11 @@ export class AuthService {
 
   // First-time Super Admin account claim
   setupSuperAdmin(data: any) {
-    return this._http.post<IAuthLoginRes>(`${env.apiURL}user/setup-superadmin`, data).pipe(
+    return this._http.post<IAuthLoginRes>(`${env.apiURL}user/setup-superadmin`, data, { withCredentials: true }).pipe(
       map(res => {
-        const token = res.JWT;
+        const token = res.accessToken || res.JWT;
         if (token) {
-          this.storeToken(token);
+          this.setAccessTokenInMemory(token);
           const decoded = this.jwtDecoding(token);
           this.setUserLogin(decoded?.name || 'Super Admin');
           this._router.navigate(['/admin/analytics']);
@@ -161,26 +190,26 @@ export class AuthService {
     }
   }
 
+  /** Returns the in-memory access token (null if absent or expired) */
   getToken(): string | null {
-    const token = localStorage.getItem(this.token_key);
-    if (!token || token === 'undefined' || token === 'null') {
-      localStorage.removeItem(this.token_key);
-      return null;
-    }
-    const decoded = this.jwtDecoding(token);
+    if (!this.accessToken) return null;
+    const decoded = this.jwtDecoding(this.accessToken);
     if (!decoded) {
-      localStorage.removeItem(this.token_key);
+      this.accessToken = null;
       return null;
     }
-    return token;
+    return this.accessToken;
   }
 
-  storeToken(token: string) {
-    localStorage.setItem(this.token_key, token);
+  /** Stores access token in memory and schedules proactive refresh */
+  setAccessTokenInMemory(token: string) {
+    this.accessToken = token;
+    this.scheduleExpRefresh(token);
   }
 
   clearTokenWithoutRedirect() {
-    localStorage.removeItem(this.token_key);
+    this.accessToken = null;
+    this.cancelExpTimer();
     this.isAuthanticate.next(null);
   }
 
@@ -216,8 +245,58 @@ export class AuthService {
   }
 
   logout() {
-    this.clearTokenWithoutRedirect();
+    // Cancel proactive refresh timer
+    this.cancelExpTimer();
+
+    // Tell backend to revoke the refresh token family
+    this._http.post(`${env.apiURL}auth/logout`, {}, { withCredentials: true }).pipe(
+      catchError(() => of(null))
+    ).subscribe();
+
+    // Clear in-memory state
+    this.accessToken = null;
+    this.isAuthanticate.next(null);
+
     this._router.navigate(['/home']);
   }
-}
 
+  /**
+   * Schedules a proactive refresh ~60 seconds before the access token expires.
+   * Replaces any existing timer to prevent duplicates.
+   */
+  private scheduleExpRefresh(token: string): void {
+    this.cancelExpTimer();
+
+    const decoded = this.jwtDecoding(token);
+    if (!decoded || !decoded.exp) return;
+
+    const nowSec = Math.floor(Date.now() / 1000);
+    const secondsUntilExpiry = decoded.exp - nowSec;
+    // Refresh 60 seconds before expiry, but at least 10 seconds from now
+    const refreshInSeconds = Math.max(secondsUntilExpiry - 60, 10);
+
+    this.expTimerHandle = setTimeout(() => {
+      this._refreshCoordinator.refresh().subscribe({
+        next: (newToken) => {
+          if (newToken) {
+            this.setAccessTokenInMemory(newToken);
+            const dec = this.jwtDecoding(newToken);
+            if (dec) {
+              this.isAuthanticate.next(dec.name || dec.id || 'Logged User');
+            }
+          } else {
+            // Refresh failed — token expired, user becomes guest
+            this.clearTokenWithoutRedirect();
+          }
+        }
+      });
+    }, refreshInSeconds * 1000);
+  }
+
+  private cancelExpTimer(): void {
+    if (this.expTimerHandle !== null) {
+      clearTimeout(this.expTimerHandle);
+      this.expTimerHandle = null;
+    }
+  }
+}

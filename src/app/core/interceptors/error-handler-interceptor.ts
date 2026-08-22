@@ -18,12 +18,8 @@ export const errorHandlerInterceptor: HttpInterceptorFn = (req, next) => {
     if (!env.production) {
       console.error('HTTP Error caught by interceptor:', error);
     }
-    if (error.status === 401) {
-      _authService.clearTokenWithoutRedirect();
-      if (!_router.url.includes('/login') && !_router.url.includes('/dashboard-login')) {
-        _router.navigate(['/login']);
-      }
-    } else if (error.status === 403) {
+    // NOTE: 401 is handled by authInterceptor (refresh + retry). Only non-auth errors below.
+    if (error.status === 403) {
       const userRole = _authService.isUser();
       if (userRole) {
         _modalService.alert({

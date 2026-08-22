@@ -5,8 +5,13 @@ export interface IAuthLogin {
 
 export interface IAuthLoginRes {
     JWT: string;
+    accessToken?: string;
     status?: string;
     message?: string;
+}
+
+export interface IRefreshTokenRes {
+    accessToken: string;
 }
 
 export interface IJWT {

@@ -16,6 +16,7 @@ import { Subscription } from 'rxjs';
 })
 export class Frontend implements OnInit, OnDestroy {
   isLoggedIn = false;
+  private _authSub?: Subscription;
   private _routerSub?: Subscription;
 
   constructor(
@@ -28,6 +29,10 @@ export class Frontend implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.checkLoginStatus();
+    this._authSub = this._authService.isLogedIn().subscribe((user) => {
+      this.isLoggedIn = !!user;
+      this._cdr.detectChanges();
+    });
     this._routerSub = this._router.events.subscribe(() => {
       this.checkLoginStatus();
     });
@@ -37,10 +42,13 @@ export class Frontend implements OnInit, OnDestroy {
     if (this._routerSub) {
       this._routerSub.unsubscribe();
     }
+    if (this._authSub) {
+      this._authSub.unsubscribe();
+    }
   }
 
   checkLoginStatus(): void {
-    const token = localStorage.getItem('token');
+    const token = this._authService.getToken();
     this.isLoggedIn = !!token;
     this._cdr.detectChanges();
   }
