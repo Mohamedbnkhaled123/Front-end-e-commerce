@@ -74,6 +74,11 @@ export class AdminAnalytics implements OnInit, OnDestroy {
 
   // System Status & Micro-Interaction Signals
   isLoading = signal<boolean>(false);
+  isFinancialLoading = signal<boolean>(false);
+  isProductsLoading = signal<boolean>(false);
+  isAuditLoading = signal<boolean>(false);
+  isSentimentLoading = signal<boolean>(false);
+
   lastRefreshedAt = signal<Date>(new Date());
   kpiAnimTrigger = signal<number>(0);
   chartReady = signal<boolean>(false);
@@ -172,7 +177,9 @@ export class AdminAnalytics implements OnInit, OnDestroy {
 
   refreshAllData(): void {
     this._analyticsService.clearCache();
+    this.kpis.set(null);
     this.topProducts.set([]);
+    this.categoryBreakdown.set([]);
     this.auditOrders.set([]);
     this.reviewSentiment.set(null);
     this.fetchAllData();
@@ -181,6 +188,10 @@ export class AdminAnalytics implements OnInit, OnDestroy {
   // Data Fetching Handler (Single Responsibility: Data Retrieval)
   private fetchAllData(): void {
     this.isLoading.set(true);
+    this.isFinancialLoading.set(true);
+    this.isProductsLoading.set(true);
+    this.isAuditLoading.set(true);
+    this.isSentimentLoading.set(true);
     this.lastRefreshedAt.set(new Date());
     this.kpiAnimTrigger.update(v => v + 1);
 
@@ -194,6 +205,8 @@ export class AdminAnalytics implements OnInit, OnDestroy {
         this.kpis.set(res.data.kpis);
         this.growth.set(res.data.growth);
         this.revenueTrend.set(res.data.revenueTrend);
+        this.isFinancialLoading.set(false);
+        this.isLoading.set(false);
         this._cdr.detectChanges();
         if (this.activeTab() === 'financial') {
           setTimeout(() => {
@@ -202,9 +215,11 @@ export class AdminAnalytics implements OnInit, OnDestroy {
           }, 50);
         }
         this.triggerNumberCounters();
-        this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false)
+      error: () => {
+        this.isFinancialLoading.set(false);
+        this.isLoading.set(false);
+      }
     });
     this.subscriptions.add(finSub);
 
@@ -214,6 +229,7 @@ export class AdminAnalytics implements OnInit, OnDestroy {
   }
 
   private fetchProductsData(): void {
+    this.isProductsLoading.set(true);
     const range = this.selectedRange();
     const from = this.customFrom();
     const to = this.customTo();
@@ -221,6 +237,7 @@ export class AdminAnalytics implements OnInit, OnDestroy {
       next: (res) => {
         this.topProducts.set(res.data.topProducts);
         this.categoryBreakdown.set(res.data.categoryBreakdown);
+        this.isProductsLoading.set(false);
         this._cdr.detectChanges();
         if (this.activeTab() === 'products') {
           setTimeout(() => {
@@ -228,15 +245,20 @@ export class AdminAnalytics implements OnInit, OnDestroy {
             this.chartReady.set(true);
           }, 50);
         }
+      },
+      error: () => {
+        this.isProductsLoading.set(false);
       }
     });
     this.subscriptions.add(prodSub);
   }
 
   private fetchReviewData(): void {
+    this.isSentimentLoading.set(true);
     const revSub = this._analyticsService.getReviewAnalytics().subscribe({
       next: (res) => {
         this.reviewSentiment.set(res.data);
+        this.isSentimentLoading.set(false);
         this._cdr.detectChanges();
         if (this.activeTab() === 'sentiment') {
           setTimeout(() => {
@@ -244,12 +266,16 @@ export class AdminAnalytics implements OnInit, OnDestroy {
             this.chartReady.set(true);
           }, 50);
         }
+      },
+      error: () => {
+        this.isSentimentLoading.set(false);
       }
     });
     this.subscriptions.add(revSub);
   }
 
   private loadOrderAudit(): void {
+    this.isAuditLoading.set(true);
     const range = this.selectedRange();
     const from = this.customFrom();
     const to = this.customTo();
@@ -267,7 +293,11 @@ export class AdminAnalytics implements OnInit, OnDestroy {
         });
         this.auditTotalCount.set(res.data.pagination.total);
         this.auditTotalPages.set(res.data.pagination.totalPages);
+        this.isAuditLoading.set(false);
         this._cdr.detectChanges();
+      },
+      error: () => {
+        this.isAuditLoading.set(false);
       }
     });
     this.subscriptions.add(orderSub);
@@ -387,6 +417,9 @@ export class AdminAnalytics implements OnInit, OnDestroy {
     const config = buildRevenueTrendConfig(trendData, this._langService);
 
     this.revenueChartInstance = new this.ChartConstructor(this.revenueCanvas.nativeElement, config);
+    requestAnimationFrame(() => {
+      if (this.revenueChartInstance) this.revenueChartInstance.resize();
+    });
   }
 
   private async renderCategoryBreakdownChart(categories: ICategoryBreakdown[]): Promise<void> {
@@ -410,6 +443,9 @@ export class AdminAnalytics implements OnInit, OnDestroy {
     });
 
     this.categoryChartInstance = new this.ChartConstructor(this.categoryCanvas.nativeElement, config);
+    requestAnimationFrame(() => {
+      if (this.categoryChartInstance) this.categoryChartInstance.resize();
+    });
   }
 
   private async renderStarBreakdownChart(starBreakdown: Record<number, number>): Promise<void> {
@@ -421,6 +457,9 @@ export class AdminAnalytics implements OnInit, OnDestroy {
     const config = buildStarBreakdownConfig(starBreakdown);
 
     this.starChartInstance = new this.ChartConstructor(this.starCanvas.nativeElement, config);
+    requestAnimationFrame(() => {
+      if (this.starChartInstance) this.starChartInstance.resize();
+    });
   }
 
   // Pure JavaScript Data Blob CSV Export

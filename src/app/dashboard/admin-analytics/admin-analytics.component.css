@@ -143,13 +143,11 @@
   will-change: opacity;
 }
 
-@keyframes verticalScaleIn {
+@keyframes fadeInScale {
   from {
-    transform: scaleY(0);
     opacity: 0;
   }
   to {
-    transform: scaleY(1);
     opacity: 1;
   }
 }
@@ -157,10 +155,9 @@
 .fluid-chart-wrapper {
   position: relative;
   width: 100%;
-  height: 350px;
-  transform-origin: bottom;
-  animation: verticalScaleIn 800ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
+  height: 360px;
+  min-height: 360px;
+  animation: fadeInScale 300ms ease-out forwards;
 }
 
 .chart-container.chart-ready {
