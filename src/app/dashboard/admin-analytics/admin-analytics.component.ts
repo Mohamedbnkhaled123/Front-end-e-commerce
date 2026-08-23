@@ -115,8 +115,11 @@ export class AdminAnalytics implements OnInit, OnDestroy {
 
     // Render charts deferred after DOM updates canvas into view
     setTimeout(() => {
-      if (tab === 'financial' && this.revenueTrend().length > 0) {
-        this.renderRevenueTrendChart(this.revenueTrend());
+      if (tab === 'financial') {
+        if (this.revenueTrend().length > 0) {
+          this.renderRevenueTrendChart(this.revenueTrend());
+        }
+        this.triggerNumberCounters();
       } else if (tab === 'products' && this.categoryBreakdown().length > 0) {
         this.renderCategoryBreakdownChart(this.categoryBreakdown());
       } else if (tab === 'sentiment' && this.reviewSentiment()?.starBreakdown) {
@@ -269,10 +272,18 @@ export class AdminAnalytics implements OnInit, OnDestroy {
     this.subscriptions.add(orderSub);
   }
 
-  // Pure JS requestAnimationFrame Count-up Ticker
+  private activeAnimationFrames: number[] = [];
+
+  // Pure JS requestAnimationFrame Count-up Ticker with smooth Quartic Ease-Out
   private triggerNumberCounters(): void {
+    this.cancelActiveAnimations();
+
     setTimeout(() => {
-      if (!this.kpiValueEls) return;
+      if (!this.kpiValueEls || this.kpiValueEls.length === 0) return;
+
+      const duration = 750; // ms (fast, responsive, smooth)
+      const startTime = performance.now();
+
       this.kpiValueEls.forEach(elRef => {
         const el = elRef.nativeElement;
         const targetAttr = el.getAttribute('data-target');
@@ -283,14 +294,36 @@ export class AdminAnalytics implements OnInit, OnDestroy {
         const target = parseFloat(targetAttr);
         if (isNaN(target)) return;
 
-        const isFloat = targetAttr.includes('.');
-        const formatted = isFloat 
-          ? target.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-          : Math.round(target).toLocaleString();
+        // Set initial text to 0 before starting animation
+        el.textContent = `${prefixAttr}0.00${suffixAttr}`;
 
-        el.textContent = `${prefixAttr}${formatted}${suffixAttr}`;
+        const step = (currentTime: number) => {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // Ease-Out Quartic curve: rapid rise with gentle deceleration
+          const easeOut = 1 - Math.pow(1 - progress, 4);
+          const current = target * easeOut;
+
+          el.textContent = `${prefixAttr}${current.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${suffixAttr}`;
+
+          if (progress < 1) {
+            const frameId = requestAnimationFrame(step);
+            this.activeAnimationFrames.push(frameId);
+          } else {
+            // Lock in exact final value
+            el.textContent = `${prefixAttr}${target.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${suffixAttr}`;
+          }
+        };
+
+        const frameId = requestAnimationFrame(step);
+        this.activeAnimationFrames.push(frameId);
       });
-    }, 80);
+    }, 40);
+  }
+
+  private cancelActiveAnimations(): void {
+    this.activeAnimationFrames.forEach(id => cancelAnimationFrame(id));
+    this.activeAnimationFrames = [];
   }
 
   // --- Safe Chart Destroy Helper ---
@@ -425,6 +458,7 @@ export class AdminAnalytics implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.cancelActiveAnimations();
     this.subscriptions.unsubscribe();
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();

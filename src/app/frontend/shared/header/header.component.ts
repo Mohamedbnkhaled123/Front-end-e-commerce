@@ -25,6 +25,7 @@ export class HeaderComponent implements OnInit {
 
   isMobileMenuOpen = signal<boolean>(false);
   isMoreDropdownOpen = signal<boolean>(false);
+  isUserMenuOpen = signal<boolean>(false);
   
   isLoggedIn$: Observable<string | null> | undefined;
 
@@ -41,6 +42,7 @@ export class HeaderComponent implements OnInit {
   async logout() {
     this.closeMobileMenu();
     this.closeMoreDropdown();
+    this.closeUserMenu();
     
     const confirmed = await this.modalService.confirm({
       title: 'Confirm Logout',
@@ -58,6 +60,7 @@ export class HeaderComponent implements OnInit {
   toggleMobileMenu(): void {
     this.isMobileMenuOpen.update(v => !v);
     this.isMoreDropdownOpen.set(false);
+    this.isUserMenuOpen.set(false);
   }
 
   closeMobileMenu(): void {
@@ -66,16 +69,30 @@ export class HeaderComponent implements OnInit {
 
   toggleMoreDropdown(): void {
     this.isMoreDropdownOpen.update(v => !v);
+    this.isUserMenuOpen.set(false);
   }
 
   closeMoreDropdown(): void {
     this.isMoreDropdownOpen.set(false);
   }
 
+  toggleUserMenu(): void {
+    this.isUserMenuOpen.update(v => !v);
+    this.isMoreDropdownOpen.set(false);
+  }
+
+  closeUserMenu(): void {
+    this.isUserMenuOpen.set(false);
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     if (!target) return;
+
+    if (this.isUserMenuOpen() && !target.closest('.user-menu-wrapper')) {
+      this.isUserMenuOpen.set(false);
+    }
 
     if (this.isMoreDropdownOpen() && !target.closest('.more-dropdown-wrapper')) {
       this.isMoreDropdownOpen.set(false);

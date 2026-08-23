@@ -108,15 +108,32 @@
 
         <!-- User Auth / Profile -->
         @if (isLoggedIn$ | async; as user) {
-          <div class="relative group hidden sm:block">
-            <button class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <div class="relative user-menu-wrapper hidden sm:block">
+            <button 
+              (click)="toggleUserMenu()" 
+              type="button" 
+              class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 min-h-[38px]">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
               <span>{{ user }}</span>
+              <svg class="w-3.5 h-3.5 transition-transform duration-200" [class.rotate-180]="isUserMenuOpen()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
             </button>
-            <div class="absolute right-0 rtl:right-auto rtl:left-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+            <div 
+              class="absolute right-0 rtl:right-auto rtl:left-0 top-full pt-2 w-48 z-50 transition-all duration-200 ease-out origin-top-right rtl:origin-top-left"
+              [class.opacity-100]="isUserMenuOpen()"
+              [class.visible]="isUserMenuOpen()"
+              [class.scale-100]="isUserMenuOpen()"
+              [class.translate-y-0]="isUserMenuOpen()"
+              [class.pointer-events-auto]="isUserMenuOpen()"
+              [class.opacity-0]="!isUserMenuOpen()"
+              [class.invisible]="!isUserMenuOpen()"
+              [class.scale-95]="!isUserMenuOpen()"
+              [class.-translate-y-2]="!isUserMenuOpen()"
+              [class.pointer-events-none]="!isUserMenuOpen()">
               <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl shadow-xl py-2">
-                <a routerLink="/my-orders" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">{{ 'nav.returns_orders' | translate }}</a>
-                <button (click)="logout()" class="block w-full text-left rtl:text-right px-4 py-2 text-sm text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 mt-1 border-t border-gray-100 dark:border-slate-800">{{ 'nav.logout' | translate }}</button>
+                <a routerLink="/my-orders" (click)="closeUserMenu()" class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">{{ 'nav.returns_orders' | translate }}</a>
+                <button (click)="logout()" class="block w-full text-left rtl:text-right px-4 py-2 text-sm text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 mt-1 border-t border-gray-100 dark:border-slate-800 cursor-pointer">{{ 'nav.logout' | translate }}</button>
               </div>
             </div>
           </div>
