@@ -48,18 +48,32 @@ export class Cart implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    const role = this._authService.isUser();
+    if (role === 'admin' || role === 'superadmin') {
+      this.cartItems = [];
+      this.calculateTotals();
+      this._cartService.clearCart();
+      return;
+    }
+
     // Subscribe to cart items state
     const sub = this._cartService.cartItems$.subscribe({
       next: (items) => {
+        const currentRole = this._authService.isUser();
+        if (currentRole === 'admin' || currentRole === 'superadmin') {
+          this.cartItems = [];
+          this.calculateTotals();
+          return;
+        }
         this.cartItems = items;
         this.calculateTotals();
       }
     });
     this.subscriptions.add(sub);
 
-    // Refresh cart if logged in
+    // Refresh cart if logged in as customer
     const token = this._authService.getToken();
-    if (token) {
+    if (token && role !== 'admin' && role !== 'superadmin') {
       this._cartService.fetchCartFromDB().subscribe();
     }
   }

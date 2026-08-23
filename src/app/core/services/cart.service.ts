@@ -28,16 +28,15 @@ export class CartService {
     private _toastService: ToastService
   ) {
     this._authService.isLogedIn().pipe(
-      map(() => this._authService.getToken()),
-      distinctUntilChanged()
-    ).subscribe((token) => {
+      map(() => ({ token: this._authService.getToken(), role: this._authService.isUser() })),
+      distinctUntilChanged((a, b) => a.token === b.token && a.role === b.role)
+    ).subscribe(({ token, role }) => {
       if (token) {
-        const role = this._authService.isUser();
         if (role === 'admin' || role === 'superadmin') {
-          // Admin shouldn't have a cart, clear guest cart if any
+          // Admin / SuperAdmin accounts must NEVER possess cart items or inherit guest carts
           this.clearCart();
         } else {
-          // Normal user, fetch from DB
+          // Normal customer, fetch synced cart from DB
           this.fetchCartFromDB().subscribe({ error: () => {} });
         }
       } else {
@@ -45,6 +44,11 @@ export class CartService {
         this.loadCartFromLocalStorage();
       }
     });
+  }
+
+  private isAdminOrSuperAdmin(): boolean {
+    const role = this._authService.isUser();
+    return role === 'admin' || role === 'superadmin';
   }
 
   private formatCartItems(data: ICartItemRaw[], defaultProduct?: IProduct): ICartItem[] {
@@ -79,6 +83,10 @@ export class CartService {
   }
 
   private loadCartFromLocalStorage() {
+    if (this.isAdminOrSuperAdmin()) {
+      this.clearCart();
+      return;
+    }
     const raw = localStorage.getItem(this.LOCAL_STORAGE_KEY);
     const items: ICartItem[] = raw ? JSON.parse(raw) : [];
     this.cartItems$.next(items);
@@ -86,30 +94,38 @@ export class CartService {
   }
 
   private saveCartToLocalStorage(items: ICartItem[]) {
+    if (this.isAdminOrSuperAdmin()) {
+      this.clearCart();
+      return;
+    }
     localStorage.setItem(this.LOCAL_STORAGE_KEY, JSON.stringify(items));
     this.cartItems$.next(items);
     this.updateCartCount(items);
   }
 
   private updateCartCount(items: ICartItem[]) {
+    if (this.isAdminOrSuperAdmin()) {
+      this.cartCount.set(0);
+      return;
+    }
     const total = items.reduce((sum, item) => sum + item.quantity, 0);
     this.cartCount.set(total);
   }
 
   // Adds product item to cart
   addToCart(product: IProduct, quantity: number = 1): Observable<boolean> {
+    if (this.isAdminOrSuperAdmin()) {
+      this._modalService.alert({
+        title: 'Action Restrained',
+        message: 'Admins and Super Admins are not allowed to add products to the cart or place orders.',
+        type: 'warning'
+      });
+      return of(false);
+    }
+
     const token = this._authService.getToken();
 
     if (token) {
-      if (this._authService.isUser() === 'admin') {
-        this._modalService.alert({
-          title: 'Action Restrained',
-          message: 'Admins are not allowed to add products to the cart or place orders.',
-          type: 'warning'
-        });
-        return of(false);
-      }
-
       const payload = {
         productId: product._id,
         quantity
@@ -154,6 +170,10 @@ export class CartService {
 
   // Updates quantity of a specific cart item atomically (Independent Product Update)
   updateQuantity(productId: string, newQuantity: number): Observable<boolean> {
+    if (this.isAdminOrSuperAdmin()) {
+      return of(false);
+    }
+
     const token = this._authService.getToken();
 
     if (token) {
@@ -180,8 +200,19 @@ export class CartService {
 
   // Fetches cart from database
   fetchCartFromDB() {
+    if (this.isAdminOrSuperAdmin()) {
+      this.cartItems$.next([]);
+      this.cartCount.set(0);
+      return of({ status: 'success', data: [] as ICartItemRaw[] });
+    }
+
     return this._http.get<{ status: string; data: ICartItemRaw[] }>(this.apiURL).pipe(
       tap((res) => {
+        if (this.isAdminOrSuperAdmin()) {
+          this.cartItems$.next([]);
+          this.cartCount.set(0);
+          return;
+        }
         const formatted = this.formatCartItems(res.data);
         this.cartItems$.next(formatted);
         this.updateCartCount(formatted);
@@ -191,6 +222,11 @@ export class CartService {
 
   // Syncs local guest cart to database sequentially
   syncCartOnLogin() {
+    if (this.isAdminOrSuperAdmin()) {
+      this.clearCart();
+      return;
+    }
+
     const raw = localStorage.getItem(this.LOCAL_STORAGE_KEY);
     if (!raw) return;
 
@@ -213,6 +249,10 @@ export class CartService {
 
   // Removes item from cart
   removeFromCart(productId: string) {
+    if (this.isAdminOrSuperAdmin()) {
+      return undefined;
+    }
+
     const token = this._authService.getToken();
     if (token) {
       return this._http.delete<{ status: string; data: ICartItemRaw[] }>(`${this.apiURL}/${productId}`).pipe(
@@ -232,6 +272,7 @@ export class CartService {
   // Clears all cart items
   clearCart() {
     localStorage.removeItem(this.LOCAL_STORAGE_KEY);
+    localStorage.removeItem('velora_guest_cart');
     this.cartItems$.next([]);
     this.cartCount.set(0);
   }

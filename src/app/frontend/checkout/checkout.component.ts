@@ -133,6 +133,12 @@ export class Checkout implements OnInit {
   }
 
   ngOnInit(): void {
+    const role = this._authService.isUser();
+    if (role === 'admin' || role === 'superadmin') {
+      this._router.navigate(['/admin/home']);
+      return;
+    }
+
     const token = this._authService.getToken();
     if (!token) {
       this._router.navigate(['/login']);

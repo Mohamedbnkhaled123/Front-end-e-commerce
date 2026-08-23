@@ -99,15 +99,16 @@ export class AuthService {
     return this._http.post<IAuthLoginRes>(this.apiURL, payload, { withCredentials: true }).pipe(
       map(res => {
         const token = res.accessToken || res.JWT;
-        if (token) {
-          this.setAccessTokenInMemory(token);
-          if (localCart) {
-            localStorage.removeItem('shopro_guest_cart');
-            localStorage.removeItem('velora_guest_cart');
-          }
-        }
         const decodedToken = this.jwtDecoding(token);
         const role = (decodedToken?.role || '').toLowerCase();
+
+        if (token) {
+          this.setAccessTokenInMemory(token);
+        }
+
+        // Always clean up guest cart from localStorage
+        localStorage.removeItem('shopro_guest_cart');
+        localStorage.removeItem('velora_guest_cart');
 
         this.setUserLogin(decodedToken?.name || decodedToken?.id || 'User');
         if (role === 'admin' || role === 'superadmin') {
@@ -130,6 +131,9 @@ export class AuthService {
 
         if (role === 'admin' || role === 'superadmin') {
           this.setAccessTokenInMemory(token);
+          // Purge any guest cart
+          localStorage.removeItem('shopro_guest_cart');
+          localStorage.removeItem('velora_guest_cart');
           this.setUserLogin(decodedToken?.name || decodedToken?.id || (role === 'superadmin' ? 'Super Admin' : 'Admin'));
           this._router.navigate(['/admin/home']);
         }
@@ -150,6 +154,8 @@ export class AuthService {
         const token = res.accessToken || res.JWT;
         if (token) {
           this.setAccessTokenInMemory(token);
+          localStorage.removeItem('shopro_guest_cart');
+          localStorage.removeItem('velora_guest_cart');
           const decoded = this.jwtDecoding(token);
           this.setUserLogin(decoded?.name || 'Super Admin');
           this._router.navigate(['/admin/analytics']);
