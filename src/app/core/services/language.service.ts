@@ -114,7 +114,64 @@ export class LanguageService {
       'catalog.calculating': 'Calculating...',
       'catalog.found_prefix': 'Found',
       'catalog.found_suffix': 'products matching these criteria',
-      'admin.accounts': 'Admin accounts'
+      'admin.accounts': 'Admin accounts',
+      'admin.analytics_title': 'Analytics',
+      'admin.analytics_subtitle': 'Real-time store performance & business intelligence',
+      'admin.last_sync': 'Last updated',
+      'admin.range_today': 'Today',
+      'admin.range_week': '7 Days',
+      'admin.range_month': '30 Days',
+      'admin.range_year': '1 Year',
+      'admin.range_custom': 'Custom',
+      'admin.refresh_data': 'Refresh Data',
+      'admin.export_csv': 'Export CSV',
+      'admin.csv': 'CSV',
+      'admin.print_pdf': 'Print PDF',
+      'admin.pdf_report': 'PDF Report',
+      'admin.date_from': 'From',
+      'admin.date_to': 'To',
+      'admin.financial_overview': 'Financial Overview',
+      'admin.product_performance': 'Product Performance',
+      'admin.audit_log_tab': 'Audit Log',
+      'admin.customer_sentiment': 'Customer Sentiment',
+      'admin.gross_sales': 'Gross Sales',
+      'admin.before_discounts': 'Before discounts',
+      'admin.orders_count': 'orders',
+      'admin.total_discounts': 'Discounts Applied',
+      'admin.product_savings': 'Savings & Vouchers',
+      'admin.promotional': 'Promotional',
+      'admin.net_revenue': 'Net Revenue',
+      'admin.gross_revenue': 'Gross Revenue',
+      'admin.net_profit_base': 'Net Revenue',
+      'admin.gross_minus_disc': 'Gross minus discounts',
+      'admin.revenue_trend': 'Revenue Trend',
+      'admin.top_sellers': 'Top Selling Products',
+      'admin.units_sold': 'Units Sold',
+      'admin.category_share': 'Category Share',
+      'admin.approved': 'Approved',
+      'admin.pending': 'Pending',
+      'admin.cancelled': 'Cancelled',
+      'admin.returned': 'Returned',
+      'admin.audit_log': 'Order Audit Log',
+      'admin.all_status': 'All Statuses',
+      'admin.order_id': 'Order ID',
+      'admin.customer': 'Customer',
+      'admin.date': 'Date',
+      'admin.total': 'Total',
+      'admin.status': 'Status',
+      'admin.audit_empty_title': 'No Transaction Records Found',
+      'admin.audit_empty_desc': 'There are no transactions recorded for the selected time window.',
+      'admin.view_all_logs': 'View All Records',
+      'admin.rating': 'Store Rating',
+      'admin.total_reviews': 'verified reviews',
+      'admin.sentiment_empty_title': 'No Customer Reviews Yet',
+      'admin.sentiment_empty_desc': 'Customer reviews and star breakdown will appear here once submitted.',
+      'admin.expand_date_range': 'Expand Date Range',
+      'admin.user_mgmt_title': 'Users & Admin Governance',
+      'admin.user_mgmt_subtitle': 'Manage registered users and system administrators',
+      'admin.add_new_admin_btn': 'Add New Admin',
+      'admin.search_user_placeholder': 'Search by name or email...',
+      'admin.registered_accounts': 'Registered Accounts'
     },
     ar: {
       'brand.name': 'شوبرو',
@@ -213,7 +270,64 @@ export class LanguageService {
       'catalog.calculating': 'جاري الحساب...',
       'catalog.found_prefix': 'تم العثور على',
       'catalog.found_suffix': 'منتج مطابق لهذه المعايير',
-      'admin.accounts': 'حسابات مسجلة'
+      'admin.accounts': 'حسابات مسجلة',
+      'admin.analytics_title': 'التحليلات',
+      'admin.analytics_subtitle': 'مؤشرات الأداء اللحظية والتقارير المالية',
+      'admin.last_sync': 'آخر تحديث',
+      'admin.range_today': 'اليوم',
+      'admin.range_week': '7 أيام',
+      'admin.range_month': '30 يوم',
+      'admin.range_year': 'سنة',
+      'admin.range_custom': 'مخصص',
+      'admin.refresh_data': 'تحديث البيانات',
+      'admin.export_csv': 'تصدير ملف CSV',
+      'admin.csv': 'CSV',
+      'admin.print_pdf': 'طباعة تقرير PDF',
+      'admin.pdf_report': 'تقرير PDF',
+      'admin.date_from': 'من',
+      'admin.date_to': 'إلى',
+      'admin.financial_overview': 'النظرة المالية',
+      'admin.product_performance': 'أداء المنتجات',
+      'admin.audit_log_tab': 'سجل العمليات',
+      'admin.customer_sentiment': 'آراء العملاء',
+      'admin.gross_sales': 'إجمالي المبيعات',
+      'admin.before_discounts': 'قبل الخصومات',
+      'admin.orders_count': 'طلبات',
+      'admin.total_discounts': 'إجمالي الخصومات',
+      'admin.product_savings': 'وفر العروض والكوبونات',
+      'admin.promotional': 'عروض ترويجية',
+      'admin.net_revenue': 'صافي الإيرادات',
+      'admin.gross_revenue': 'الإيرادات الإجمالية',
+      'admin.net_profit_base': 'صافي الإيرادات',
+      'admin.gross_minus_disc': 'المبيعات بعد الخصم',
+      'admin.revenue_trend': 'اتجاه الإيرادات',
+      'admin.top_sellers': 'المنتجات الأكثر مبيعاً',
+      'admin.units_sold': 'القطع المباعة',
+      'admin.category_share': 'نسبة مبيعات الفئات',
+      'admin.approved': 'مكتملة',
+      'admin.pending': 'قيد الانتظار',
+      'admin.cancelled': 'ملغاة',
+      'admin.returned': 'مرتجعة',
+      'admin.audit_log': 'سجل تدقيق الطلبات',
+      'admin.all_status': 'جميع الحالات',
+      'admin.order_id': 'رقم الطلب',
+      'admin.customer': 'العميل',
+      'admin.date': 'التاريخ',
+      'admin.total': 'الإجمالي',
+      'admin.status': 'الحالة',
+      'admin.audit_empty_title': 'لا توجد عمليات مسجلة',
+      'admin.audit_empty_desc': 'لا توجد أي معاملات مسجلة في النطاق الزمني المحدد.',
+      'admin.view_all_logs': 'عرض كل السجلات',
+      'admin.rating': 'تقييم المتجر',
+      'admin.total_reviews': 'تقييم موثق',
+      'admin.sentiment_empty_title': 'لا توجد تقييمات للعملاء بعد',
+      'admin.sentiment_empty_desc': 'ستظهر تقييمات المشترين وآراؤهم هنا فور إرسالها.',
+      'admin.expand_date_range': 'توسيع النطاق الزمني',
+      'admin.user_mgmt_title': 'إدارة المستخدمين والأدمن',
+      'admin.user_mgmt_subtitle': 'إدارة حسابات المشترين ومسؤولي النظام وصلاحياتهم',
+      'admin.add_new_admin_btn': 'إضافة أدمن جديد',
+      'admin.search_user_placeholder': 'البحث بالاسم أو البريد الإلكتروني...',
+      'admin.registered_accounts': 'الحسابات المسجلة'
     }
   };
 
@@ -288,7 +402,19 @@ export class LanguageService {
   }
 
   translate(key: string): string {
+    if (!key) return '';
     const lang = this.currentLang();
-    return this.criticalDictionary[lang]?.[key] || this.dynamicDictionary()?.[key] || key;
+    const val = this.criticalDictionary[lang]?.[key] || this.dynamicDictionary()?.[key];
+    if (val) return val;
+
+    // Fallback: If a key is missing, format it cleanly without any '.' or '_' characters
+    if (typeof key === 'string' && (key.includes('.') || key.includes('_'))) {
+      const parts = key.split('.');
+      const cleanKey = parts[parts.length - 1] || key;
+      return cleanKey
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, c => c.toUpperCase());
+    }
+    return key;
   }
 }
