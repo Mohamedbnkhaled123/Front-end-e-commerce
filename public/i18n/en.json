@@ -470,5 +470,6 @@
   "catalog.max": "Max",
   "catalog.calculating": "Calculating...",
   "catalog.found_prefix": "Found",
-  "catalog.found_suffix": "products matching these criteria"
+  "catalog.found_suffix": "products matching these criteria",
+  "admin.accounts": "Admin accounts"
 }

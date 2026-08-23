@@ -470,5 +470,6 @@
   "catalog.max": "أقصى",
   "catalog.calculating": "جاري الحساب...",
   "catalog.found_prefix": "تم العثور على",
-  "catalog.found_suffix": "منتج مطابق لهذه المعايير"
+  "catalog.found_suffix": "منتج مطابق لهذه المعايير",
+  "admin.accounts": "حسابات مسجلة"
 }

@@ -44,7 +44,7 @@ export interface SelectOption {
 
       <!-- Smooth Floating Menu Dropdown -->
       <div
-        class="absolute left-0 rtl:left-auto rtl:right-0 mt-2 min-w-full w-max max-w-[calc(100vw-2rem)] sm:max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-gray-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 py-2 max-h-64 overflow-y-auto custom-select-scrollbar text-xs sm:text-sm font-medium transition-all duration-200 ease-out origin-top"
+        class="absolute left-0 rtl:left-auto rtl:right-0 mt-2 min-w-full w-max max-w-[calc(100vw-2rem)] sm:max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-gray-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 p-1.5 space-y-1 max-h-64 overflow-y-auto custom-select-scrollbar text-xs sm:text-sm font-medium transition-all duration-200 ease-out origin-top"
         [class.opacity-100]="isOpen()"
         [class.scale-100]="isOpen()"
         [class.translate-y-0]="isOpen()"
@@ -65,7 +65,7 @@ export interface SelectOption {
             [class.text-white]="opt.value === selectedValue() && !opt.disabled"
             [class.font-bold]="opt.value === selectedValue()"
             [class.shadow-xs]="opt.value === selectedValue()"
-            [class.bg-blue-50]="highlightedIndex() === $index && opt.value !== selectedValue() && !opt.disabled"
+            [class.bg-slate-100]="highlightedIndex() === $index && opt.value !== selectedValue() && !opt.disabled"
             [class.dark:bg-slate-800]="highlightedIndex() === $index && opt.value !== selectedValue() && !opt.disabled"
             [class.text-blue-600]="highlightedIndex() === $index && opt.value !== selectedValue() && !opt.disabled"
             [class.dark:text-blue-400]="highlightedIndex() === $index && opt.value !== selectedValue() && !opt.disabled"
@@ -73,7 +73,7 @@ export interface SelectOption {
             [class.rtl:-translate-x-1]="highlightedIndex() === $index && !opt.disabled"
             [class.text-slate-700]="opt.value !== selectedValue() && highlightedIndex() !== $index"
             [class.dark:text-slate-200]="opt.value !== selectedValue() && highlightedIndex() !== $index"
-            class="px-4 py-2.5 mx-1.5 rounded-xl cursor-pointer flex items-center justify-between gap-3 transition-all duration-150 ease-out whitespace-nowrap"
+            class="px-3.5 py-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-3 transition-all duration-150 ease-out whitespace-nowrap"
             role="option"
             [attr.aria-selected]="opt.value === selectedValue()"
           >

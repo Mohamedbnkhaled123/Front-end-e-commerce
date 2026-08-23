@@ -113,7 +113,8 @@ export class LanguageService {
       'catalog.max': 'Max',
       'catalog.calculating': 'Calculating...',
       'catalog.found_prefix': 'Found',
-      'catalog.found_suffix': 'products matching these criteria'
+      'catalog.found_suffix': 'products matching these criteria',
+      'admin.accounts': 'Admin accounts'
     },
     ar: {
       'brand.name': 'شوبرو',
@@ -211,7 +212,8 @@ export class LanguageService {
       'catalog.max': 'أقصى',
       'catalog.calculating': 'جاري الحساب...',
       'catalog.found_prefix': 'تم العثور على',
-      'catalog.found_suffix': 'منتج مطابق لهذه المعايير'
+      'catalog.found_suffix': 'منتج مطابق لهذه المعايير',
+      'admin.accounts': 'حسابات مسجلة'
     }
   };
 
