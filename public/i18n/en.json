@@ -78,6 +78,7 @@
   "cart.coupon_applied": "Coupon applied successfully",
   "admin.discount": "Coupon Discount",
   "admin.coupon_discount": "Coupon Discount",
+  "admin.permanent_delete": "Delete Permanently",
   "checkout.title": "Checkout & Shipping Address",
   "checkout.subtitle": "Complete your shipping information and payment option below.",
   "checkout.full_name": "Full Name",

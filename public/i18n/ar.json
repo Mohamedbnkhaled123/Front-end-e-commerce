@@ -78,6 +78,7 @@
   "cart.coupon_applied": "تم تطبيق الكوبون بنجاح",
   "admin.discount": "خصم الكوبون",
   "admin.coupon_discount": "خصم الكوبون",
+  "admin.permanent_delete": "حذف نهائي",
   "checkout.title": "إتمام الشراء وعنوان التوصيل",
   "checkout.subtitle": "يرجى استكمال تفاصيل الطلب والتوصيل أدناه.",
   "checkout.full_name": "الاسم الكامل",

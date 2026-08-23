@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../core/services/product.service';
 import { ModalService } from '../../core/services/modal.service';
+import { LanguageService } from '../../core/services/language.service';
 import { IProduct } from '../../core/models/product.model';
 import { env } from '../../../env/env';
 import { Subscription } from 'rxjs';
@@ -33,6 +34,7 @@ export class AdminProducts implements OnInit, OnDestroy {
   constructor(
     private _productService: ProductService,
     private _modalService: ModalService,
+    public _langService: LanguageService,
     private _cdr: ChangeDetectorRef
   ) {}
 
@@ -223,11 +225,12 @@ export class AdminProducts implements OnInit, OnDestroy {
 
   // Restores a soft-deleted product
   async restoreProduct(id: string) {
+    const isArabic = this._langService?.currentLang() === 'ar';
     const confirmed = await this._modalService.confirm({
-      title: 'Restore Product',
-      message: 'Are you sure you want to restore this product?',
-      confirmText: 'Yes, Restore',
-      cancelText: 'Cancel',
+      title: isArabic ? 'استرجاع المنتج' : 'Restore Product',
+      message: isArabic ? 'هل أنت متأكد من رغبتك في استرجاع هذا المنتج وإعادته للكتالوج؟' : 'Are you sure you want to restore this product?',
+      confirmText: isArabic ? 'نعم، استرجاع' : 'Yes, Restore',
+      cancelText: isArabic ? 'إلغاء' : 'Cancel',
       type: 'success'
     });
 
@@ -235,7 +238,7 @@ export class AdminProducts implements OnInit, OnDestroy {
 
     const sub = this._productService.restoreProduct(id).subscribe({
       next: () => {
-        this.message = 'Product restored successfully!';
+        this.message = isArabic ? 'تم استرجاع المنتج بنجاح!' : 'Product restored successfully!';
         this.loadProducts();
         this._cdr.detectChanges();
         setTimeout(() => {
@@ -245,8 +248,45 @@ export class AdminProducts implements OnInit, OnDestroy {
       },
       error: (err) => {
         this._modalService.alert({
-          title: 'Product Restore Failed',
-          message: err?.error?.message || 'Error occurred while restoring product.',
+          title: isArabic ? 'فشل استرجاع المنتج' : 'Product Restore Failed',
+          message: err?.error?.message || (isArabic ? 'حدث خطأ أثناء استرجاع المنتج.' : 'Error occurred while restoring product.'),
+          type: 'danger'
+        });
+        this._cdr.detectChanges();
+      }
+    });
+    this.subscriptions.add(sub);
+  }
+
+  // Permanently deletes product from database (Hard Delete)
+  async permanentDeleteProduct(id: string) {
+    const isArabic = this._langService?.currentLang() === 'ar';
+    const confirmed = await this._modalService.confirm({
+      title: isArabic ? 'حذف المنتج نهائياً' : 'Permanent Delete Product',
+      message: isArabic
+        ? 'تحذير: سيتم حذف هذا المنتج نهائياً من قاعدة البيانات ولن تتمكن من استرجاعه إطلاقاً. هل أنت متأكد من المتابعة؟'
+        : 'Warning: This will permanently delete the product from the database. You will NOT be able to restore it. Are you sure you want to proceed?',
+      confirmText: isArabic ? 'نعم، احذف نهائياً' : 'Yes, Delete Permanently',
+      cancelText: isArabic ? 'إلغاء' : 'Cancel',
+      type: 'danger'
+    });
+
+    if (!confirmed) return;
+
+    const sub = this._productService.permanentDeleteProduct(id).subscribe({
+      next: () => {
+        this.message = isArabic ? 'تم حذف المنتج نهائياً بنجاح!' : 'Product permanently deleted successfully!';
+        this.loadProducts();
+        this._cdr.detectChanges();
+        setTimeout(() => {
+          this.message = '';
+          this._cdr.detectChanges();
+        }, 3000);
+      },
+      error: (err) => {
+        this._modalService.alert({
+          title: isArabic ? 'فشل الحذف النهائي' : 'Permanent Deletion Failed',
+          message: err?.error?.message || (isArabic ? 'حدث خطأ أثناء الحذف النهائي للمنتج.' : 'Error occurred while permanently deleting product.'),
           type: 'danger'
         });
         this._cdr.detectChanges();

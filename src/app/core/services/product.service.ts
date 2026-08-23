@@ -76,6 +76,13 @@ export class ProductService {
     );
   }
 
+  // Permanently deletes product by ID (Hard Delete)
+  permanentDeleteProduct(id: string) {
+    return this._http.delete<{ status: string; message: string }>(`${this.apiURL}/${id}/permanent`).pipe(
+      tap(() => this.notifyMutation())
+    );
+  }
+
   // Restore product
   restoreProduct(id: string) {
     return this._http.patch(`${this.apiURL}/${id}/restore`, {}).pipe(
