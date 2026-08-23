@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrderService, IOrder } from '../../core/services/order.service';
 import { ModalService } from '../../core/services/modal.service';
+import { CustomSelectComponent, SelectOption } from '../../shared/custom-select/custom-select.component';
 import { Subscription } from 'rxjs';
 import { env } from '../../../env/env';
 
@@ -14,7 +15,7 @@ import { LanguageService } from '../../core/services/language.service';
 @Component({
   selector: 'app-admin-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, LocalizeFieldPipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, LocalizeFieldPipe, CustomSelectComponent],
   templateUrl: './admin-orders.component.html'
 })
 export class AdminOrders implements OnInit, OnDestroy {
@@ -53,6 +54,33 @@ export class AdminOrders implements OnInit, OnDestroy {
     'rejected',
     'cancelledByAdmin'
   ];
+
+  get filterStatusOptions(): SelectOption[] {
+    return [
+      { value: '', label: this._langService.translate('admin.all_statuses') },
+      ...this.availableStatuses.map(s => ({
+        value: s,
+        label: this._langService.translate(this.formatStatus(s))
+      }))
+    ];
+  }
+
+  getOrderActionOptions(currentStatus: string): SelectOption[] {
+    const list: SelectOption[] = [];
+    if (!this.adminSelectableStatuses.includes(currentStatus)) {
+      list.push({
+        value: currentStatus,
+        label: this._langService.translate(this.formatStatus(currentStatus))
+      });
+    }
+    for (const s of this.adminSelectableStatuses) {
+      list.push({
+        value: s,
+        label: this._langService.translate(this.formatStatus(s))
+      });
+    }
+    return list;
+  }
 
   constructor(
     private _orderService: OrderService,
@@ -132,11 +160,10 @@ export class AdminOrders implements OnInit, OnDestroy {
   }
 
   // Updates order status with confirmation guard and rollback
-  async onStatusChange(order: IOrder, selectEl: HTMLSelectElement) {
+  async onStatusChange(order: IOrder, newStatus: string) {
     const currentStatus = order.orderStatus;
-    const newStatus = selectEl.value;
 
-    if (newStatus === currentStatus) return;
+    if (!newStatus || newStatus === currentStatus) return;
 
     if (newStatus === 'cancelledByUser') {
       this._modalService.alert({
@@ -144,7 +171,6 @@ export class AdminOrders implements OnInit, OnDestroy {
         message: 'Sorry, the status "Cancelled by user" can only be set by the customer when they cancel their order.',
         type: 'warning'
       });
-      selectEl.value = currentStatus;
       return;
     }
 
@@ -167,7 +193,6 @@ export class AdminOrders implements OnInit, OnDestroy {
     });
 
     if (!confirmed) {
-      selectEl.value = currentStatus;
       return;
     }
 
@@ -189,7 +214,6 @@ export class AdminOrders implements OnInit, OnDestroy {
         }, 3000);
       },
       error: (err) => {
-        selectEl.value = currentStatus;
         this._modalService.alert({
           title: 'Update Failed',
           message: err?.error?.message || 'Failed to update order status.',
