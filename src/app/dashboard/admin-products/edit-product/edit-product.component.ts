@@ -1,13 +1,14 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService, ICategory } from '../../../core/services/category.service';
 import { SubCategoryService, ISubCategory } from '../../../core/services/subcategory.service';
 import { TaxonomyService, IMainTaxonomyGroup } from '../../../core/services/taxonomy.service';
 import { ModalService } from '../../../core/services/modal.service';
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
+import { CustomSelectComponent, SelectOption } from '../../../shared/custom-select/custom-select.component';
 import { LanguageService } from '../../../core/services/language.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 import { env } from '../../../../env/env';
@@ -16,7 +17,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-edit-product',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, TranslatePipe],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule, TranslatePipe, CustomSelectComponent],
   templateUrl: './edit-product.component.html'
 })
 export class EditProduct implements OnInit, OnDestroy {
@@ -35,6 +36,20 @@ export class EditProduct implements OnInit, OnDestroy {
   selectedSubCategoryId = '';
   isLoadingCategories = false;
   isLoadingSubCategories = false;
+
+  get mainGroupOptions(): SelectOption[] {
+    return this.taxonomyGroups.map(g => ({
+      value: g.id,
+      label: this.taxonomyService.getGroupName(g)
+    }));
+  }
+
+  get subCategoryOptions(): SelectOption[] {
+    return this.currentGroupCategories.map(cat => ({
+      value: cat._id,
+      label: cat.name
+    }));
+  }
 
   isLoading = false;
   isSaving = false;

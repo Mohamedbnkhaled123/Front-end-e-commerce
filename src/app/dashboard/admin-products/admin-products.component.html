@@ -41,18 +41,13 @@
           class="w-full text-sm text-slate-900 dark:text-white placeholder-slate-400 border-none outline-none bg-transparent"
         >
       </div>
-      <div class="flex items-center gap-3 flex-wrap">
-        <select 
-          [(ngModel)]="selectedStatus" 
-          (ngModelChange)="applyFilter()"
-          class="text-xs bg-slate-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg px-6 rtl:pl-10 ltr:pr-10 py-2 text-slate-900 dark:text-white font-medium outline-none min-h-[36px]">
-          <option value="">{{ 'admin.all_status' | translate }}</option>
-          <option value="active">{{ 'admin.active' | translate }}</option>
-          <option value="lowstock">{{ 'admin.low_stock' | translate }}</option>
-          <option value="outofstock">{{ 'product.out_of_stock' | translate }}</option>
-          <option value="archived">{{ 'admin.archived_disabled' | translate }}</option>
-          <option value="deleted">{{ 'admin.deleted_recycle_bin' | translate }}</option>
-        </select>
+      <div class="flex items-center gap-3 flex-wrap min-w-[190px]">
+        <app-custom-select
+          [options]="statusOptions"
+          [(ngModel)]="selectedStatus"
+          (valueChange)="applyFilter()"
+          triggerClasses="px-3.5 py-2 min-h-[38px] text-xs font-semibold"
+        ></app-custom-select>
       </div>
     </div>
 

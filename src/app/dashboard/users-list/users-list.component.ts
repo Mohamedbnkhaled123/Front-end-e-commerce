@@ -7,12 +7,13 @@ import { UserService } from '../../core/services/user-service';
 import { AuthService } from '../../core/services/auth-service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
+import { CustomSelectComponent, SelectOption } from '../../shared/custom-select/custom-select.component';
 import { IUser } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-users-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, CustomSelectComponent],
   templateUrl: './users-list.component.html'
 })
 export class UsersList implements OnInit, OnDestroy {
@@ -33,6 +34,23 @@ export class UsersList implements OnInit, OnDestroy {
   totalPages = 1;
 
   private subscriptions = new Subscription();
+
+  get roleOptions(): SelectOption[] {
+    return [
+      { value: '', label: this._langService.translate('admin.all_roles') },
+      { value: 'superadmin', label: this._langService.translate('admin.role_superadmin') },
+      { value: 'admin', label: this._langService.translate('admin.role_admin') },
+      { value: 'user', label: this._langService.translate('admin.role_user') }
+    ];
+  }
+
+  get statusOptions(): SelectOption[] {
+    return [
+      { value: '', label: this._langService.translate('admin.all_status') },
+      { value: 'active', label: this._langService.translate('admin.active') },
+      { value: 'deactivated', label: this._langService.translate('admin.deactivated') }
+    ];
+  }
 
   constructor(
     private _userService: UserService,

@@ -70,15 +70,13 @@
                     {{ 'admin.add_category_btn' | translate }}
                   </button>
                 </div>
-                <select
-                  [value]="selectedMainGroupId"
-                  (change)="onMainGroupChange($any($event.target).value)"
-                  class="w-full bg-white dark:bg-slate-800 border rounded-lg px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white border-gray-300 dark:border-slate-700 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer">
-                  <option value="" disabled>{{ 'admin.select_main_category' | translate }}</option>
-                  @for (group of taxonomyGroups; track group.id) {
-                    <option [value]="group.id">{{ taxonomyService.getGroupName(group) }}</option>
-                  }
-                </select>
+                <app-custom-select
+                  [options]="mainGroupOptions"
+                  [ngModel]="selectedMainGroupId"
+                  (valueChange)="onMainGroupChange($event)"
+                  placeholder="{{ 'admin.select_main_category' | translate }}"
+                  triggerClasses="px-3.5 py-2.5 min-h-[42px] text-sm font-semibold"
+                ></app-custom-select>
               </div>
 
               <!-- Subcategory Selection -->
@@ -95,16 +93,14 @@
                     {{ 'admin.add_subcategory_btn' | translate }}
                   </button>
                 </div>
-                <select
-                  [value]="selectedCategoryId"
-                  (change)="selectCategory($any($event.target).value)"
+                <app-custom-select
+                  [options]="subCategoryOptions"
+                  [ngModel]="selectedCategoryId"
+                  (valueChange)="selectCategory($event)"
                   [disabled]="!selectedMainGroupId || currentGroupCategories.length === 0"
-                  class="w-full bg-white dark:bg-slate-800 border rounded-lg px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white border-gray-300 dark:border-slate-700 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
-                  <option value="" disabled>{{ 'admin.select_subcategory' | translate }}</option>
-                  @for (cat of currentGroupCategories; track cat._id) {
-                    <option [value]="cat._id">{{ cat.name }}</option>
-                  }
-                </select>
+                  placeholder="{{ 'admin.select_subcategory' | translate }}"
+                  triggerClasses="px-3.5 py-2.5 min-h-[42px] text-sm font-semibold"
+                ></app-custom-select>
               </div>
             </div>
           }

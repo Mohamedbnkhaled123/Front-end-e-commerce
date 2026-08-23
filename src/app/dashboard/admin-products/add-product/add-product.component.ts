@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService } from '../../../core/services/product.service';
 import { CategoryService, ICategory } from '../../../core/services/category.service';
 import { SubCategoryService, ISubCategory } from '../../../core/services/subcategory.service';
@@ -9,12 +9,14 @@ import { TaxonomyService, IMainTaxonomyGroup } from '../../../core/services/taxo
 import { CloudinaryService } from '../../../core/services/cloudinary.service';
 import { Subscription, of } from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
+import { CustomSelectComponent, SelectOption } from '../../../shared/custom-select/custom-select.component';
+import { LanguageService } from '../../../core/services/language.service';
 import { TranslatePipe } from '../../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-add-product',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, TranslatePipe],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule, TranslatePipe, CustomSelectComponent],
   templateUrl: './add-product.component.html'
 })
 export class AddProduct implements OnInit {
@@ -37,6 +39,27 @@ export class AddProduct implements OnInit {
   subCategories: ISubCategory[] = [];
   selectedSubCategoryId = '';
   isLoadingSubCategories = false;
+
+  get mainGroupOptions(): SelectOption[] {
+    return this.taxonomyGroups.map(g => ({
+      value: g.id,
+      label: this.taxonomyService.getGroupName(g)
+    }));
+  }
+
+  get subCategoryOptions(): SelectOption[] {
+    return this.currentGroupCategories.map(cat => ({
+      value: cat._id,
+      label: cat.name
+    }));
+  }
+
+  get modalParentCategoryOptions(): SelectOption[] {
+    return this.categories.map(cat => ({
+      value: cat._id,
+      label: cat.name
+    }));
+  }
 
   // === Add Category Modal ===
   showCategoryModal = false;
@@ -61,6 +84,7 @@ export class AddProduct implements OnInit {
     private _categoryService: CategoryService,
     private _subCategoryService: SubCategoryService,
     public taxonomyService: TaxonomyService,
+    public _langService: LanguageService,
     private _cloudinaryService: CloudinaryService,
     private _router: Router,
     private _cdr: ChangeDetectorRef

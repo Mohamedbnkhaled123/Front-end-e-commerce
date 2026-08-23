@@ -10,12 +10,13 @@ import { IProduct } from '../../core/models/product.model';
 import { env } from '../../../env/env';
 import { Subscription } from 'rxjs';
 
+import { CustomSelectComponent, SelectOption } from '../../shared/custom-select/custom-select.component';
 import { TranslatePipe } from '../../core/pipes/translate.pipe';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, TranslatePipe, LocalizeFieldPipe],
+  imports: [CommonModule, RouterLink, FormsModule, TranslatePipe, LocalizeFieldPipe, CustomSelectComponent],
   templateUrl: './admin-products.component.html'
 })
 export class AdminProducts implements OnInit, OnDestroy {
@@ -30,6 +31,17 @@ export class AdminProducts implements OnInit, OnDestroy {
   currentPage = 1;
   pageSize = 13;
   private subscriptions = new Subscription();
+
+  get statusOptions(): SelectOption[] {
+    return [
+      { value: '', label: this._langService.translate('admin.all_status') },
+      { value: 'active', label: this._langService.translate('admin.active') },
+      { value: 'lowstock', label: this._langService.translate('admin.low_stock') },
+      { value: 'outofstock', label: this._langService.translate('product.out_of_stock') },
+      { value: 'archived', label: this._langService.translate('admin.archived_disabled') },
+      { value: 'deleted', label: this._langService.translate('admin.deleted_recycle_bin') }
+    ];
+  }
 
   constructor(
     private _productService: ProductService,
