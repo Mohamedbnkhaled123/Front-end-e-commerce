@@ -171,6 +171,7 @@ export class AdminAnalytics implements OnInit, OnDestroy {
   }
 
   refreshAllData(): void {
+    this._analyticsService.clearCache();
     this.topProducts.set([]);
     this.auditOrders.set([]);
     this.reviewSentiment.set(null);

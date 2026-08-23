@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError, shareReplay } from 'rxjs/operators';
 import { env } from '../../../env/env';
 import { IOrder } from '../models/order.model';
 
@@ -58,6 +59,8 @@ export interface ICategoryBreakdown {
   _id: string;
   revenue: number;
   quantitySold: number;
+  orderCount: number;
+  percentage: number;
 }
 
 export interface IProductAnalyticsRes {
@@ -107,24 +110,61 @@ export interface IReviewAnalyticsRes {
 })
 export class AnalyticsService {
   private apiURL = env.apiURL + 'analytics';
+  private cache = new Map<string, Observable<any>>();
 
   constructor(private _http: HttpClient) {}
 
+  public clearCache(): void {
+    this.cache.clear();
+  }
+
   getFinancialAnalytics(range: string = 'month', from?: string, to?: string): Observable<IFinancialAnalyticsRes> {
+    const cacheKey = `financial:${range}:${from || ''}:${to || ''}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
     let params = new HttpParams().set('range', range);
     if (from) params = params.set('from', from);
     if (to) params = params.set('to', to);
-    return this._http.get<IFinancialAnalyticsRes>(`${this.apiURL}/financial`, { params });
+
+    const req$ = this._http.get<IFinancialAnalyticsRes>(`${this.apiURL}/financial`, { params }).pipe(
+      shareReplay({ bufferSize: 1, refCount: false }),
+      catchError(err => {
+        this.cache.delete(cacheKey);
+        return throwError(() => err);
+      })
+    );
+
+    this.cache.set(cacheKey, req$);
+    return req$;
   }
 
   getProductAnalytics(range: string = 'month', from?: string, to?: string): Observable<IProductAnalyticsRes> {
+    const cacheKey = `products:${range}:${from || ''}:${to || ''}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
     let params = new HttpParams().set('range', range);
     if (from) params = params.set('from', from);
     if (to) params = params.set('to', to);
-    return this._http.get<IProductAnalyticsRes>(`${this.apiURL}/products`, { params });
+
+    const req$ = this._http.get<IProductAnalyticsRes>(`${this.apiURL}/products`, { params }).pipe(
+      shareReplay({ bufferSize: 1, refCount: false }),
+      catchError(err => {
+        this.cache.delete(cacheKey);
+        return throwError(() => err);
+      })
+    );
+
+    this.cache.set(cacheKey, req$);
+    return req$;
   }
 
   getOrderAudit(range: string = 'month', page: number = 1, limit: number = 10, status: string = 'all', from?: string, to?: string): Observable<IOrderAuditRes> {
+    const cacheKey = `orders:${range}:${page}:${limit}:${status}:${from || ''}:${to || ''}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
     let params = new HttpParams()
       .set('range', range)
       .set('page', page.toString())
@@ -132,10 +172,33 @@ export class AnalyticsService {
       .set('status', status);
     if (from) params = params.set('from', from);
     if (to) params = params.set('to', to);
-    return this._http.get<IOrderAuditRes>(`${this.apiURL}/orders`, { params });
+
+    const req$ = this._http.get<IOrderAuditRes>(`${this.apiURL}/orders`, { params }).pipe(
+      shareReplay({ bufferSize: 1, refCount: false }),
+      catchError(err => {
+        this.cache.delete(cacheKey);
+        return throwError(() => err);
+      })
+    );
+
+    this.cache.set(cacheKey, req$);
+    return req$;
   }
 
   getReviewAnalytics(): Observable<IReviewAnalyticsRes> {
-    return this._http.get<IReviewAnalyticsRes>(`${this.apiURL}/reviews`);
+    const cacheKey = 'reviews';
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
+
+    const req$ = this._http.get<IReviewAnalyticsRes>(`${this.apiURL}/reviews`).pipe(
+      shareReplay({ bufferSize: 1, refCount: false }),
+      catchError(err => {
+        this.cache.delete(cacheKey);
+        return throwError(() => err);
+      })
+    );
+
+    this.cache.set(cacheKey, req$);
+    return req$;
   }
 }

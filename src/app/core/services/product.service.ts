@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, Subject, throwError } from 'rxjs';
+import { catchError, shareReplay, tap } from 'rxjs/operators';
 import { env } from '../../../env/env';
 import { IProductListRes, IProductRes } from '../models/product.model';
 
@@ -11,17 +11,35 @@ import { IProductListRes, IProductRes } from '../models/product.model';
 export class ProductService {
   private apiURL = env.apiURL + 'product';
 
+  // In-memory application-session cache for product requests
+  private cache = new Map<string, Observable<any>>();
+
   // Event stream notifying components & caches when products are created, edited, deleted, or restored
   public productMutated$ = new Subject<void>();
 
   constructor(private _http: HttpClient) {}
 
   private notifyMutation() {
+    this.clearCache();
     this.productMutated$.next();
   }
 
-  // Fetches all store products (now with server-side pagination support)
-  getAllProducts(params?: any) {
+  // Explicitly clears the in-memory product request cache
+  public clearCache(): void {
+    this.cache.clear();
+  }
+
+  private buildParamsKey(params?: any): string {
+    if (!params) return 'all';
+    const keys = Object.keys(params).sort();
+    return keys
+      .filter(k => params[k] !== undefined && params[k] !== null && params[k] !== '')
+      .map(k => `${k}=${params[k]}`)
+      .join('&') || 'all';
+  }
+
+  // Fetches all store products (now with server-side pagination & in-memory session caching)
+  getAllProducts(params?: any): Observable<IProductListRes> {
     let queryParams = new HttpParams();
     if (params) {
       if (params.page) queryParams = queryParams.set('page', params.page);
@@ -37,22 +55,86 @@ export class ProductService {
       }
       if (params.all) queryParams = queryParams.set('all', params.all);
     }
-    return this._http.get<IProductListRes>(this.apiURL, { params: queryParams });
+
+    const cacheKey = `getAllProducts:${this.buildParamsKey(params)}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const req$ = this._http.get<IProductListRes>(this.apiURL, { params: queryParams }).pipe(
+      shareReplay({ bufferSize: 1, refCount: false }),
+      catchError(err => {
+        this.cache.delete(cacheKey);
+        return throwError(() => err);
+      })
+    );
+
+    this.cache.set(cacheKey, req$);
+    return req$;
   }
 
-  // Fetches single product details by slug
-  getProductBySlug(slug: string) {
-    return this._http.get<IProductRes>(`${this.apiURL}/${slug}`);
+  // Fetches single product details by slug (cached in-memory per session)
+  getProductBySlug(slug: string): Observable<IProductRes> {
+    const cleanSlug = (slug || '').toLowerCase().trim();
+    const cacheKey = `getProductBySlug:${cleanSlug}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const req$ = this._http.get<IProductRes>(`${this.apiURL}/${cleanSlug}`).pipe(
+      shareReplay({ bufferSize: 1, refCount: false }),
+      catchError(err => {
+        this.cache.delete(cacheKey);
+        return throwError(() => err);
+      })
+    );
+
+    this.cache.set(cacheKey, req$);
+    return req$;
   }
 
-  // Fetches single product details by ID
-  getProductById(id: string) {
-    return this._http.get<IProductRes>(`${this.apiURL}/id/${id}`);
+  // Fetches single product details by ID (cached in-memory per session)
+  getProductById(id: string): Observable<IProductRes> {
+    const cleanId = (id || '').trim();
+    const cacheKey = `getProductById:${cleanId}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const req$ = this._http.get<IProductRes>(`${this.apiURL}/id/${cleanId}`).pipe(
+      shareReplay({ bufferSize: 1, refCount: false }),
+      catchError(err => {
+        this.cache.delete(cacheKey);
+        return throwError(() => err);
+      })
+    );
+
+    this.cache.set(cacheKey, req$);
+    return req$;
   }
 
-  // Fetches related category products
-  getRelatedProducts(slug: string) {
-    return this._http.get<IProductListRes>(`${this.apiURL}/related/${slug}`);
+  // Fetches related category products (cached in-memory per session)
+  getRelatedProducts(slug: string): Observable<IProductListRes> {
+    const cleanSlug = (slug || '').toLowerCase().trim();
+    const cacheKey = `getRelatedProducts:${cleanSlug}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const req$ = this._http.get<IProductListRes>(`${this.apiURL}/related/${cleanSlug}`).pipe(
+      shareReplay({ bufferSize: 1, refCount: false }),
+      catchError(err => {
+        this.cache.delete(cacheKey);
+        return throwError(() => err);
+      })
+    );
+
+    this.cache.set(cacheKey, req$);
+    return req$;
   }
 
   // Creates new store product

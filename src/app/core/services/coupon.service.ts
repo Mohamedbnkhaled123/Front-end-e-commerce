@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError, shareReplay, tap } from 'rxjs/operators';
 import { env } from '../../../env/env';
 import { ICoupon, ICouponListRes, ICouponValidateRes } from '../models/coupon.model';
 
@@ -20,25 +21,53 @@ export function cleanAddressTitle(title?: string): string {
 })
 export class CouponService {
   private apiURL = env.apiURL + 'coupon';
+  private couponsCache$: Observable<ICouponListRes> | null = null;
 
   constructor(private _http: HttpClient) {}
 
+  public clearCache(): void {
+    this.couponsCache$ = null;
+  }
+
+  // Fetches all store coupons (cached in-memory for Admin session)
   getAllCoupons(): Observable<ICouponListRes> {
-    return this._http.get<ICouponListRes>(this.apiURL);
+    if (this.couponsCache$) {
+      return this.couponsCache$;
+    }
+
+    this.couponsCache$ = this._http.get<ICouponListRes>(this.apiURL).pipe(
+      shareReplay({ bufferSize: 1, refCount: false }),
+      catchError(err => {
+        this.couponsCache$ = null;
+        return throwError(() => err);
+      })
+    );
+
+    return this.couponsCache$;
   }
 
+  // Creates new store coupon
   createCoupon(payload: Partial<ICoupon>): Observable<{ status: string; message: string; data: ICoupon }> {
-    return this._http.post<{ status: string; message: string; data: ICoupon }>(this.apiURL, payload);
+    return this._http.post<{ status: string; message: string; data: ICoupon }>(this.apiURL, payload).pipe(
+      tap(() => this.clearCache())
+    );
   }
 
+  // Toggles coupon active status
   toggleCouponStatus(id: string): Observable<{ status: string; message: string; data: ICoupon }> {
-    return this._http.patch<{ status: string; message: string; data: ICoupon }>(`${this.apiURL}/${id}/status`, {});
+    return this._http.patch<{ status: string; message: string; data: ICoupon }>(`${this.apiURL}/${id}/status`, {}).pipe(
+      tap(() => this.clearCache())
+    );
   }
 
+  // Deletes coupon permanently
   deleteCoupon(id: string): Observable<{ status: string; message: string }> {
-    return this._http.delete<{ status: string; message: string }>(`${this.apiURL}/${id}`);
+    return this._http.delete<{ status: string; message: string }>(`${this.apiURL}/${id}`).pipe(
+      tap(() => this.clearCache())
+    );
   }
 
+  // Real-time coupon checkout validation (never cached because it validates dynamic cart subtotals)
   validateCoupon(code: string, orderSubtotal: number): Observable<ICouponValidateRes> {
     return this._http.post<ICouponValidateRes>(`${this.apiURL}/validate`, { code, orderSubtotal });
   }
